@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>F10 Persistent Homology Filtration</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=f10-persistent-homology-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="topology" data-lab-id="f10" data-keywords="topological data analysis persistent homology Vietoris Rips filtration barcode Betti">
+    <section class="visual-stack" aria-label="Interactive 3D persistent homology filtration visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="F10 persistent homology 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>F10</strong></div>
+          <div class="formula-chip"><span>birth -> death</span>Persistent homology watches components merge, loops appear, and triangles fill holes across scale.</div>
+        </div>
+        <div class="concept-rail" aria-hidden="true">
+          <span data-visual-key="radius-balls">Radius balls epsilon</span>
+          <span data-visual-key="rips-edges">Rips edges</span>
+          <span data-visual-key="loop-birth">Loop birth</span>
+          <span data-visual-key="triangle-death">Triangle death</span>
+          <span data-visual-key="barcode-rack">Barcode rack</span>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected feature</span><strong>Filtration is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(2,minmax(0,.62fr)) repeat(5,minmax(0,.58fr)) repeat(4,minmax(0,.48fr));">
+        <select id="dataset" data-control="dataset" aria-label="Point cloud dataset">
+          <option value="circle">Noisy circle</option>
+          <option value="clusters">Two clusters</option>
+          <option value="figure8">Figure eight</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="TDA view">
+          <option value="complex">Complex</option>
+          <option value="barcode">Barcode</option>
+          <option value="diagram">Diagram</option>
+          <option value="betti">Betti curve</option>
+        </select>
+        <div class="command-control">
+          <label for="epsilon">Epsilon <output id="epsilonLabel" data-output="epsilon">0.36</output></label>
+          <input id="epsilon" data-param="epsilon" type="range" min="0.12" max="1.65" step="0.01" value="0.36">
+        </div>
+        <div class="command-control">
+          <label for="noiseScale">Noise <output data-output="noiseScale">0.10</output></label>
+          <input id="noiseScale" data-param="noiseScale" type="range" min="0" max="0.35" step="0.01" value="0.10">
+        </div>
+        <div class="command-control">
+          <label for="fillThreshold">Fill <output data-output="fillThreshold">1.08</output></label>
+          <input id="fillThreshold" data-param="fillThreshold" type="range" min="0.5" max="1.7" step="0.01" value="1.08">
+        </div>
+        <div class="command-control">
+          <label for="persistenceCut">Persist <output data-output="persistenceCut">0.42</output></label>
+          <input id="persistenceCut" data-param="persistenceCut" type="range" min="0.05" max="0.95" step="0.01" value="0.42">
+        </div>
+        <div class="command-control">
+          <label for="sampleJitter">Seed <output data-output="sampleJitter">2</output></label>
+          <input id="sampleJitter" data-param="sampleJitter" type="range" min="0" max="9" step="1" value="2">
+        </div>
+        <button id="grow" class="primary" data-action="pulse" type="button">Grow balls</button>
+        <button id="jumpLoop" data-action="step" type="button">Birth H1</button>
+        <button id="fillLoop" data-action="step" type="button">Kill loop</button>
+        <button id="reseed" data-action="reset" type="button">Reseed</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block F 3D lab</p>
+        <h1>F10 Persistent Homology</h1>
+        <p class="subtitle">Rotate the point cloud, epsilon balls, Vietoris-Rips edges, filled triangles, component merge tree, H1 loop rail, barcode intervals, diagram points, and Betti curve.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Beta0"><span>β0</span><strong id="beta0Label">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Beta1"><span>β1</span><strong id="beta1Label">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Edges"><span>Edges</span><strong id="edgeLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Triangles"><span>Triangles</span><strong id="triangleLabel">0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading filtration diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: epsilon grows the complex, noise changes short bars, fill threshold kills loops, persistence cutoff separates signal from noise, and dataset changes the topology.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=f10-persistent-homology-v1"></script>
+  <script src="shared/ml-lab-core.js?math3d=f10-persistent-homology-v1"></script>
+  <script>
+    window.__f10LabSnapshot = window.__f10LabSnapshot || function () { return null; };
+    createF10PersistentHomologyLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

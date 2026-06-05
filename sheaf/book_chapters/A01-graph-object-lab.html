@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>A01 - Graph Object Lab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#05080d;--panel:#0a151e;--ink:#eef8f7;--muted:#9db6b4;--line:#223641;--cyan:#59e0d3;--blue:#68adff;--gold:#f0c65a;--rose:#ff6f91;--green:#7de39a}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,sans-serif}
+    .app{width:100vw;height:100dvh;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;padding:12px;background:radial-gradient(circle at 25% 12%,rgba(89,224,211,.12),transparent 34%),linear-gradient(135deg,#05080d,#0c1720 60%,#05080d)}
+    .stage{position:relative;min-width:0;min-height:0;border:1px solid var(--line);background:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),#071018;background-size:38px 38px;overflow:hidden}
+    canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}.hud{position:absolute;left:14px;right:14px;top:14px;display:flex;justify-content:space-between;gap:12px;pointer-events:none}.chip{border:1px solid var(--line);background:rgba(7,16,24,.82);padding:10px 12px;box-shadow:0 18px 42px rgba(0,0,0,.35)}.chip span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:850}.chip strong{display:block;margin-top:4px;font-size:16px}.formula{max-width:520px;font:13px/1.35 Cascadia Mono,Consolas,monospace;color:#e8fffb}
+    .legend{position:absolute;left:14px;right:14px;bottom:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;pointer-events:none}.legend div{border:1px solid rgba(89,224,211,.28);background:rgba(7,16,24,.78);padding:8px 10px;font-size:12px;font-weight:760}
+    aside{border:1px solid var(--line);background:rgba(10,21,30,.96);padding:14px;display:grid;grid-template-rows:auto auto auto auto minmax(0,1fr);gap:12px;overflow:hidden}h1{margin:0;font-size:24px;line-height:1.05}.eyebrow{margin:0 0 6px;color:var(--cyan);font-size:11px;text-transform:uppercase;font-weight:900}.sub{margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.35}.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field{border:1px solid rgba(230,250,247,.14);background:rgba(255,255,255,.035);padding:8px}.field label{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;font-weight:850}.field output{color:var(--ink)}input[type=range]{width:100%;accent-color:var(--cyan)}button,select{width:100%;min-height:39px;border:1px solid rgba(230,250,247,.18);background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));color:var(--ink);font-weight:850;padding:8px}button:hover,select:hover{border-color:rgba(89,224,211,.55)}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{min-height:58px;border:1px solid rgba(230,250,247,.14);background:rgba(255,255,255,.035);padding:9px}.metric span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase}.metric strong{display:block;margin-top:5px;font-size:19px}.read{border:1px solid rgba(230,250,247,.14);background:rgba(255,255,255,.035);padding:11px;overflow:auto}.read h2{margin:0 0 8px;font-size:15px}.read p{margin:0 0 10px;color:#cfe4e2;font-size:13px;line-height:1.45}
+    @media(max-width:900px){.app{display:block;padding:8px}.stage{height:100dvh}.formula{display:none}aside{display:none}.legend{grid-template-columns:1fr 1fr}.chip strong{font-size:14px}}
+  </style>
+</head>
+<body>
+<main class="app">
+  <section class="stage" aria-label="Interactive table versus graph lab">
+    <canvas id="viz"></canvas>
+    <div class="hud">
+      <div class="chip"><span>A01 lab</span><strong>Table -> graph object</strong></div>
+      <div class="chip formula"><span>formal object</span><strong>G = (V, E, X, A); edge = (source, relation, target, evidence)</strong></div>
+    </div>
+    <div class="legend">
+      <div style="color:var(--gold)">gold: regulator or source node</div>
+      <div style="color:var(--cyan)">cyan: target/entity node</div>
+      <div style="color:var(--rose)">rose: context/evidence node</div>
+      <div style="color:var(--blue)">blue: feature/assay signal</div>
+    </div>
+  </section>
+  <aside>
+    <header>
+      <p class="eyebrow">Generated specifically for A01</p>
+      <h1>Why relational data is different</h1>
+      <p class="sub">Change the controls and watch a row table become a graph object with direction, edge meaning, features, and evidence provenance.</p>
+    </header>
+    <div class="controls">
+      <select id="mode">
+        <option value="split">Table and graph</option>
+        <option value="graph">Graph only</option>
+        <option value="message">Message movement</option>
+        <option value="biology">Biology example</option>
+      </select>
+      <button id="pulse">Pulse relation</button>
+      <button id="reset">Reset</button>
+      <button id="swap">Swap layout</button>
+    </div>
+    <div class="controls" id="sliders"></div>
+    <div class="metrics">
+      <div class="metric"><span>relational information</span><strong id="m0">0.00</strong></div>
+      <div class="metric"><span>table loss</span><strong id="m1">0.00</strong></div>
+      <div class="metric"><span>message reach</span><strong id="m2">0.00</strong></div>
+      <div class="metric"><span>evidence clarity</span><strong id="m3">0.00</strong></div>
+    </div>
+    <div class="read">
+      <h2>How to read it</h2>
+      <p><b>Table mode:</b> rows are useful but relation meaning is hidden in columns or extra files.</p>
+      <p><b>Graph mode:</b> nodes, edges, features, and evidence are separate objects. This is why GNNs can move information along relations instead of treating samples as isolated rows.</p>
+      <p id="state"></p>
+    </div>
+  </aside>
+</main>
+<script>
+const canvas=document.getElementById("viz"),ctx=canvas.getContext("2d");
+const sliders=[
+  ["edge density",58],["directionality",72],["feature visibility",62],["evidence confidence",66]
+];
+let mode="split",pulse=0,flip=false,vals=sliders.map(x=>x[1]);
+function resize(){const r=canvas.parentElement.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=Math.floor(r.width*d);canvas.height=Math.floor(r.height*d);ctx.setTransform(d,0,0,d,0,0);draw()}
+addEventListener("resize",resize);
+const q=s=>document.querySelector(s);
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function round(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function label(x,y,t,c="#eaf8f7"){ctx.save();ctx.font="800 12px Inter,Segoe UI,sans-serif";const w=ctx.measureText(t).width+18;ctx.fillStyle="rgba(5,12,18,.82)";ctx.strokeStyle="rgba(230,250,247,.18)";round(x-w/2,y-14,w,24,8);ctx.fill();ctx.stroke();ctx.fillStyle=c;ctx.textAlign="center";ctx.fillText(t,x,y+4);ctx.restore()}
+function node(x,y,r,c,t){const g=ctx.createRadialGradient(x-r*.3,y-r*.3,2,x,y,r);g.addColorStop(0,"#fff");g.addColorStop(.18,c);g.addColorStop(1,"#13242c");ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle="rgba(255,255,255,.25)";ctx.stroke();label(x,y-r-13,t)}
+function edge(a,b,c,w=3,arrow=true){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();if(arrow){const ang=Math.atan2(b.y-a.y,b.x-a.x);ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-12*Math.cos(ang-.35),b.y-12*Math.sin(ang-.35));ctx.lineTo(b.x-12*Math.cos(ang+.35),b.y-12*Math.sin(ang+.35));ctx.closePath();ctx.fill()}}
+function bg(w,h){ctx.fillStyle="#05080d";ctx.fillRect(0,0,w,h);ctx.strokeStyle="rgba(89,224,211,.06)";ctx.lineWidth=1;for(let x=0;x<w;x+=38){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let y=0;y<h;y+=38){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}}
+function drawTable(x,y,w,h){round(x,y,w,h,14);ctx.fillStyle="rgba(11,23,33,.88)";ctx.fill();ctx.strokeStyle="#263e49";ctx.stroke();ctx.font="800 14px Inter";ctx.fillStyle="#f0c65a";ctx.fillText("Table: rows store entities",x+22,y+34);const cols=["entity","feature","label","relation?"];const rows=[["TF_A","high","regulator","hidden"],["Gene_B","mid","target","hidden"],["Gene_C","low","target","hidden"],["Cell_D","state","context","hidden"]];const cw=w/4,rh=(h-70)/5;ctx.font="700 12px Inter";for(let c=0;c<4;c++){ctx.fillStyle="#9db6b4";ctx.fillText(cols[c],x+18+c*cw,y+68)}for(let r=0;r<5;r++){ctx.strokeStyle="#263e49";ctx.beginPath();ctx.moveTo(x,y+78+r*rh);ctx.lineTo(x+w,y+78+r*rh);ctx.stroke()}for(let c=1;c<4;c++){ctx.beginPath();ctx.moveTo(x+c*cw,y+50);ctx.lineTo(x+c*cw,y+h-20);ctx.stroke()}rows.forEach((row,r)=>row.forEach((v,c)=>{ctx.fillStyle=c===3?"#ff6f91":"#eef8f7";ctx.fillText(v,x+18+c*cw,y+103+r*rh)}));}
+function graphPoints(w,h){const cx=flip?w*.43:w*.63,cy=h*.5;return {tf:{x:cx-120,y:cy-10},b:{x:cx+50,y:cy-120},c:{x:cx+70,y:cy+40},d:{x:cx+190,y:cy+150},assay:{x:cx-20,y:cy+160}}}
+function drawGraph(w,h){const p=graphPoints(w,h),dense=vals[0]/100,dir=vals[1]/100,feat=vals[2]/100,evid=vals[3]/100;edge(p.tf,p.b,`rgba(89,224,211,${.35+.55*evid})`,3+5*dense,dir>.35);edge(p.tf,p.c,`rgba(255,111,145,${.3+.55*evid})`,2+4*dense,dir>.35);edge(p.b,p.d,"rgba(104,173,255,.42)",2+2*dense,dir>.62);edge(p.c,p.d,"rgba(104,173,255,.34)",2+2*dense,dir>.62);edge(p.assay,p.b,"rgba(240,198,90,.48)",2+3*feat,false);edge(p.assay,p.c,"rgba(240,198,90,.42)",2+3*feat,false);node(p.tf.x,p.tf.y,34,"#f0c65a",mode==="biology"?"TF":"source");node(p.b.x,p.b.y,28,"#59e0d3",mode==="biology"?"Gene B":"entity B");node(p.c.x,p.c.y,28,"#68adff",mode==="biology"?"Gene C":"entity C");node(p.d.x,p.d.y,30,"#ff6f91",mode==="biology"?"cell state":"context");node(p.assay.x,p.assay.y,25,"#7de39a","evidence");label((p.tf.x+p.b.x)/2,(p.tf.y+p.b.y)/2-15,mode==="biology"?"activates":"relation", "#59e0d3");label((p.tf.x+p.c.x)/2,(p.tf.y+p.c.y)/2+15,mode==="biology"?"represses":"typed edge", "#ff6f91");if(mode==="message"||pulse>0){const t=(Date.now()%1400)/1400;[p.b,p.c,p.d].forEach((target,i)=>{const from=i<2?p.tf:(t<.5?p.b:p.c);const local=i<2?t:(t-.5)*2;const x=from.x+(target.x-from.x)*clamp(local,0,1),y=from.y+(target.y-from.y)*clamp(local,0,1);ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(x,y,7+4*Math.sin(t*Math.PI),0,Math.PI*2);ctx.fill()})}}
+function draw(){const w=canvas.clientWidth,h=canvas.clientHeight;bg(w,h);if(mode==="split"){drawTable(w*.06,h*.22,w*.36,h*.48);drawGraph(w,h);label(w*.5,h*.16,"same facts: a table hides relations; a graph makes them computable","#f0c65a")}else if(mode==="graph"||mode==="message"||mode==="biology"){drawGraph(w,h);label(w*.5,h*.16,mode==="biology"?"biological graph: TF, target genes, assay evidence, context":"graph object: V nodes, E edges, X features, A adjacency","#f0c65a")}const rel=(vals[0]+vals[1])/200,loss=1-vals[2]/100*.55-vals[3]/100*.35,reach=(vals[0]/100)*(vals[1]/100),clarity=vals[3]/100;["m0","m1","m2","m3"].forEach((id,i)=>q("#"+id).textContent=[rel,loss,reach,clarity][i].toFixed(2));q("#state").textContent=`Current reading: edge density ${vals[0]/100}, directionality ${vals[1]/100}, feature visibility ${vals[2]/100}, evidence confidence ${vals[3]/100}.`;if(pulse>0){pulse--;requestAnimationFrame(draw)}}
+function init(){const box=q("#sliders");sliders.forEach((s,i)=>{const div=document.createElement("div");div.className="field";div.innerHTML=`<label>${s[0]} <output>${(vals[i]/100).toFixed(2)}</output></label><input type="range" min="0" max="100" value="${vals[i]}">`;const inp=div.querySelector("input"),out=div.querySelector("output");inp.oninput=()=>{vals[i]=+inp.value;out.textContent=(vals[i]/100).toFixed(2);draw()};box.appendChild(div)});q("#mode").onchange=e=>{mode=e.target.value;draw()};q("#pulse").onclick=()=>{pulse=90;draw()};q("#reset").onclick=()=>{vals=sliders.map(x=>x[1]);document.querySelectorAll("input").forEach((inp,i)=>{inp.value=vals[i];inp.previousElementSibling.querySelector("output").textContent=(vals[i]/100).toFixed(2)});mode="split";q("#mode").value=mode;draw()};q("#swap").onclick=()=>{flip=!flip;draw()};resize();setInterval(()=>{if(mode==="message"||pulse>0)draw()},33)}
+init();
+</script>
+</body>
+</html>

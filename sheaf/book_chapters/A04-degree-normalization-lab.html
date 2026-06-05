@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A04 - Degree Normalization Lab</title>
+<style>
+  :root{--bg:#061018;--panel:#0c1c26;--panel2:#08151d;--line:#2d5061;--text:#f7fbff;--muted:#b8cbd3;--cyan:#64f1e1;--gold:#ffd166;--rose:#ff6d96;--blue:#80b8ff;--green:#9af58f}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--text);font-family:Segoe UI,Inter,Arial,sans-serif}
+  body{background:radial-gradient(circle at 25% 10%,rgba(100,241,225,.14),transparent 30%),radial-gradient(circle at 78% 55%,rgba(255,109,150,.10),transparent 30%),linear-gradient(135deg,#050b10,#0c1821)}
+  .app{width:100%;min-height:100vh;display:grid;grid-template-columns:minmax(790px,1fr) 390px;gap:14px;padding:14px;align-items:start}
+  .stage,.side{border:1px solid var(--line);background:rgba(7,16,22,.92);border-radius:14px;box-shadow:0 18px 64px rgba(0,0,0,.38);overflow:hidden}
+  .stage{min-height:780px;padding:18px;background:linear-gradient(rgba(255,255,255,.026) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.026) 1px,transparent 1px),rgba(5,12,18,.95);background-size:44px 44px}
+  .topbar{display:grid;grid-template-columns:280px 1fr;gap:12px;margin-bottom:14px}
+  .chip{border:1px solid #315466;background:#0a1922;padding:12px 14px;border-radius:10px}
+  .chip b{display:block;color:var(--cyan);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}.chip span{font-weight:950;font-size:18px;line-height:1.25}
+  .formula code{font:850 15px/1.35 Consolas,Menlo,monospace;color:#f6fbff;white-space:normal;overflow-wrap:anywhere}
+  .workspace{display:grid;grid-template-columns:1.05fr 1.15fr;gap:12px}
+  .panel{border:1px solid #2a4c5d;background:rgba(9,21,29,.94);border-radius:12px;padding:12px;min-width:0}
+  .panel h2{margin:0 0 8px;color:var(--cyan);font-size:17px;line-height:1.15}.panel p{margin:0 0 8px;color:#c7dbe3;font-size:13px;line-height:1.35}
+  .graphBox{height:360px} svg{display:block;width:100%;height:100%}
+  .edge{fill:none;stroke-linecap:round;opacity:.55}.edge.active{opacity:1;filter:url(#edgeGlow)}
+  .node text{font:850 12px Segoe UI,Arial,sans-serif;fill:#f6fbff;text-anchor:middle}.role{font:700 10px Segoe UI,Arial,sans-serif!important;fill:#aac0ca!important}.node circle{stroke:#fff;stroke-width:2.2;filter:url(#glow)}
+  .bars{display:grid;gap:9px}.barRow{display:grid;grid-template-columns:90px 1fr 72px;align-items:center;gap:8px;font-size:12px;color:#dceff5}.barShell{height:30px;border-radius:9px;background:#102a36;border:1px solid #2d5364;overflow:hidden}.bar{height:100%;border-radius:8px;transition:width .25s ease}
+  .matrix{display:grid;gap:4px;align-items:center;justify-content:start;max-width:100%;overflow:auto;padding-bottom:4px}.cell,.head,.rowhead,.corner{width:62px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:850}.head,.rowhead{background:#0a1620;border:1px solid #203946;color:#b8ccd5}.cell{font-family:Consolas,Menlo,monospace;background:#0b1921;border:1px solid #1f3947;color:#9fb4bd}.cell.active{background:var(--cyan);color:#061017;border-color:#e4fffb;box-shadow:0 0 16px rgba(100,241,225,.48)}.cell.nonzero{background:#153443;color:#e9fbff}
+  .readout,.codebox{margin:0;border:1px solid #244554;background:#08151d;border-radius:9px;padding:10px;color:#e8fbff;font:750 12px/1.45 Consolas,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+  .side{padding:14px;display:flex;flex-direction:column;gap:12px}.eyebrow{color:var(--cyan);font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:11px}h1{font-size:28px;line-height:1.05;margin:4px 0 6px}.side p{color:#c8d8df;margin:0;font-size:14px;line-height:1.45}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}button,select{width:100%;min-width:0;border:1px solid #2b4858;background:#14212b;color:#fff;border-radius:7px;padding:10px 9px;font-weight:850;font-size:13px;line-height:1.15}button:active{transform:translateY(1px)}
+  .slider,.check{border:1px solid #203c4b;background:#101d26;padding:10px;border-radius:8px}.slider label,.check label{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:#b7cbd4;font-weight:850;margin-bottom:6px}input[type=range]{width:100%;accent-color:var(--cyan)}input[type=checkbox]{width:20px;height:20px;accent-color:var(--cyan)}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid #2a4553;background:#0d1a22;padding:10px;border-radius:8px}.metric b{display:block;color:#a9c0ca;font-size:11px;text-transform:uppercase;margin-bottom:6px}.metric span{font-weight:950;font-size:21px}.explain{border:1px solid #2a4553;background:#0d1a22;padding:12px;font-size:14px;line-height:1.45;color:#d7e8ef;border-radius:8px}
+  @media(max-width:980px){.app{display:flex;flex-direction:column;padding:8px;overflow:hidden}.stage,.side{width:calc(100vw - 16px);max-width:calc(100vw - 16px);min-width:0}.stage{min-height:0;padding:12px}.topbar{grid-template-columns:1fr}.workspace{grid-template-columns:1fr}.graphBox{height:330px}.controls,.metrics{grid-template-columns:1fr}.chip span{font-size:17px}.formula code{font-size:14px}}
+  @media(max-width:480px){.app{transform:scale(.88);transform-origin:top left;width:calc(100vw / .88);max-width:none}}
+</style>
+</head>
+<body>
+<main class="app">
+  <section class="stage">
+    <div class="topbar">
+      <div class="chip"><b>A04 lab</b><span>degree -> normalization -> biological scale</span></div>
+      <div class="chip formula"><b>active formula</b><code id="formula">h'_i = sum_j alpha_ji h_j</code></div>
+    </div>
+    <div class="workspace">
+      <div class="panel">
+        <h2>1. Biological neighborhood</h2>
+        <p>Watch a broad hub and a specific regulator compete to explain the target gene update.</p>
+        <div class="graphBox"><svg id="graph" viewBox="0 0 520 360">
+          <defs>
+            <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="edgeGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <marker id="arrowC" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M1,1 L9,5.5 L1,10 Z" fill="#64f1e1"/></marker>
+            <marker id="arrowR" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M1,1 L9,5.5 L1,10 Z" fill="#ff6d96"/></marker>
+            <marker id="arrowB" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M1,1 L9,5.5 L1,10 Z" fill="#80b8ff"/></marker>
+          </defs>
+          <g id="edges"></g><g id="nodes"></g><circle id="pulseDot" cx="-20" cy="-20" r="7" fill="#fff" opacity="0"/>
+        </svg></div>
+      </div>
+      <div class="panel">
+        <h2>2. Contribution bars</h2>
+        <p>The same neighbor values produce different messages depending on the normalization rule.</p>
+        <div class="bars" id="bars"></div>
+      </div>
+      <div class="panel">
+        <h2>3. One target row of A-hat</h2>
+        <p>This is the row used to update the selected target. Normalization changes the coefficients, not the biology labels.</p>
+        <div id="matrix" class="matrix"></div>
+      </div>
+      <div class="panel">
+        <h2>4. Numerical update</h2>
+        <pre class="readout" id="readout"></pre>
+      </div>
+    </div>
+  </section>
+  <aside class="side">
+    <div><div class="eyebrow">Generated specifically for A04</div><h1>When does a hub dominate?</h1><p>Change the normalization rule, hub degree, evidence confidence, and self-loop. The target update changes even when the graph drawing looks almost the same.</p></div>
+    <div class="controls">
+      <select id="preset"><option value="grn">GRN: hub TF vs specific TF</option><option value="ppi">PPI: popular protein vs module partner</option><option value="cell">Cell graph: dense niche vs close neighbor</option></select>
+      <select id="mode"><option value="sum">Raw sum</option><option value="mean">Mean over incoming</option><option value="gcn">Symmetric GCN</option><option value="evidence">Evidence-aware GCN</option></select>
+      <button id="pulse">Pulse messages</button><button id="reset">Reset</button>
+    </div>
+    <div class="check"><label>include self-loop <input id="selfLoop" type="checkbox" checked></label></div>
+    <div class="slider"><label>hub degree <span id="hubDegVal"></span></label><input id="hubDeg" type="range" min="2" max="80" step="1" value="40"></div>
+    <div class="slider"><label>hub signal <span id="hubSignalVal"></span></label><input id="hubSignal" type="range" min="0" max="100" step="1" value="82"></div>
+    <div class="slider"><label>specific signal <span id="specSignalVal"></span></label><input id="specSignal" type="range" min="0" max="100" step="1" value="62"></div>
+    <div class="slider"><label>specific evidence <span id="evidenceVal"></span></label><input id="evidence" type="range" min="0" max="100" step="1" value="88"></div>
+    <div class="slider"><label>batch/noise pressure <span id="noiseVal"></span></label><input id="noise" type="range" min="0" max="100" step="1" value="18"></div>
+    <div class="metrics">
+      <div class="metric"><b>target update</b><span id="targetVal">0</span></div>
+      <div class="metric"><b>hub share</b><span id="hubShare">0</span></div>
+      <div class="metric"><b>scale risk</b><span id="scaleRisk">0</span></div>
+      <div class="metric"><b>bio trust</b><span id="trust">0</span></div>
+    </div>
+    <div class="explain" id="explain"></div>
+  </aside>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const COLORS={hub:'#ffd166',spec:'#ff6d96',target:'#64f1e1',self:'#80b8ff',other:'#9af58f'};
+const presets={
+  grn:{hub:'HubTF',spec:'SpecTF',target:'GeneX',hubRole:'broad regulator',specRole:'specific regulator',targetRole:'target gene'},
+  ppi:{hub:'HubProt',spec:'ModuleProt',target:'ProtX',hubRole:'popular protein',specRole:'module partner',targetRole:'protein target'},
+  cell:{hub:'DenseNiche',spec:'NeighborCell',target:'CellX',hubRole:'dense niche',specRole:'close neighbor',targetRole:'cell state'}
+};
+const pos={hub:{x:120,y:180},spec:{x:125,y:300},target:{x:365,y:225},self:{x:365,y:88}};
+let pulsing=false,pulseT=0;
+function params(){
+  const hd=Number($('hubDeg').value), hs=Number($('hubSignal').value)/100, ss=Number($('specSignal').value)/100, ev=Number($('evidence').value)/100, noise=Number($('noise').value)/100;
+  return {hd,hs,ss,ev,noise,self:$('selfLoop').checked,mode:$('mode').value,preset:presets[$('preset').value]};
+}
+function coefficients(p){
+  const incoming=2+(p.self?1:0), targetDeg=incoming, specDeg=2, selfDeg=targetDeg;
+  let alpha={hub:1,spec:1,self:p.self?1:0}, formula='h_i_new = sum_j h_j';
+  if(p.mode==='mean'){alpha={hub:1/incoming,spec:1/incoming,self:p.self?1/incoming:0}; formula='h_i_new = (1 / deg_i) sum_j h_j'}
+  if(p.mode==='gcn'){alpha={hub:1/Math.sqrt(p.hd*targetDeg),spec:1/Math.sqrt(specDeg*targetDeg),self:p.self?1/Math.sqrt(selfDeg*targetDeg):0}; formula='h_i_new = sum_j 1/sqrt(d_j d_i) h_j'}
+  if(p.mode==='evidence'){alpha={hub:(1-p.noise*.45)/Math.sqrt(p.hd*targetDeg),spec:p.ev/Math.sqrt(specDeg*targetDeg),self:p.self?.72/Math.sqrt(selfDeg*targetDeg):0}; formula='h_i_new = sum_j q_ji / sqrt(d_j d_i) h_j'}
+  return {alpha,formula,targetDeg};
+}
+function compute(){
+  const p=params(), c=coefficients(p);
+  const values={hub:p.hs,spec:p.ss,self:.46};
+  const contrib={hub:c.alpha.hub*values.hub,spec:c.alpha.spec*values.spec,self:c.alpha.self*values.self};
+  const total=contrib.hub+contrib.spec+contrib.self;
+  const hubShare=total>0?contrib.hub/total:0;
+  const scaleRisk=Math.min(1,(p.mode==='sum'?total/2.2:hubShare*.75+p.noise*.35));
+  const trust=Math.max(0,Math.min(1,(p.mode==='evidence'?0.35:0.18)+p.ev*.55+(1-p.noise)*.25-hubShare*.18));
+  return {p,c,values,contrib,total,hubShare,scaleRisk,trust};
+}
+function drawGraph(s){
+  const p=s.p, labels=p.preset;
+  const hubWidth=4+Math.min(18,p.hd/4), specWidth=6+8*p.ev, selfWidth=p.self?6:0;
+  $('edges').innerHTML=`
+    <path class="edge active" d="M${pos.hub.x+42},${pos.hub.y} C220,145 270,160 ${pos.target.x-45},${pos.target.y-10}" stroke="${COLORS.hub}" stroke-width="${hubWidth}" marker-end="url(#arrowC)"/>
+    <path class="edge active" d="M${pos.spec.x+38},${pos.spec.y-8} C220,320 270,285 ${pos.target.x-45},${pos.target.y+18}" stroke="${COLORS.spec}" stroke-width="${specWidth}" marker-end="url(#arrowR)"/>
+    ${p.self?`<path class="edge active" d="M${pos.target.x},${pos.target.y-48} C420,145 420,305 ${pos.target.x},${pos.target.y+48}" stroke="${COLORS.self}" stroke-width="${selfWidth}" marker-end="url(#arrowB)"/>`:''}
+    <text x="230" y="142" fill="#f7fbff" font-size="11" font-weight="850">degree ${p.hd}</text>
+    <text x="228" y="326" fill="#f7fbff" font-size="11" font-weight="850">evidence ${p.ev.toFixed(2)}</text>`;
+  const node=(id,label,role,r,color)=>`<g class="node"><circle cx="${pos[id].x}" cy="${pos[id].y}" r="${r}" fill="${color}"/><text x="${pos[id].x}" y="${pos[id].y-4}">${label}</text><text class="role" x="${pos[id].x}" y="${pos[id].y+20}">${role}</text></g>`;
+  $('nodes').innerHTML=node('hub',labels.hub,labels.hubRole,42+Math.min(20,p.hd/5),COLORS.hub)+node('spec',labels.spec,labels.specRole,42,COLORS.spec)+node('target',labels.target,labels.targetRole,50,COLORS.target);
+  if(pulsing){pulseT+=.025; const t=Math.min(1,pulseT); const hx=pos.hub.x+(pos.target.x-pos.hub.x)*t, hy=pos.hub.y+(pos.target.y-pos.hub.y)*t; $('pulseDot').setAttribute('cx',hx);$('pulseDot').setAttribute('cy',hy);$('pulseDot').setAttribute('opacity','1'); if(t>=1){pulsing=false;pulseT=0;$('pulseDot').setAttribute('opacity','0')}}
+}
+function drawBars(s){
+  const max=Math.max(.001,s.contrib.hub,s.contrib.spec,s.contrib.self);
+  const rows=[['hub',s.p.preset.hub,COLORS.hub],['spec',s.p.preset.spec,COLORS.spec],['self','self-loop',COLORS.self]].filter(r=>r[0]!=='self'||s.p.self);
+  $('bars').innerHTML=rows.map(([key,label,color])=>`<div class="barRow"><b>${label}</b><div class="barShell"><div class="bar" style="width:${Math.max(2,100*s.contrib[key]/max)}%;background:${color}"></div></div><span>${s.contrib[key].toFixed(3)}</span></div>`).join('');
+}
+function drawMatrix(s){
+  const names=[s.p.preset.hub,s.p.preset.spec,'self',s.p.preset.target], vals=[s.c.alpha.hub,s.c.alpha.spec,s.p.self?s.c.alpha.self:0,0];
+  $('matrix').style.gridTemplateColumns='repeat(5,62px)';
+  let html='<div class="corner"></div>'+names.map(n=>`<div class="head">${n}</div>`).join('');
+  html+=`<div class="rowhead">${s.p.preset.target}</div>`;
+  vals.forEach((v,i)=>{let cls='cell '+(v?'nonzero active':''); html+=`<div class="${cls}">${v?v.toFixed(3):'0'}</div>`});
+  $('matrix').innerHTML=html;
+}
+function updateText(s){
+  $('formula').textContent=s.c.formula;
+  $('readout').textContent=`mode = ${$('mode').value}\n${s.p.preset.hub}: alpha ${s.c.alpha.hub.toFixed(4)} * h ${s.values.hub.toFixed(2)} = ${s.contrib.hub.toFixed(4)}\n${s.p.preset.spec}: alpha ${s.c.alpha.spec.toFixed(4)} * h ${s.values.spec.toFixed(2)} = ${s.contrib.spec.toFixed(4)}\nself: alpha ${s.c.alpha.self.toFixed(4)} * h ${s.values.self.toFixed(2)} = ${s.contrib.self.toFixed(4)}\nupdated target = ${s.total.toFixed(4)}`;
+  $('targetVal').textContent=s.total.toFixed(2); $('hubShare').textContent=(100*s.hubShare).toFixed(0)+'%'; $('scaleRisk').textContent=s.scaleRisk.toFixed(2); $('trust').textContent=s.trust.toFixed(2);
+  $('hubDegVal').textContent=s.p.hd; $('hubSignalVal').textContent=s.p.hs.toFixed(2); $('specSignalVal').textContent=s.p.ss.toFixed(2); $('evidenceVal').textContent=s.p.ev.toFixed(2); $('noiseVal').textContent=s.p.noise.toFixed(2);
+  $('explain').textContent=s.p.mode==='sum'?'Raw sum is useful as a warning: the target update grows with incoming mass. In biology this can confuse real hub biology with database coverage or graph construction artifacts.':s.p.mode==='mean'?'Mean aggregation equalizes the target row. It controls magnitude but does not know whether one regulator is a broad hub or a specific causal candidate.':s.p.mode==='gcn'?'Symmetric GCN normalization divides by source and target degrees. A high-degree source gets a smaller per-edge coefficient, so hubs do not win purely by being hubs.':'Evidence-aware GCN keeps the degree correction but lets assay confidence modulate the edge. This is closer to GRN practice, where motif, ATAC, perturbation, and prior support should not be collapsed blindly.';
+}
+function render(){const s=compute();drawGraph(s);drawBars(s);drawMatrix(s);updateText(s);window.__A04LabReady=true;window.__A04LabSnapshot={mode:s.p.mode,hubDegree:s.p.hd,targetUpdate:s.total,hubShare:s.hubShare}; if(pulsing)requestAnimationFrame(render)}
+['preset','mode','selfLoop','hubDeg','hubSignal','specSignal','evidence','noise'].forEach(id=>$(id).addEventListener('input',render));
+$('pulse').addEventListener('click',()=>{pulsing=true;pulseT=0;requestAnimationFrame(render)});
+$('reset').addEventListener('click',()=>{$('preset').value='grn';$('mode').value='gcn';$('selfLoop').checked=true;$('hubDeg').value=40;$('hubSignal').value=82;$('specSignal').value=62;$('evidence').value=88;$('noise').value=18;render()});
+$('mode').value='gcn';render();
+</script>
+</body>
+</html>

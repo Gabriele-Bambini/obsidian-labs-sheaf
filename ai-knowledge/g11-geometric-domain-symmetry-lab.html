@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G11 Geometric Deep Learning Atlas</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g11-geometric-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="geometric" data-lab-id="g11" data-keywords="domain symmetry operator grid set graph manifold gauge sheaf readout">
+    <section class="visual-stack" aria-label="Interactive 3D geometric deep learning atlas">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G11 geometric deep learning domain symmetry operator 3D atlas"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G11</strong></div>
+          <div class="formula-chip"><span id="formulaText">domain -> symmetry -> operator -> readout</span>The right architecture is the one whose computations respect the object's transformations.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected contract</span><strong>Domain atlas is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.46fr)) repeat(5,minmax(0,.45fr)) repeat(6,minmax(0,.43fr));">
+        <select id="domainSelect" data-control="domainSelect" aria-label="Geometric domain">
+          <option value="grid">Grid</option>
+          <option value="groups">Groups</option>
+          <option value="set">Set</option>
+          <option value="graph">Graph</option>
+          <option value="manifold">Manifold</option>
+          <option value="sheaf">Sheaf</option>
+        </select>
+        <select id="operatorSelect" data-control="operatorSelect" aria-label="Operator family">
+          <option value="convolution">Conv</option>
+          <option value="deepsets">DeepSets</option>
+          <option value="message">Msg pass</option>
+          <option value="diffusion">Diffuse</option>
+          <option value="gauge">Gauge transport</option>
+        </select>
+        <select id="outputType" data-control="outputType" aria-label="Output contract">
+          <option value="equivariant">Equiv</option>
+          <option value="invariant">Invar</option>
+          <option value="node">Node</option>
+        </select>
+        <div class="command-control">
+          <label for="operatorDepth">Depth <output data-output="operatorDepth">3</output></label>
+          <input id="operatorDepth" data-param="operatorDepth" type="range" min="1" max="8" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="localityRadius">Locality <output data-output="localityRadius">1.10</output></label>
+          <input id="localityRadius" data-param="localityRadius" type="range" min="0.35" max="2.6" step="0.05" value="1.10">
+        </div>
+        <div class="command-control">
+          <label for="domainMismatch">Mismatch <output data-output="domainMismatch">0.18</output></label>
+          <input id="domainMismatch" data-param="domainMismatch" type="range" min="0" max="1.2" step="0.01" value="0.18">
+        </div>
+        <div class="command-control">
+          <label for="symmetryPrior">Prior <output data-output="symmetryPrior">0.72</output></label>
+          <input id="symmetryPrior" data-param="symmetryPrior" type="range" min="0" max="1" step="0.01" value="0.72">
+        </div>
+        <div class="command-control">
+          <label for="readoutStrength">Readout <output data-output="readoutStrength">0.66</output></label>
+          <input id="readoutStrength" data-param="readoutStrength" type="range" min="0" max="1" step="0.01" value="0.66">
+        </div>
+        <button id="applySymmetry" class="primary" data-action="pulse" type="button">Test sym</button>
+        <button id="runOperator" data-action="step" type="button">Run op</button>
+        <button id="showGauge" data-action="step" type="button" aria-label="Gauge transport">Gauge</button>
+        <button id="testReadout" data-action="step" type="button" aria-label="Readout contract">Readout</button>
+        <button id="switchDomain" data-action="step" type="button">Graph perm</button>
+        <button id="resetG11" data-action="reset" type="button" aria-label="Reset lab">Rst</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G11 Geometric Deep Learning Atlas</h1>
+        <p class="subtitle">Rotate the atlas, choose a domain, then test whether symmetry, local operator, and readout contract actually fit that object.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Symmetry score"><span>Symmetry</span><strong id="symmetryLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Operator locality"><span>Locality</span><strong id="localityLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Domain mismatch"><span>Mismatch</span><strong id="mismatchLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Readout stability"><span>Readout</span><strong id="readoutLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading domain-symmetry diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: the domain changes the object, operator changes the local footprint, gauge exposes frame transport, and readout switches between invariant pooling and equivariant fields.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g11-geometric-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=g11-geometric-v3"></script>
+  <script>
+    window.__g11LabSnapshot = window.__g11LabSnapshot || function () { return null; };
+    createG11GeometricDomainLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

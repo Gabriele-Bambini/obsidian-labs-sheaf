@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G07 Link Prediction And Graph Readout</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g07-link-readout-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="link-readout" data-lab-id="g07" data-keywords="link readout pooling decoder negative sampling graph classification">
+    <section class="visual-stack" aria-label="Interactive 3D link prediction and graph readout visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G07 link prediction and graph readout 3D visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G07</strong></div>
+          <div class="formula-chip"><span id="formulaText">same encoder, different head</span>Pair decoders answer edge questions; readouts answer whole-graph questions.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected task head</span><strong>Pair decoder and readout are loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.58fr)) repeat(5,minmax(0,.58fr)) repeat(5,minmax(0,.42fr));">
+        <select id="decoderMode" data-control="decoderMode" aria-label="Link decoder">
+          <option value="dot">Dot decoder</option>
+          <option value="bilinear">Bilinear decoder</option>
+          <option value="mlp">MLP pair features</option>
+          <option value="seal">SEAL subgraph</option>
+        </select>
+        <select id="readoutMode" data-control="readoutMode" aria-label="Graph readout">
+          <option value="sum">Sum pooling</option>
+          <option value="mean">Mean pooling</option>
+          <option value="max">Max pooling</option>
+          <option value="attention">Attention pooling</option>
+        </select>
+        <select id="splitMode" data-control="splitMode" aria-label="Negative sampling split">
+          <option value="uniform">Uniform negatives</option>
+          <option value="hard">Hard negatives</option>
+          <option value="temporal">Temporal guard</option>
+        </select>
+        <div class="command-control">
+          <label for="messageDepth">Depth <output data-output="messageDepth">2</output></label>
+          <input id="messageDepth" data-param="messageDepth" type="range" min="1" max="6" step="1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="decoderGain">Gain <output data-output="decoderGain">1.10</output></label>
+          <input id="decoderGain" data-param="decoderGain" type="range" min="0.2" max="2.6" step="0.01" value="1.10">
+        </div>
+        <div class="command-control">
+          <label for="negativeHardness">Negs <output data-output="negativeHardness">0.34</output></label>
+          <input id="negativeHardness" data-param="negativeHardness" type="range" min="0" max="1.4" step="0.01" value="0.34">
+        </div>
+        <div class="command-control">
+          <label for="candidateBudget">Pairs <output data-output="candidateBudget">5</output></label>
+          <input id="candidateBudget" data-param="candidateBudget" type="range" min="1" max="12" step="1" value="5">
+        </div>
+        <div class="command-control">
+          <label for="readoutSharpness">Readout <output data-output="readoutSharpness">0.46</output></label>
+          <input id="readoutSharpness" data-param="readoutSharpness" type="range" min="0" max="1.4" step="0.01" value="0.46">
+        </div>
+        <button id="scoreLink" class="primary" data-action="pulse" type="button">Score link</button>
+        <button id="sampleNegatives" data-action="step" type="button">Hard negs</button>
+        <button id="poolGraph" data-action="step" type="button">Pool graph</button>
+        <button id="diffPoolStep" data-action="step" type="button">Coarsen S</button>
+        <button id="resetG07" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G07 Link Prediction And Graph Readout</h1>
+        <p class="subtitle">Rotate the encoded graph, then switch between pair scoring, hard negative sampling, graph pooling assumptions, and DiffPool-style coarsening.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Decoder margin"><span>Margin</span><strong id="decoderMarginLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Precision proxy"><span>Precision</span><strong id="precisionLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Readout norm"><span>Readout</span><strong id="readoutNormLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Pair coverage"><span id="linkLabel">Pairs</span><strong id="pairCoverageLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading link prediction and readout diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: decoder mode changes pair geometry, hard negatives change ranking difficulty, readout mode changes the graph vector, and DiffPool coarsens nodes into modules.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g07-link-readout-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=g07-link-readout-v3"></script>
+  <script>
+    window.__g07LabSnapshot = window.__g07LabSnapshot || function () { return null; };
+    createG07LinkReadoutLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

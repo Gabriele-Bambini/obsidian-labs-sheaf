@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>I01 Quantum State Measurement</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?quantum=i01-clarity-v2">
+</head>
+<body>
+  <main class="lab-shell lab-3d-shell gnn-lab math-3d-lab" data-lab-kind="quantum" data-lab-id="i01" data-keywords="quantum mechanics qubit bloch sphere born rule measurement density matrix">
+    <section class="visual-stack" aria-label="Interactive 3D qubit measurement visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to rotate the 3D Bloch sphere. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="I01 qubit Bloch sphere, measurement basis, Born rule probabilities, and samples"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>I01</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">P(+ basis)=|&lt;b+|psi&gt;|^2=(1+r . b)/2</strong></div>
+        </div>
+        <div class="hud quantum-hud"><h1>1. State |psi> -> 2. Measurement basis -> 3. Born rule -> samples</h1></div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong id="selectedLabel">Bloch sphere measurement flow</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select id="viewMode" aria-label="Concept view">
+          <option value="state" selected>State vector</option>
+          <option value="basis">Measurement basis</option>
+          <option value="born">Born samples</option>
+          <option value="density">Density / coherence</option>
+        </select>
+        <select id="basis" aria-label="Measurement basis">
+          <option value="Z" selected>Basis Z</option>
+          <option value="X">Basis X</option>
+          <option value="Y">Basis Y</option>
+          <option value="custom">Custom axis</option>
+        </select>
+        <div class="command-control">
+          <label for="theta">State theta <output data-output="theta">1.57</output></label>
+          <input id="theta" type="range" min="0" max="3.1416" step="0.01" value="1.57">
+        </div>
+        <div class="command-control">
+          <label for="phi">Relative phase phi <output data-output="phi">0.00</output></label>
+          <input id="phi" type="range" min="0" max="6.2832" step="0.01" value="0">
+        </div>
+        <div class="command-control">
+          <label for="basisAngle">Custom basis angle <output data-output="basisAngle">0.00</output></label>
+          <input id="basisAngle" type="range" min="0" max="6.2832" step="0.01" value="0">
+        </div>
+        <div class="command-control">
+          <label for="shots">Shots <output data-output="shots">64</output></label>
+          <input id="shots" type="range" min="8" max="256" step="8" value="64">
+        </div>
+        <div class="command-control">
+          <label for="coherence">Coherence <output data-output="coherence">1.00</output></label>
+          <input id="coherence" type="range" min="0.2" max="1" step="0.01" value="1">
+        </div>
+        <button id="hadamard" class="primary" type="button">Preset |+></button>
+        <button id="measureY" type="button">Measure Y</button>
+        <button id="measure" type="button">Measure Z</button>
+        <button id="fireShot" type="button">Measure 1</button>
+        <button id="runShots" type="button">Run shots</button>
+        <button id="resetI01" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block I 3D lab</p>
+        <h1>I01 Quantum State And Measurement</h1>
+        <p class="subtitle">A concrete one-qubit measurement lab: Bloch sphere, state vector, basis axis, projection geometry, exact Born-rule bars, finite-shot sample dots, and density-matrix coherence.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Born p0"><span id="basisOutcome0">p(0 in Z)</span><strong id="p0Label">0.50</strong></div>
+        <div class="metric" data-role="metric" data-metric="Born p1"><span id="basisOutcome1">p(1 in Z)</span><strong id="p1Label">0.50</strong></div>
+        <div class="metric" data-role="metric" data-metric="Counts"><span>Counts</span><strong id="sampleLabel">0/0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Purity"><span>Purity</span><strong id="purityLabel">1.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight"><span id="basisLabel">Z</span> basis axis: projection length becomes probability before samples are drawn.</p>
+        <p id="state" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Move theta to change population, move phi to change relative phase, switch basis to see the same state answer a different question, then run shots to compare exact probabilities with samples.</p>
+    </aside>
+  </main>
+  <!-- compatibility marker: class="lab-shell lab-3d-shell" -->
+  <!-- {"visual":{"kind":"bloch-born-measurement","graphStyle":"concrete"},"profile":{"preferredMetric":"Born probability"},"graph":{"nodes":["Bloch sphere","current state vector","measurement basis axis","Born rule bars","sample dots","density matrix coherence"],"edges":["projection to basis","probability to histogram","coherence shrink"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/quantum-labs.js?quantum=i01-clarity-v2"></script>
+  <script>
+    window.__i01LabReady = false;
+    window.__i01LabSnapshot = window.__i01LabSnapshot || function () { return null; };
+    createI01QuantumMeasurementLab();
+  </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>J08 - Graph prompting and instruction tuning</title>
+  <link rel="stylesheet" href="shared/gnn-bio-lab-core.css">
+</head>
+<body>
+  <main class="gnn-bio-lab lab-shell lab-3d-shell" data-lab-kind="architecture" data-lab-id="j08">
+    <section class="visual-stack" aria-label="Interactive 3D graph biology visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="J08 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>J08</strong></div>
+          <div class="formula-chip"><span id="formulaText">h_i&#x27; = phi(h_i, AGG_j psi(h_i,h_j,e_ij))</span>Architectures differ by what they let a node see, weight, remember, sample, and read out.</div>
+        </div>
+        <div class="concept-rail"></div>
+        <div class="selected-chip" data-role="selected"><span>Selected mechanism</span><strong>Loading lab.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Command bar under the 3D visualization">
+        <select data-mode aria-label="View mode">
+          <option value="object">Object view</option>
+          <option value="process">Process view</option>
+          <option value="formal">Formal view</option>
+          <option value="diagnostic">Diagnostic view</option>
+        </select>
+        <button type="button" data-command="Switch aggregator">Switch aggregator</button>
+<button type="button" data-command="Open attention heads">Open attention heads</button>
+<button type="button" data-command="Sample neighborhood">Sample neighborhood</button>
+<button type="button" data-command="Compare readout">Compare readout</button>
+        <div class="command-control"><label>Depth <output data-output="depth">3</output></label><input data-param="depth" type="range" min="1" max="12" step="1" value="3"></div>
+        <div class="command-control"><label>Evidence <output data-output="evidence">0.62</output></label><input data-param="evidence" type="range" min="0" max="100" step="1" value="62"></div>
+        <div class="command-control"><label>Noise <output data-output="noise">0.18</output></label><input data-param="noise" type="range" min="0" max="100" step="1" value="18"></div>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Advanced GNN Theory</p>
+        <h1>J08 - Graph prompting and instruction tuning</h1>
+        <p class="subtitle">AI Knowledge style lab: 3D object, command bar, metrics, state explanation, direct controls, mobile srcdoc compatibility.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Attention entropy"><span>Attention entropy</span><strong>0.00</strong></div>
+<div class="metric" data-role="metric" data-metric="Coverage"><span>Coverage</span><strong>0.00</strong></div>
+<div class="metric" data-role="metric" data-metric="Memory cost"><span>Memory cost</span><strong>0.00</strong></div>
+<div class="metric" data-role="metric" data-metric="Task margin"><span>Task margin</span><strong>0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading.</p>
+        <p id="state" class="state-box">Waiting for first render.</p>
+      </div>
+      <p class="hint">Drag the scene, use mode and mechanism controls, then watch node geometry, edge transport, matrix cells, bars, metrics, and state text change together.</p>
+    </aside>
+  </main>
+  <script id="lab-config" type="application/json">{"lessonId": "J08", "title": "Graph prompting and instruction tuning", "section": "Advanced GNN Theory", "category": "gnn-architectures", "kind": "architecture", "formula": "h_i' = phi(h_i, AGG_j psi(h_i,h_j,e_ij))", "insight": "Architectures differ by what they let a node see, weight, remember, sample, and read out.", "controls": ["Switch aggregator", "Open attention heads", "Sample neighborhood", "Compare readout"], "metrics": ["Attention entropy", "Coverage", "Memory cost", "Task margin"], "nodes": ["input graph", "encoder", "message", "attention", "update", "readout", "loss", "task"], "colors": ["#54a8ff", "#77df96", "#e8b857", "#ff6d8b"]}</script>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-bio-lab-core.js"></script>
+  <script>
+    try {
+      createGnnBioLab();
+    } catch (error) {
+      console.error(error);
+      const selected = document.querySelector("[data-role='selected'] strong");
+      const state = document.getElementById("state");
+      if (selected) selected.textContent = "Lab error: " + error.message;
+      if (state) state.textContent = "Interactive render failed. Open the direct HTML link or check the Obsidian interactive-lab-server plugin.";
+    }
+  </script>
+</body>
+</html>

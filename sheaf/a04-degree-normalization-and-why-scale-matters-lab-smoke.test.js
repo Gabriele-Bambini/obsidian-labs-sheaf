@@ -1,0 +1,11 @@
+const fs = require('fs');
+const html = fs.readFileSync('a04-degree-normalization-and-why-scale-matters-lab.html', 'utf8');
+if (!html.includes('A04 - Degree Normalization Lab')) throw new Error('missing A04 title');
+if (!html.includes('window.__A04LabReady')) throw new Error('missing ready flag');
+if (!html.includes('window.__A04LabSnapshot')) throw new Error('missing snapshot flag');
+if (!html.includes('hub degree')) throw new Error('missing hub-degree control');
+if (!html.includes('Symmetric GCN')) throw new Error('missing GCN mode');
+if (!html.includes('Evidence-aware GCN')) throw new Error('missing evidence mode');
+if (!html.includes('@media(max-width')) throw new Error('missing mobile CSS');
+if (/https?:\/\/cdn/i.test(html)) throw new Error('CDN dependency found');
+console.log('ok A04 degree-normalization lab');

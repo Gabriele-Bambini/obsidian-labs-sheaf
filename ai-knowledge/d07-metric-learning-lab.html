@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D07 Metric Learning</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=d06-d07-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="learning" data-lab-id="d07" data-keywords="metric learning Mahalanobis contrastive triplet proxy retrieval mining margin">
+    <section class="visual-stack" aria-label="Interactive 3D metric-learning visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="D07 Metric Learning 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>D07</strong></div>
+          <div class="formula-chip"><span>Metric sketch</span>Anchor-positive pull, anchor-negative margin, Mahalanobis shape, proxy targets, and top-k retrieval all change together.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected relation</span><strong>Metric-learning triplet is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.78fr) minmax(0,.78fr) minmax(0,.82fr) repeat(5,minmax(0,1fr)) repeat(4,minmax(0,.58fr));">
+        <select id="lossType" data-control="mode" aria-label="Loss type">
+          <option value="triplet">Triplet</option>
+          <option value="contrastive">Contrastive</option>
+          <option value="proxy">Proxy</option>
+        </select>
+        <select id="metricType" aria-label="Metric geometry">
+          <option value="euclidean">Euclidean</option>
+          <option value="mahalanobis">Mahalanobis</option>
+          <option value="cosine">Cosine</option>
+        </select>
+        <select id="miningMode" aria-label="Mining mode">
+          <option value="semi">Semi-hard</option>
+          <option value="hard">Hard</option>
+          <option value="random">Random</option>
+        </select>
+        <div class="command-control">
+          <label for="margin">Margin <output data-output="margin">0.55</output></label>
+          <input id="margin" data-param="margin" type="range" min="0.2" max="1.1" step="0.01" value="0.55">
+        </div>
+        <div class="command-control">
+          <label for="classSeparation">Separation <output data-output="classSeparation">1.05</output></label>
+          <input id="classSeparation" data-param="classSeparation" type="range" min="0.55" max="1.65" step="0.01" value="1.05">
+        </div>
+        <div class="command-control">
+          <label for="embeddingSpread">Spread <output data-output="embeddingSpread">0.72</output></label>
+          <input id="embeddingSpread" data-param="embeddingSpread" type="range" min="0.25" max="1.15" step="0.01" value="0.72">
+        </div>
+        <div class="command-control">
+          <label for="metricStretch">Stretch <output data-output="metricStretch">1.55</output></label>
+          <input id="metricStretch" data-param="metricStretch" type="range" min="0.65" max="2.4" step="0.01" value="1.55">
+        </div>
+        <div class="command-control">
+          <label for="miningPressure">Mining <output data-output="miningPressure">0.62</output></label>
+          <input id="miningPressure" data-param="miningPressure" type="range" min="0" max="1" step="0.02" value="0.62">
+        </div>
+        <button id="mineTriplet" class="primary" data-action="pulse" type="button">Mine negative</button>
+        <button id="trainStep" data-action="step" type="button">Train step</button>
+        <button id="runFive" data-action="pulse" type="button">Run 5</button>
+        <button id="resetMetric" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block D 3D lab</p>
+        <h1>D07 Metric Learning</h1>
+        <p class="subtitle">Rotate the embedding space, mine negatives, switch losses, and watch distance become a task-specific retrieval rule.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Loss"><span>Loss</span><strong id="lossLabel">0.000</strong></div>
+        <div class="metric" data-role="metric" data-metric="KNN"><span>KNN</span><strong id="scoreBadge">0%</strong></div>
+        <div class="metric" data-role="metric" data-metric="d(a,p)"><span>d(a,p)</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="d(a,n)"><span>d(a,n)</span><strong>0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading metric-learning geometry.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Every command changes geometry: loss swaps the active objective, metric shape changes the distance shell, mining picks a different negative, and training steps reshape retrieval neighborhoods.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=d06-d07-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=d06-d07-canonical-clarity-v2"></script>
+  <script>
+    window.__d07LabSnapshot = window.__d07LabSnapshot || function () { return null; };
+    createD07MetricLearningLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

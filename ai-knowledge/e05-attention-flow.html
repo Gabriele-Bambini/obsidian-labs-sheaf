@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E05 Attention Flow</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=e04-e05-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e05" data-keywords="attention transformer query key value softmax mask multi head positional encoding">
+    <section class="visual-stack" aria-label="Interactive 3D attention QKV visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E05 Attention Flow 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E05</strong></div>
+          <div class="formula-chip"><span>Attention sketch</span>Q asks, K is compared, softmax normalizes allowed keys, and V vectors mix into a new token representation.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected query</span><strong>Attention row is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.64fr) minmax(0,.66fr) minmax(0,.7fr) repeat(7,minmax(0,.72fr)) repeat(3,minmax(0,.54fr));">
+        <select id="queryToken" data-control="queryToken" aria-label="Query token">
+          <option value="the">the</option>
+          <option value="cat">cat</option>
+          <option value="sat" selected>sat</option>
+          <option value="down">down</option>
+          <option value="today">today</option>
+        </select>
+        <select id="maskType" aria-label="Mask type">
+          <option value="none">Full</option>
+          <option value="causal">Causal</option>
+          <option value="padding">Padding</option>
+          <option value="local">Local</option>
+        </select>
+        <select id="headType" aria-label="Head type">
+          <option value="syntax">Syntax</option>
+          <option value="copy">Copy</option>
+          <option value="local">Local</option>
+          <option value="delimiter">Delimiter</option>
+        </select>
+        <div class="command-control">
+          <label for="temperature">Temp <output data-output="temperature">1.00</output></label>
+          <input id="temperature" data-param="temperature" type="range" min="0.25" max="3" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="headCount">Heads <output data-output="headCount">3</output></label>
+          <input id="headCount" data-param="headCount" type="range" min="1" max="8" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="positionBias">Pos <output data-output="positionBias">0.25</output></label>
+          <input id="positionBias" data-param="positionBias" type="range" min="-1" max="1" step="0.05" value="0.25">
+        </div>
+        <div class="command-control">
+          <label for="sequenceLength">Tokens <output data-output="sequenceLength">6</output></label>
+          <input id="sequenceLength" data-param="sequenceLength" type="range" min="4" max="10" step="1" value="6">
+        </div>
+        <div class="command-control">
+          <label for="valueMix">Value <output data-output="valueMix">0.70</output></label>
+          <input id="valueMix" data-param="valueMix" type="range" min="0.15" max="1.4" step="0.05" value="0.7">
+        </div>
+        <div class="command-control">
+          <label for="scoreScale">Scale <output data-output="scoreScale">1.00</output></label>
+          <input id="scoreScale" data-param="scoreScale" type="range" min="0.5" max="2.2" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="localWindow">Window <output data-output="localWindow">2</output></label>
+          <input id="localWindow" data-param="localWindow" type="range" min="1" max="4" step="1" value="2">
+        </div>
+        <button id="applyMask" class="primary" data-action="step" type="button">Mask logits</button>
+        <button id="mixValues" data-action="pulse" type="button">Mix weighted V</button>
+        <button id="resetAttention" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E05 Attention Flow</h1>
+        <p class="subtitle">Rotate the token rails, score matrix, mask shutters, probability bars, multi-head lanes, positional wave, and value-mixing basin.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Entropy"><span>Entropy</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Max weight"><span>Max</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Allowed keys"><span>Allowed</span><strong>0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Heads"><span>Heads</span><strong>0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading attention geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: mask changes allowed keys, temperature reshapes softmax bars, heads add relation lanes, and values move into the output basin.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=e04-e05-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=e04-e05-canonical-clarity-v2"></script>
+  <script>
+    window.__e05LabSnapshot = window.__e05LabSnapshot || function () { return null; };
+    // __e05LabReady = true is set by createE05AttentionFlowLab after the first render setup.
+    createE05AttentionFlowLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

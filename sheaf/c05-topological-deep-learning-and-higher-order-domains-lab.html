@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>C05 - Topological Higher-Order Biology Lab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#071016;--panel:#0e1b24;--panel2:#112632;--ink:#eaf7f8;--muted:#9fb9c5;--line:#244758;--cyan:#58e0d3;--green:#77df96;--gold:#e8b857;--red:#ff7a69;--purple:#a78bfa}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0%,#143143 0,#071016 46%,#05090d 100%);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+    .lab{height:100vh;min-height:680px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(330px,.75fr);gap:14px;padding:14px;overflow:hidden}
+    .stage,.panel{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(15,31,42,.94),rgba(8,17,24,.96));box-shadow:0 18px 60px rgba(0,0,0,.32)}
+    .stage{position:relative;display:grid;grid-template-rows:1fr auto;min-width:0;overflow:hidden}
+    canvas{width:100%;height:100%;display:block;background:linear-gradient(180deg,#08151d,#071016)}
+    .hud{position:absolute;left:18px;right:18px;top:16px;display:flex;justify-content:space-between;gap:10px;pointer-events:none}
+    .badge,.formula{border:1px solid rgba(88,224,211,.24);background:rgba(8,18,25,.78);backdrop-filter:blur(8px);border-radius:13px;padding:9px 11px}
+    .badge span,.metric span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.badge strong{font-size:18px}.formula{max-width:560px;color:#d9f3f4;font-size:13px;line-height:1.35}
+    .controls{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;padding:12px;border-top:1px solid var(--line);background:rgba(5,11,16,.78)}
+    label{display:grid;gap:5px;color:var(--muted);font-size:12px}select,input,button{width:100%;border:1px solid #31566a;background:#0d202b;color:var(--ink);border-radius:10px;padding:8px 9px;font:inherit;font-size:13px}button{font-weight:750;cursor:pointer}button:hover{border-color:var(--cyan);background:#113241}
+    input[type=range]{padding:0;accent-color:var(--cyan)}output{color:#fff;font-weight:750}.panel{padding:16px;display:flex;flex-direction:column;gap:13px;overflow:auto}
+    h1{font-size:24px;line-height:1.05;margin:0}h2{font-size:16px;margin:0 0 8px}.eyebrow{margin:0 0 6px;color:var(--cyan);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.sub{margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.45}
+    .metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.metric{border:1px solid #244758;border-radius:12px;background:#0b1821;padding:10px}.metric strong{font-size:20px;color:#fff}
+    .card{border:1px solid #244758;border-radius:14px;background:#0a1720;padding:12px}.card p{margin:0;color:#c6dde5;font-size:13px;line-height:1.48}.legend{display:grid;gap:7px}.item{display:flex;align-items:center;gap:8px;color:#cce3e8;font-size:13px}.dot{width:12px;height:12px;border-radius:99px}.matrix{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;white-space:pre;line-height:1.32;color:#d6eef0;overflow:auto;background:#061015;border:1px solid #1b3645;border-radius:10px;padding:10px}
+    @media(max-width:920px){.lab{height:auto;min-height:1220px;grid-template-columns:1fr;grid-template-rows:620px auto;padding:10px}.controls{grid-template-columns:repeat(2,minmax(0,1fr))}.hud{left:10px;right:10px;top:10px;flex-direction:column}.formula{max-width:none}.panel{overflow:visible}}
+  </style>
+</head>
+<body>
+<main class="lab">
+  <section class="stage">
+    <canvas id="canvas" aria-label="Interactive higher-order topological biology visualization"></canvas>
+    <div class="hud">
+      <div class="badge"><span>Live domain</span><strong id="domainName">Regulatory motif</strong></div>
+      <div class="formula"><strong id="formula">L1 = B1^T B1 + B2 B2^T</strong><br><span id="explain">Edge signals are constrained by nodes below and faces above.</span></div>
+    </div>
+    <div class="controls">
+      <label>Biology preset<select id="preset"><option value="grn">TF-target motif</option><option value="ppi">protein complex</option><option value="cell">cell communication triad</option><option value="spatial">spatial tissue niche</option></select></label>
+      <label>Signal layer<select id="layer"><option value="nodes">0-cochains: nodes</option><option value="edges">1-cochains: edge flows</option><option value="faces">2-cochains: faces</option></select></label>
+      <label>Face weight <output id="faceOut">0.70</output><input id="face" type="range" min="0" max="100" value="70"></label>
+      <label>Boundary strength <output id="boundaryOut">0.80</output><input id="boundary" type="range" min="0" max="100" value="80"></label>
+      <label>Signal amplitude <output id="ampOut">0.75</output><input id="amp" type="range" min="0" max="100" value="75"></label>
+      <label>Noise <output id="noiseOut">0.18</output><input id="noise" type="range" min="0" max="100" value="18"></label>
+      <button id="addFace">Add face</button><button id="removeFace">Remove face</button><button id="diffuse">Diffuse one step</button><button id="reset">Reset</button>
+    </div>
+  </section>
+  <aside class="panel">
+    <header><p class="eyebrow">C05 interactive lab</p><h1>Higher-order domains for biological GNNs</h1><p class="sub">Drag the canvas to rotate. Add and remove faces. Switch from node signals to edge flows and face-level group signals. Watch the boundary matrices and Hodge energy change.</p></header>
+    <div class="metrics">
+      <div class="metric"><span>Hodge energy</span><strong id="energy">0.00</strong></div>
+      <div class="metric"><span>Loop inconsistency</span><strong id="loop">0.00</strong></div>
+      <div class="metric"><span>Higher-order coverage</span><strong id="coverage">0%</strong></div>
+      <div class="metric"><span>Biology caution</span><strong id="caution">low</strong></div>
+    </div>
+    <div class="card"><h2>What the picture means</h2><p id="insight"></p></div>
+    <div class="card"><h2>Boundary matrices</h2><div class="matrix" id="matrix"></div></div>
+    <div class="card legend">
+      <div class="item"><span class="dot" style="background:var(--cyan)"></span>Nodes: genes, proteins, cells, or spatial spots.</div>
+      <div class="item"><span class="dot" style="background:var(--gold)"></span>Edges: pairwise regulation, interaction, or communication.</div>
+      <div class="item"><span class="dot" style="background:var(--green)"></span>Faces: group claims such as complexes, motifs, or niches.</div>
+      <div class="item"><span class="dot" style="background:var(--red)"></span>Red glow: inconsistency that a graph-only model can hide.</div>
+    </div>
+  </aside>
+</main>
+<script>
+(() => {
+  const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
+  const ids=['preset','layer','face','boundary','amp','noise'];
+  const el=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));
+  const out={face:document.getElementById('faceOut'),boundary:document.getElementById('boundaryOut'),amp:document.getElementById('ampOut'),noise:document.getElementById('noiseOut')};
+  const metrics={energy:document.getElementById('energy'),loop:document.getElementById('loop'),coverage:document.getElementById('coverage'),caution:document.getElementById('caution')};
+  const domainName=document.getElementById('domainName'),formula=document.getElementById('formula'),explain=document.getElementById('explain'),insight=document.getElementById('insight'),matrix=document.getElementById('matrix');
+  let faces=2,theta=-0.35,phi=0.62,diffusion=0,drag=false,last=null,pulse=0;
+  const presets={
+    grn:{name:'Regulatory motif',nodes:['TF','GeneA','GeneB','State','Peak'],note:'A filled face means the TF, two targets, and chromatin/context evidence are treated as a motif, not three unrelated edges.'},
+    ppi:{name:'Protein complex',nodes:['P1','P2','P3','P4','Function'],note:'A protein complex is a group object. Clique expansion creates many edges, but the face says the group is the unit of evidence.'},
+    cell:{name:'Cell communication triad',nodes:['Sender','Ligand','Receiver','Target','Niche'],note:'Ligand, receptor, and cell context often form a triad. Higher-order structure can represent that a signal needs all parts.'},
+    spatial:{name:'Spatial tissue niche',nodes:['Cell1','Cell2','Cell3','Spot','Marker'],note:'Spatial neighborhoods are not only pairwise proximity. A face can represent a local tissue niche or multicell microenvironment.'}
+  };
+  const base=[[-1.25,-.75,.2],[.1,-1.05,-.1],[1.15,-.35,.15],[.62,.9,-.25],[-.82,.72,.05]];
+  const edges=[[0,1],[1,2],[2,0],[2,3],[3,4],[4,0],[1,3]];
+  const faceSets=[[0,1,2],[0,3,4]];
+  function resize(){const r=canvas.getBoundingClientRect();const d=Math.min(devicePixelRatio||1,2);canvas.width=Math.max(640,r.width*d);canvas.height=Math.max(420,r.height*d);ctx.setTransform(d,0,0,d,0,0);draw();}
+  function params(){return {fw:+el.face.value/100,bs:+el.boundary.value/100,amp:+el.amp.value/100,noise:+el.noise.value/100,layer:el.layer.value,preset:el.preset.value};}
+  function project(p){const c=Math.cos(theta),s=Math.sin(theta),cp=Math.cos(phi),sp=Math.sin(phi);let x=p[0]*c-p[2]*s,z=p[0]*s+p[2]*c,y=p[1]*cp-z*sp;z=p[1]*sp+z*cp;const scale=Math.min(canvas.clientWidth,canvas.clientHeight)*.25*(1+z*.08);return [canvas.clientWidth*.5+x*scale,canvas.clientHeight*.52+y*scale,z];}
+  function signal(i,p){const q=params();return q.amp*(Math.sin(i*1.7+diffusion*.45)+.55*Math.cos(i*2.1+q.noise*4));}
+  function edgeSignal(ei){const [a,b]=edges[ei];return signal(b)-signal(a);}
+  function hodgeEnergy(){const q=params();let grad=0;edges.forEach((_,i)=>grad+=Math.abs(edgeSignal(i)));let curl=0;faceSets.slice(0,faces).forEach(f=>{const idx=[findEdge(f[0],f[1]),findEdge(f[1],f[2]),findEdge(f[2],f[0])];curl+=Math.abs(idx.reduce((acc,i)=>acc+(i>=0?edgeSignal(i):0),0));});return {grad:grad*q.bs,curl:curl*q.fw,energy:grad*q.bs+curl*q.fw,coverage:faces/faceSets.length};}
+  function findEdge(a,b){return edges.findIndex(e=>(e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a));}
+  function drawFace(points,color,alpha){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.fillStyle=color.replace('ALPHA',alpha);ctx.fill();ctx.strokeStyle='rgba(119,223,150,.75)';ctx.lineWidth=2;ctx.stroke();}
+  function draw(){if(!ctx)return;canvas.setAttribute('data-rendered','true');const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);const q=params(),preset=presets[q.preset];domainName.textContent=preset.name;out.face.textContent=q.fw.toFixed(2);out.boundary.textContent=q.bs.toFixed(2);out.amp.textContent=q.amp.toFixed(2);out.noise.textContent=q.noise.toFixed(2);const pts=base.map(project);
+    const grid=Math.max(36,Math.floor(w/18));ctx.strokeStyle='rgba(120,160,180,.08)';ctx.lineWidth=1;for(let x=0;x<w;x+=grid){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let y=0;y<h;y+=grid){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+    faceSets.slice(0,faces).forEach((f,i)=>drawFace(f.map(j=>pts[j]),i?'rgba(167,139,250,ALPHA)':'rgba(119,223,150,ALPHA)',.22+.32*q.fw));
+    edges.forEach(([a,b],i)=>{const ea=edgeSignal(i),intensity=Math.min(1,Math.abs(ea));ctx.strokeStyle=ea>=0?`rgba(232,184,87,${.35+.55*intensity})`:`rgba(88,224,211,${.35+.55*intensity})`;ctx.lineWidth=3+4*intensity;ctx.beginPath();ctx.moveTo(pts[a][0],pts[a][1]);ctx.lineTo(pts[b][0],pts[b][1]);ctx.stroke();});
+    pts.forEach((p,i)=>{const val=signal(i),r=18+8*Math.abs(val);ctx.beginPath();ctx.arc(p[0],p[1],r+5,0,Math.PI*2);ctx.fillStyle=val>=0?'rgba(88,224,211,.16)':'rgba(255,122,105,.16)';ctx.fill();ctx.beginPath();ctx.arc(p[0],p[1],r,0,Math.PI*2);ctx.fillStyle='#f8fdff';ctx.strokeStyle=val>=0?'#58e0d3':'#ff7a69';ctx.lineWidth=4;ctx.fill();ctx.stroke();ctx.fillStyle='#102333';ctx.font='700 12px system-ui';ctx.textAlign='center';ctx.fillText(preset.nodes[i],p[0],p[1]+4);});
+    drawLayerGlyph(q,pts);updateText(q,preset);pulse+=.01;requestAnimationFrame(()=>{if(diffusion%1!==0)draw();});
+  }
+  function drawLayerGlyph(q,pts){ctx.save();ctx.globalAlpha=.9;ctx.font='700 13px ui-monospace,monospace';ctx.textAlign='left';ctx.fillStyle='#dff7f8';let label=q.layer==='nodes'?'0-cochain x on nodes':q.layer==='edges'?'1-cochain flow on edges':'2-cochain s on faces';ctx.fillText(label,22,canvas.clientHeight-28);ctx.restore();}
+  function updateText(q,preset){const e=hodgeEnergy();document.documentElement.dataset.c05Energy=e.energy.toFixed(2);metrics.energy.textContent=e.energy.toFixed(2);metrics.loop.textContent=e.curl.toFixed(2);metrics.coverage.textContent=Math.round(e.coverage*100)+'%';metrics.caution.textContent=e.energy>5.5?'high':e.energy>3?'medium':'low';formula.textContent=q.layer==='nodes'?'L0 = B1 B1^T':q.layer==='edges'?'L1 = B1^T B1 + B2 B2^T':'L2 = B2^T B2';explain.textContent=q.layer==='nodes'?'Node signals smooth across pairwise edges.':q.layer==='edges'?'Edge flows are checked by nodes below and faces above.':'Face signals represent group-level biological evidence.';insight.textContent=preset.note+' If you remove faces, the same drawing becomes pairwise again and the model loses the object that represents the group claim.';matrix.textContent=`B1: nodes x edges\n[ -1  0  1  0  0 -1  0 ]\n[  1 -1  0  0  0  0 -1 ]\n[  0  1 -1 -1  0  0  0 ]\n[  0  0  0  1 -1  0  1 ]\n[  0  0  0  0  1  1  0 ]\n\nB2: edges x faces, active faces=${faces}\nface weight=${q.fw.toFixed(2)}, boundary=${q.bs.toFixed(2)}\nL_k = B_k^T B_k + B_{k+1}B_{k+1}^T`;}
+  function reset(){faces=2;diffusion=0;theta=-.35;phi=.62;el.face.value=70;el.boundary.value=80;el.amp.value=75;el.noise.value=18;draw();}
+  ids.forEach(id=>el[id].addEventListener('input',draw));document.getElementById('addFace').onclick=()=>{faces=Math.min(2,faces+1);draw()};document.getElementById('removeFace').onclick=()=>{faces=Math.max(0,faces-1);draw()};document.getElementById('diffuse').onclick=()=>{diffusion+=.5;draw()};document.getElementById('reset').onclick=reset;
+  canvas.addEventListener('pointerdown',e=>{drag=true;last=[e.clientX,e.clientY];canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!drag)return;theta+=(e.clientX-last[0])*.008;phi+=(e.clientY-last[1])*.006;phi=Math.max(-.8,Math.min(1.1,phi));last=[e.clientX,e.clientY];draw()});canvas.addEventListener('pointerup',()=>drag=false);
+  addEventListener('resize',resize,{passive:true});resize();document.documentElement.dataset.c05LabReady='true';window.__C05_LAB_READY__=true;window.__C05LabReady=true;window.__C05LabSnapshot=()=>({...params(),faces,...hodgeEnergy()});
+})();
+</script>
+</body>
+</html>

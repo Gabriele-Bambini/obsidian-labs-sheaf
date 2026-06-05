@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G04 GraphSAGE Sampling Cone</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g04-graphsage-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="graphsage" data-lab-id="g04" data-keywords="sampling fanout inductive GraphSAGE aggregator coverage variance">
+    <section class="visual-stack" aria-label="Interactive 3D GraphSAGE sampling visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G04 GraphSAGE sampling 3D visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G04</strong></div>
+          <div class="formula-chip"><span id="formulaText">h'_v = sigma(W concat(h_v, AGG(sample(N(v)))))</span>GraphSAGE embeds unseen nodes by sampling neighborhoods and applying a learned aggregator.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected sampling cone</span><strong>GraphSAGE sampler is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.58fr)) repeat(5,minmax(0,.58fr)) repeat(4,minmax(0,.48fr));">
+        <select id="aggregator" data-control="aggregator" aria-label="GraphSAGE aggregator">
+          <option value="mean">Mean aggregator</option>
+          <option value="pool">Pooling aggregator</option>
+          <option value="lstm">Ordered LSTM sample</option>
+        </select>
+        <select id="graphDomain" data-control="graphDomain" aria-label="Inductive domain">
+          <option value="products">Product graph</option>
+          <option value="papers">Citation graph</option>
+          <option value="fraud">Fraud graph</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="Sampling view">
+          <option value="cone">Sampling cone</option>
+          <option value="variance">Variance</option>
+          <option value="embedding">Embedding</option>
+          <option value="contrastive">Contrastive</option>
+        </select>
+        <div class="command-control">
+          <label for="depth">Depth <output data-output="depth">2</output></label>
+          <input id="depth" data-param="depth" type="range" min="1" max="4" step="1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="fanout">Fanout <output data-output="fanout">4</output></label>
+          <input id="fanout" data-param="fanout" type="range" min="1" max="10" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="sampleNoise">Variance <output data-output="sampleNoise">0.52</output></label>
+          <input id="sampleNoise" data-param="sampleNoise" type="range" min="0.1" max="1.4" step="0.01" value="0.52">
+        </div>
+        <div class="command-control">
+          <label for="aggregatorGain">Gain <output data-output="aggregatorGain">0.82</output></label>
+          <input id="aggregatorGain" data-param="aggregatorGain" type="range" min="0.2" max="1.8" step="0.01" value="0.82">
+        </div>
+        <div class="command-control">
+          <label for="targetCarry">Target <output data-output="targetCarry">0.42</output></label>
+          <input id="targetCarry" data-param="targetCarry" type="range" min="0" max="1" step="0.01" value="0.42">
+        </div>
+        <button id="sampleNeighbors" class="primary" data-action="pulse" type="button">Sample fanout</button>
+        <button id="aggregate" data-action="step" type="button">Build embedding</button>
+        <button id="newNode" data-action="step" type="button">Embed unseen</button>
+        <button id="contrastiveSplit" data-action="reset" type="button">Contrast pairs</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G04 GraphSAGE Sampling</h1>
+        <p class="subtitle">Rotate the target node, sampled fanout cone, layer-wise receptive field, unseen inductive node, aggregator output, and contrastive positive/negative split.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Sampling variance"><span>Variance</span><strong id="varianceLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Coverage"><span>Coverage</span><strong id="coverageLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Compute cost"><span>Compute</span><strong id="costLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Embedding drift"><span>Drift</span><strong id="driftLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading GraphSAGE sampling diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: fanout changes coverage and variance, depth expands the receptive field, New node tests inductive embedding, and Negatives shows the contrastive objective.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g04-graphsage-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=g04-graphsage-v3"></script>
+  <script>
+    window.__g04LabSnapshot = window.__g04LabSnapshot || function () { return null; };
+    createG04GraphSageSamplingLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

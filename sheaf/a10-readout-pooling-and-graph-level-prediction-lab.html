@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>A10 - Readout Pooling Lab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#071015;--panel:#0d1c26;--panel2:#102838;--line:#24485d;--text:#e9f6f8;--muted:#9fb9c6;--cyan:#58e0d3;--blue:#54a8ff;--gold:#e8b857;--pink:#ff6d8b;--green:#6ee7a8}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.45 Inter,Segoe UI,system-ui,Arial,sans-serif}
+    body{min-height:100vh}.shell{height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;padding:12px;background:radial-gradient(circle at 20% 10%,#123044 0,#071015 42%,#050b10 100%)}
+    .stage,.panel{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(13,28,38,.96),rgba(7,16,21,.96));box-shadow:0 18px 50px rgba(0,0,0,.35);min-width:0;min-height:0}
+    .stage{display:grid;grid-template-rows:minmax(0,1fr) auto;overflow:hidden;position:relative}.canvas-wrap{position:relative;min-height:0}canvas{display:block;width:100%;height:100%;min-height:360px;touch-action:none}
+    .overlay{position:absolute;left:14px;right:14px;top:14px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between;pointer-events:none}.badge,.formula{border:1px solid rgba(143,216,242,.25);background:rgba(7,16,21,.72);backdrop-filter:blur(8px);border-radius:12px;padding:9px 11px}.badge span,.formula span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.badge strong{font-size:18px}.formula{max-width:560px;color:#cfe5ec}.formula code{color:var(--cyan);font-weight:700}
+    .controls{display:grid;grid-template-columns:1.2fr 1fr repeat(4,1fr);gap:10px;padding:10px;border-top:1px solid var(--line);background:#091720}.control{min-width:0}.control label{display:flex;justify-content:space-between;gap:8px;margin-bottom:4px;color:var(--muted);font-size:12px}.control output{color:var(--text);font-weight:700}select,input,button{width:100%;border:1px solid #315b70;border-radius:10px;background:#102838;color:var(--text);font:inherit}select,button{height:38px;padding:0 10px}button{cursor:pointer;font-weight:700}button.active{border-color:var(--cyan);background:#123846}input[type=range]{height:38px;accent-color:var(--cyan)}
+    .panel{display:flex;flex-direction:column;gap:12px;padding:14px;overflow:auto}.panel h1{font-size:22px;line-height:1.1;margin:0}.panel p{margin:0;color:var(--muted)}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--cyan)!important}
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:10px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;margin-top:4px;font-size:20px}
+    .bars{display:grid;gap:7px}.bar-row{display:grid;grid-template-columns:62px minmax(0,1fr) 46px;gap:8px;align-items:center}.bar-track{height:12px;border-radius:99px;background:#0a1720;overflow:hidden;border:1px solid #203c4d}.bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--blue));border-radius:99px}.bar-row b{font-size:12px;color:#d7e9ee}.bar-row em{font-style:normal;color:var(--muted);font-size:12px;text-align:right}
+    .insight{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:12px}.insight h2{font-size:15px;margin:0 0 6px}.insight code{color:var(--cyan)}.legend{display:flex;flex-wrap:wrap;gap:7px}.legend span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:var(--muted)}.dot{width:9px;height:9px;border-radius:99px;display:inline-block}
+    @media(max-width:860px){html,body{height:100%;overflow:hidden}.shell{height:100vh;min-height:0;grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(220px,30vh);padding:8px;overflow:hidden}.stage{min-height:0;grid-template-rows:minmax(0,1fr) auto}.canvas-wrap{min-height:0}canvas{height:100%;min-height:0}.overlay{position:absolute;left:10px;right:10px;top:10px;display:flex}.badge{padding:7px 9px}.formula{max-width:62%;padding:7px 9px}.controls{grid-template-columns:1fr 1fr;gap:8px;padding:8px;max-height:168px;overflow:auto}.control label{font-size:11px}select,button{height:34px}.panel{min-height:0;max-height:none;padding:10px;overflow:auto}.panel h1{font-size:18px}.metric-grid{grid-template-columns:1fr 1fr}.metric{padding:8px}.metric strong{font-size:17px}.bars{gap:5px}.bar-row{grid-template-columns:58px minmax(0,1fr) 38px}.bar-row:nth-child(n+7){display:none}.insight{padding:10px}.legend{display:none}}
+    @media(max-width:480px){.shell{grid-template-rows:minmax(0,1fr) 245px}.formula{display:none}.controls{grid-template-columns:1fr;max-height:154px}.panel{font-size:12px}.metric-grid{grid-template-columns:1fr}.insight:nth-of-type(2){display:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="stage" aria-label="Interactive readout and pooling visualization">
+      <div class="canvas-wrap">
+        <canvas id="scene" aria-label="3D pooling funnel canvas"></canvas>
+        <div class="overlay">
+          <div class="badge"><span>Chapter lab</span><strong>A10</strong></div>
+          <div class="formula"><span>Readout formula</span><code>z_G = READOUT({h_i})</code> turns node embeddings into one graph token.</div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control"><label>Biological preset</label><select id="preset">
+          <option value="grn">GRN regulatory module</option>
+          <option value="molecule">Molecule toxicity</option>
+          <option value="pathway">Pathway activation</option>
+          <option value="tissue">Spatial tissue niche</option>
+        </select></div>
+        <div class="control"><label>Pooling rule</label><select id="pool">
+          <option value="sum">sum</option>
+          <option value="mean">mean</option>
+          <option value="max">max</option>
+          <option value="attention">attention</option>
+          <option value="topk">top-k module</option>
+        </select></div>
+        <div class="control"><label>Rare signal <output id="rareOut">0.80</output></label><input id="rare" type="range" min="0" max="100" value="80"></div>
+        <div class="control"><label>Background nodes <output id="sizeOut">8</output></label><input id="size" type="range" min="0" max="30" value="8"></div>
+        <div class="control"><label>Attention sharpness <output id="sharpOut">4.0</output></label><input id="sharp" type="range" min="5" max="90" value="40"></div>
+        <div class="control"><label>Top-k kept <output id="topkOut">35%</output></label><input id="topk" type="range" min="10" max="80" value="35"></div>
+      </div>
+    </section>
+    <aside class="panel">
+      <header><p class="eyebrow">Readout and graph-level prediction</p><h1>Which biological signal survives pooling?</h1><p id="subtitle">A graph token is only as honest as the readout bias that produced it.</p></header>
+      <div class="metric-grid">
+        <div class="metric"><span>Graph score</span><strong id="score">0.00</strong></div>
+        <div class="metric"><span>Rare retention</span><strong id="retention">0%</strong></div>
+        <div class="metric"><span>Size bias risk</span><strong id="sizeBias">0%</strong></div>
+        <div class="metric"><span>Contribution entropy</span><strong id="entropy">0.00</strong></div>
+      </div>
+      <div class="insight"><h2>Node contributions</h2><div id="bars" class="bars"></div></div>
+      <div class="insight"><h2>Interpretation</h2><p id="insight">Change a control to inspect the readout.</p></div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--cyan)"></i> rare diagnostic node</span>
+        <span><i class="dot" style="background:var(--blue)"></i> ordinary biological node</span>
+        <span><i class="dot" style="background:var(--gold)"></i> module/context node</span>
+        <span><i class="dot" style="background:var(--pink)"></i> graph token</span>
+      </div>
+    </aside>
+  </main>
+  <script>
+    const canvas = document.getElementById('scene');
+    const ctx = canvas.getContext('2d');
+    const controls = {
+      preset: document.getElementById('preset'), pool: document.getElementById('pool'), rare: document.getElementById('rare'),
+      size: document.getElementById('size'), sharp: document.getElementById('sharp'), topk: document.getElementById('topk')
+    };
+    const out = {
+      rare: document.getElementById('rareOut'), size: document.getElementById('sizeOut'), sharp: document.getElementById('sharpOut'), topk: document.getElementById('topkOut'),
+      score: document.getElementById('score'), retention: document.getElementById('retention'), sizeBias: document.getElementById('sizeBias'), entropy: document.getElementById('entropy'),
+      bars: document.getElementById('bars'), insight: document.getElementById('insight'), subtitle: document.getElementById('subtitle')
+    };
+    const presets = {
+      grn:{rare:'TF driver', ordinary:'target gene', module:'enhancer evidence', claim:'validated regulatory module', base:[.12,.18,.16,.11,.14,.2]},
+      molecule:{rare:'toxic group', ordinary:'atom', module:'ring context', claim:'molecule toxicity', base:[.08,.14,.1,.12,.18,.16]},
+      pathway:{rare:'upstream kinase', ordinary:'pathway gene', module:'branch module', claim:'pathway activation', base:[.2,.28,.24,.22,.18,.26]},
+      tissue:{rare:'activated immune cell', ordinary:'neighbor cell', module:'ligand context', claim:'inflammatory niche', base:[.1,.16,.13,.11,.2,.15]}
+    };
+    let rotation = -0.45, tilt = 0.55, dragging = false, lastX = 0, lastY = 0, snapshot = {};
+    function resize(){const r=canvas.parentElement.getBoundingClientRect();const d=Math.min(devicePixelRatio||1,2);canvas.width=Math.max(320,Math.floor(r.width*d));canvas.height=Math.max(320,Math.floor(r.height*d));canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';ctx.setTransform(d,0,0,d,0,0);draw();}
+    function baseNodes(){const p=presets[controls.preset.value];const rare=Number(controls.rare.value)/100;const extra=Number(controls.size.value);const nodes=[
+      {id:p.rare,type:'rare',v:rare,x:-1.35,y:-.1,z:.35},{id:p.ordinary+' 1',type:'ordinary',v:p.base[0],x:-.75,y:-.82,z:-.1},{id:p.ordinary+' 2',type:'ordinary',v:p.base[1],x:-.62,y:.72,z:.18},{id:p.ordinary+' 3',type:'ordinary',v:p.base[2],x:.05,y:-.55,z:.5},{id:p.module,type:'module',v:p.base[3]+.12,x:.18,y:.74,z:-.25},{id:p.ordinary+' 4',type:'ordinary',v:p.base[4],x:.82,y:-.2,z:.04},{id:p.ordinary+' 5',type:'ordinary',v:p.base[5],x:.78,y:.62,z:.34}
+    ];for(let i=0;i<extra;i++){const a=i*.83;nodes.push({id:'background '+(i+1),type:'background',v:.035+(i%5)*.008,x:1.15+Math.cos(a)*(.55+(i%3)*.1),y:Math.sin(a)*(.55+(i%4)*.08),z:-.35+(i%6)*.14});}return nodes;}
+    function compute(nodes){const pool=controls.pool.value;let raw=nodes.map(n=>n.v), weights=raw.map(()=>1), contrib=[];if(pool==='mean'){weights=raw.map(()=>1/raw.length);contrib=raw.map((v,i)=>v*weights[i]);}
+      else if(pool==='sum'){contrib=raw.slice();}
+      else if(pool==='max'){let m=Math.max(...raw);contrib=raw.map(v=>v===m?v:0);}
+      else if(pool==='attention'){const k=Number(controls.sharp.value)/10;const ex=raw.map(v=>Math.exp(k*v));const s=ex.reduce((a,b)=>a+b,0);weights=ex.map(v=>v/s);contrib=raw.map((v,i)=>v*weights[i]);}
+      else {const keep=Math.max(1,Math.ceil(raw.length*Number(controls.topk.value)/100));const order=raw.map((v,i)=>[v,i]).sort((a,b)=>b[0]-a[0]).slice(0,keep).map(x=>x[1]);contrib=raw.map((v,i)=>order.includes(i)?v/keep:0);weights=raw.map((_,i)=>order.includes(i)?1/keep:0);}
+      const z=contrib.reduce((a,b)=>a+b,0);const mean=raw.reduce((a,b)=>a+b,0)/raw.length;const sum=raw.reduce((a,b)=>a+b,0);const rareIndex=nodes.findIndex(n=>n.type==='rare');const total=Math.abs(z)||1;const retention=Math.max(0,Math.min(1,Math.abs(contrib[rareIndex]||0)/total));const sizeBias=Math.max(0,Math.min(1,Math.abs(sum-mean)/(sum+1)));const pos=contrib.map(v=>Math.max(0,v));const ps=pos.map(v=>v/(pos.reduce((a,b)=>a+b,0)||1));const entropy=-ps.reduce((a,p)=>p>0?a+p*Math.log(p):a,0)/Math.log(Math.max(2,ps.length));return {z,score:1/(1+Math.exp(-(z*3.2-.8))),contrib,weights,retention,sizeBias,entropy};}
+    function project(n,w,h){const cr=Math.cos(rotation),sr=Math.sin(rotation),ct=Math.cos(tilt),st=Math.sin(tilt);let x=n.x*cr-n.z*sr;let z=n.x*sr+n.z*cr;let y=n.y*ct-z*st;z=n.y*st+z*ct;const scale=170/(2.8+z);return {x:w*.33+x*scale,y:h*.53+y*scale,s:scale/4,z};}
+    function color(n){return n.type==='rare'?'#58e0d3':n.type==='module'?'#e8b857':n.type==='background'?'#315b70':'#54a8ff'}
+    function draw(){if(!canvas.width)return;const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);const nodes=baseNodes();const stats=compute(nodes);snapshot={pool:controls.pool.value,preset:controls.preset.value,score:stats.score,retention:stats.retention,sizeBias:stats.sizeBias,nodeCount:nodes.length};ctx.save();ctx.lineWidth=1.4;ctx.strokeStyle='rgba(143,216,242,.17)';for(let i=1;i<nodes.length;i++){const a=project(nodes[Math.max(0,i-2)],w,h),b=project(nodes[i],w,h);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}const pts=nodes.map(n=>project(n,w,h));pts.forEach((p,i)=>{const n=nodes[i],r=(w<600?7:8)+Math.min(w<600?19:26,n.v*(w<600?21:28));ctx.beginPath();ctx.fillStyle=color(n);ctx.globalAlpha=.95;ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;ctx.fillStyle='#eaf7f9';ctx.font=(w<600?'11px':'12px')+' Segoe UI';if(i<(w<600?6:7))ctx.fillText(n.id,p.x+r+5,p.y+4);});const token={x:w<600?w*.71:w*.75,y:h*.5};const tokenRadius=(w<600?30:42)+stats.score*(w<600?11:22);ctx.strokeStyle='rgba(88,224,211,.45)';ctx.lineWidth=2;pts.slice(0,Math.min(12,pts.length)).forEach((p,i)=>{ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.quadraticCurveTo(w*(w<600?.49:.55),h*(.28+.04*(i%5)),token.x,token.y);ctx.stroke();});ctx.beginPath();ctx.fillStyle='#ff6d8b';ctx.arc(token.x,token.y,tokenRadius,0,Math.PI*2);ctx.fill();ctx.fillStyle='#08131a';ctx.font='700 '+(w<600?18:24)+'px Segoe UI';ctx.textAlign='center';ctx.fillText('z_G',token.x,token.y+7);if(w>=600){ctx.textAlign='left';ctx.fillStyle='#dceff4';ctx.font='15px Segoe UI';ctx.fillText('graph token',token.x-tokenRadius*.65,token.y+tokenRadius+24);}ctx.restore();updatePanel(nodes,stats);}
+    function updatePanel(nodes,stats){const p=presets[controls.preset.value];out.rare.textContent=(Number(controls.rare.value)/100).toFixed(2);out.size.textContent=controls.size.value;out.sharp.textContent=(Number(controls.sharp.value)/10).toFixed(1);out.topk.textContent=controls.topk.value+'%';out.score.textContent=stats.score.toFixed(2);out.retention.textContent=Math.round(stats.retention*100)+'%';out.sizeBias.textContent=Math.round(stats.sizeBias*100)+'%';out.entropy.textContent=stats.entropy.toFixed(2);out.subtitle.textContent='Current claim: '+p.claim+'. Node count: '+nodes.length+'.';const max=Math.max(...stats.contrib.map(v=>Math.abs(v)),.001);out.bars.innerHTML='';nodes.slice(0,10).forEach((n,i)=>{const row=document.createElement('div');row.className='bar-row';row.innerHTML='<b>'+n.id.replace('background','bg')+'</b><div class="bar-track"><div class="bar-fill" style="width:'+Math.round(Math.abs(stats.contrib[i])/max*100)+'%;background:'+color(n)+'"></div></div><em>'+stats.contrib[i].toFixed(2)+'</em>';out.bars.appendChild(row);});const pool=controls.pool.value;const messages={sum:'Sum pooling preserves total evidence, so graph size can become a shortcut if extra nodes are sampling artifacts.',mean:'Mean pooling controls size but can dilute rare biological drivers.',max:'Max pooling preserves existence of a strong signal but can be brittle to one noisy node.',attention:'Attention readout learns importance weights; useful, but not automatic mechanistic explanation.',topk:'Top-k pooling behaves like a small learned module summary; audit whether the kept nodes match biology.'};out.insight.textContent=messages[pool]+' In this preset, ask whether the graph-level label should depend on '+p.rare+', all '+p.ordinary+' nodes, or a module-level pattern.';}
+    Object.values(controls).forEach(el=>el.addEventListener('input',draw));canvas.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!dragging)return;rotation+=(e.clientX-lastX)*.008;tilt+=(e.clientY-lastY)*.006;tilt=Math.max(-1.1,Math.min(1.1,tilt));lastX=e.clientX;lastY=e.clientY;draw()});canvas.addEventListener('pointerup',()=>dragging=false);window.addEventListener('resize',resize);window.__A10LabSnapshot=()=>snapshot;window.__A10LabReady=true;resize();
+  </script>
+</body>
+</html>

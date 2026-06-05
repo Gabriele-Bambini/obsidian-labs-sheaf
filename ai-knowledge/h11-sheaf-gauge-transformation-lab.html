@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H11 Sheaf Theory And Gauge Theory</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=h05-intuitive-v11-h11-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="sheaf" data-lab-id="h11" data-keywords="sheaf gauge theory local frames covariant restriction invariant energy holonomy curvature">
+    <section class="visual-stack">
+      <div class="stage">
+        <div class="lab-viewport">
+          <canvas id="canvas" aria-label="H11 concrete sheaf gauge covariance visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>H11</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">B'_ve = B_ve g_v^-1</strong></div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>local gauge frame</strong></div>
+      </div>
+      <div class="command-bar controls">
+        <select id="scenario" aria-label="Gauge scenario">
+          <option value="edge">Two-node edge</option>
+          <option value="triangle">Triangle cycle</option>
+        </select>
+        <select id="mode" aria-label="Gauge mode">
+          <option value="covariant">Covariant gauge</option>
+          <option value="broken">Broken gauge</option>
+          <option value="curvature">Holonomy curvature</option>
+        </select>
+        <div class="command-control">
+          <label for="gaugeSteps">Gauge steps <output data-output="gaugeSteps">4</output></label>
+          <input id="gaugeSteps" type="range" min="1" max="10" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="frameRotation">Frame rotation <output data-output="frameRotation">1.00</output></label>
+          <input id="frameRotation" type="range" min="0.25" max="1.8" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="gaugeMismatch">Gauge mismatch <output data-output="gaugeMismatch">0.14</output></label>
+          <input id="gaugeMismatch" type="range" min="0" max="0.8" step="0.02" value="0.14">
+        </div>
+        <div class="command-control">
+          <label for="visibleFrames">Visible frames <output data-output="visibleFrames">3</output></label>
+          <input id="visibleFrames" type="range" min="1" max="3" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="invariantAnchor">Invariant anchor <output data-output="invariantAnchor">0.62</output></label>
+          <input id="invariantAnchor" type="range" min="0" max="1" step="0.02" value="0.62">
+        </div>
+        <button id="applyGauge" class="primary" data-action="step" type="button">Gauge transform</button>
+        <button id="breakGauge" data-action="pulse" type="button">Break gauge</button>
+        <button id="cycleHolonomy" data-action="step" type="button">Show holonomy</button>
+        <button id="resetH11" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block H 3D lab</p>
+        <h1>H11 Sheaf Theory And Gauge Theory</h1>
+        <p class="subtitle">Local frames, fiber vectors, gauge matrices, covariant restriction updates, invariant energy, broken-coordinate artifacts, and triangle holonomy.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Gauge error"><span>Gauge error</span><strong id="errorLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Invariant energy"><span>Invariant energy</span><strong id="energyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Frame coverage"><span>Energy ratio</span><strong id="ratioLabel">1.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Curvature signal"><span>Holonomy</span><strong id="holonomyLabel">0.0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading gauge diagnostics.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Covariant gauge changes rotate local coordinates and update restrictions by the inverse. Broken gauge rotates coordinates only, creating fake disagreement.</p>
+    </aside>
+  </main>
+  <!-- {"visual":{"kind":"gauge-frames","graphStyle":"anchors"},"profile":{"preferredMetric":"Gauge error"},"graph":{"nodes":["gauge transform ring","local gauge frame","invariant energy orbit","same section different coordinates","holonomy curvature"],"edges":["g_v action","inverse restriction update","energy invariant"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=h05-intuitive-v11-h11-clarity-v2"></script>
+  <script src="shared/sheaf-dynamics-labs.js?math3d=h05-intuitive-v11-h11-clarity-v2"></script>
+  <script>
+    window.__h11LabReady = false;
+    window.__h11LabSnapshot = window.__h11LabSnapshot || function () { return null; };
+    createH11GaugeTheoryConcreteLab();
+  </script>
+</body>
+</html>

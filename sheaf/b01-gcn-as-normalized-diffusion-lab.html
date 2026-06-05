@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>B01 - GCN Normalized Diffusion Lab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#071015;--panel:#0d1c26;--line:#24485d;--text:#e9f6f8;--muted:#9fb9c6;--cyan:#58e0d3;--blue:#54a8ff;--gold:#e8b857;--pink:#ff6d8b;--green:#6ee7a8;--red:#ff7a7a;--violet:#a78bfa}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.42 Inter,Segoe UI,system-ui,Arial,sans-serif}
+    .shell{height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 382px;gap:12px;padding:12px;background:radial-gradient(circle at 18% 8%,#123044 0,#071015 48%,#050b10 100%)}
+    .stage,.panel{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(13,28,38,.96),rgba(7,16,21,.97));box-shadow:0 18px 50px rgba(0,0,0,.34);min-width:0;min-height:0}
+    .stage{display:grid;grid-template-rows:minmax(0,1fr) auto;overflow:hidden;position:relative}.canvas-wrap{min-height:0;position:relative}canvas{display:block;width:100%;height:100%;min-height:340px;touch-action:none}
+    .overlay{position:absolute;left:14px;right:14px;top:14px;display:flex;gap:10px;justify-content:space-between;pointer-events:none}.badge,.formula{border:1px solid rgba(143,216,242,.25);background:rgba(7,16,21,.78);backdrop-filter:blur(8px);border-radius:12px;padding:9px 11px}.badge span,.formula span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.badge strong{font-size:18px}.formula{max-width:700px;color:#cfe5ec}.formula code{color:var(--cyan);font-weight:800}
+    .controls{display:grid;grid-template-columns:1.15fr 1fr .72fr .72fr .72fr .72fr;gap:10px;padding:10px;border-top:1px solid var(--line);background:#091720}.control{min-width:0;overflow:hidden}.control label{display:flex;justify-content:space-between;margin-bottom:4px;color:var(--muted);font-size:12px}.control output{color:var(--text);font-weight:800}select,input{width:100%;min-width:0;border:1px solid #315b70;border-radius:10px;background:#102838;color:var(--text);font:inherit}select{height:38px;padding:0 10px}input[type=range]{height:38px;accent-color:var(--cyan)}
+    .panel{display:flex;flex-direction:column;gap:12px;padding:14px;overflow:auto}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--cyan)!important}.panel h1{font-size:22px;line-height:1.1;margin:0}.panel p{margin:0;color:var(--muted)}
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:10px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;margin-top:4px;font-size:19px}.good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--gold)}
+    .bars{display:grid;gap:7px}.bar-row{display:grid;grid-template-columns:116px minmax(0,1fr) 48px;gap:8px;align-items:center}.track{height:13px;border:1px solid #203c4d;background:#08131a;border-radius:999px;overflow:hidden}.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),var(--blue));width:0}.bar-row b{font-size:12px}.bar-row em{font-style:normal;text-align:right;color:var(--muted);font-size:12px}
+    .card{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:12px}.card h2{font-size:15px;margin:0 0 6px}.legend{display:flex;flex-wrap:wrap;gap:7px}.legend span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:var(--muted)}.dot{width:9px;height:9px;border-radius:99px;display:inline-block}
+    @media(max-width:860px){html,body{height:100%;overflow:hidden;max-width:100vw}.shell{width:100vw;height:100vh;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,54vh) minmax(0,1fr);gap:8px;padding:8px;overflow:hidden}.stage,.panel{width:100%;max-width:100%;overflow:hidden}.stage{grid-template-rows:minmax(0,1fr) auto}.canvas-wrap{min-height:0}canvas{min-height:230px}.overlay{left:10px;right:10px;top:10px}.formula{display:none}.controls{grid-template-columns:repeat(3,minmax(0,1fr));max-height:166px;overflow:hidden;padding:8px;gap:7px}.control label{display:block;font-size:11px;line-height:1.15}.control output{float:right;font-size:11px}select,input[type=range]{height:30px}.panel{min-height:0;padding:10px;gap:9px;overflow:auto}.panel h1{font-size:17px;line-height:1.14;overflow-wrap:break-word}.metric-grid{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:8px}.metric strong{font-size:17px}.legend{display:none}.card:nth-of-type(2){display:none}}
+    @media(max-width:480px){.shell{grid-template-rows:minmax(0,54vh) minmax(0,1fr)}.controls{grid-template-columns:repeat(2,minmax(0,1fr));max-height:184px}.metric-grid{grid-template-columns:1fr}.panel header p:not(.eyebrow){display:none}.bars .bar-row:nth-child(n+5){display:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="stage" aria-label="Interactive GCN normalized diffusion visualization">
+      <div class="canvas-wrap">
+        <canvas id="scene" aria-label="GCN normalized diffusion canvas"></canvas>
+        <div class="overlay">
+          <div class="badge"><span>Chapter lab</span><strong>B01</strong></div>
+          <div class="formula"><span>Propagation rule</span><code>H' = sigma(D_hat^-1/2 A_hat D_hat^-1/2 H W)</code>. Watch the graph, matrix, and signal curves change together.</div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control"><label>Biological graph</label><select id="preset">
+          <option value="hub">TF program with hub gene</option>
+          <option value="modules">two cell-state modules</option>
+          <option value="pathway">pathway chain</option>
+        </select></div>
+        <div class="control"><label>Normalization</label><select id="norm">
+          <option value="sym">symmetric GCN</option>
+          <option value="rw">random-walk</option>
+          <option value="self">self-loop sum</option>
+          <option value="raw">raw adjacency</option>
+        </select></div>
+        <div class="control"><label>Layers <output id="layersOut">2</output></label><input id="layers" type="range" min="0" max="8" value="2"></div>
+        <div class="control"><label>Hub degree <output id="hubOut">4</output></label><input id="hub" type="range" min="1" max="7" value="4"></div>
+        <div class="control"><label>Residual <output id="resOut">15</output></label><input id="residual" type="range" min="0" max="70" value="15"></div>
+        <div class="control"><label>Signal</label><select id="signal">
+          <option value="tf">TF spike</option>
+          <option value="gradient">cell-state gradient</option>
+          <option value="noisy">noisy expression</option>
+          <option value="module">accessible module</option>
+        </select></div>
+      </div>
+    </section>
+    <aside class="panel">
+      <header><p class="eyebrow">GCN diffusion microscope</p><h1>When is normalized averaging enough?</h1><p id="subtitle">Change the graph, normalization, and depth. The graph colors, matrix weights, and smoothing curves move together.</p></header>
+      <div class="metric-grid">
+        <div class="metric"><span>Feature variance</span><strong id="variance">0.00</strong></div>
+        <div class="metric"><span>Dirichlet energy</span><strong id="energy">0.00</strong></div>
+        <div class="metric"><span>Hub influence</span><strong id="hubMetric">0%</strong></div>
+        <div class="metric"><span>Mixing radius</span><strong id="radius">0</strong></div>
+      </div>
+      <div class="card"><h2>Layer trace</h2><div id="bars" class="bars"></div></div>
+      <div class="card"><h2>Interpretation</h2><p id="insight">Move a control to inspect the diffusion regime.</p></div>
+      <div class="legend"><span><i class="dot" style="background:var(--cyan)"></i> high signal</span><span><i class="dot" style="background:var(--pink)"></i> low signal</span><span><i class="dot" style="background:var(--gold)"></i> hub</span></div>
+    </aside>
+  </main>
+  <script>
+    const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
+    const controls={preset:document.getElementById('preset'),norm:document.getElementById('norm'),layers:document.getElementById('layers'),hub:document.getElementById('hub'),residual:document.getElementById('residual'),signal:document.getElementById('signal')};
+    const out={layers:document.getElementById('layersOut'),hub:document.getElementById('hubOut'),res:document.getElementById('resOut'),variance:document.getElementById('variance'),energy:document.getElementById('energy'),hubMetric:document.getElementById('hubMetric'),radius:document.getElementById('radius'),bars:document.getElementById('bars'),insight:document.getElementById('insight'),subtitle:document.getElementById('subtitle')};
+    let snapshot={};
+    function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
+    function buildGraph(){const preset=controls.preset.value,hubDegree=Number(controls.hub.value);let nodes=[],edges=[];function add(id,label,x,y,kind){nodes.push({id,label,x,y,kind})}function edge(a,b,w=1){edges.push([a,b,w]);edges.push([b,a,w])}
+      if(preset==='modules'){['TF1','G1','G2','G3','TF2','G4','G5','G6','Bridge'].forEach((l,i)=>add(i,l,[.18,.30,.31,.18,.70,.82,.70,.82,.50][i],[.25,.19,.38,.55,.25,.19,.55,.38,.40][i],i===8?'bridge':(i===0||i===4?'tf':'gene')));[[0,1],[0,2],[1,2],[2,3],[4,5],[4,7],[5,6],[6,7],[2,8],[8,5]].forEach(e=>edge(e[0],e[1]));}
+      else if(preset==='pathway'){for(let i=0;i<9;i++)add(i,i===0?'TF':'G'+i,.12+i*.095,.30+Math.sin(i*.9)*.18,i===0?'tf':(i===4?'hub':'gene'));for(let i=0;i<8;i++)edge(i,i+1);edge(1,4);edge(4,7);}
+      else {add(0,'TF',.18,.35,'tf');add(1,'G1',.36,.22,'gene');add(2,'G2',.36,.48,'gene');add(3,'HUB',.58,.35,'hub');add(4,'State',.78,.22,'state');add(5,'G3',.78,.50,'gene');edge(0,1);edge(0,2);edge(1,3);edge(2,3);edge(3,4);edge(3,5);for(let i=0;i<hubDegree;i++){const id=6+i,ang=-1.2+i*(2.4/Math.max(1,hubDegree-1));add(id,'H'+(i+1),.58+Math.cos(ang)*.18,.35+Math.sin(ang)*.26,'leaf');edge(3,id,.75)}}return {nodes,edges}}
+    function initialSignal(g){const s=controls.signal.value;return g.nodes.map((n,i)=>{if(s==='tf')return n.kind==='tf'?1:.08+((i*37)%17)/200;if(s==='gradient')return clamp(n.x*.95+.05*Math.sin(i),0,1);if(s==='module')return (n.x<.48?.82:.18)+(n.kind==='bridge'?.18:0);return clamp(.45+.35*Math.sin(i*1.8)+.18*Math.cos(i*.7),0,1)})}
+    function matrix(g){const n=g.nodes.length,A=Array.from({length:n},()=>Array(n).fill(0));g.edges.forEach(([a,b,w])=>A[b][a]+=w);const norm=controls.norm.value;if(norm!=='raw')for(let i=0;i<n;i++)A[i][i]+=1;const deg=A.map(row=>row.reduce((a,b)=>a+b,0));const P=Array.from({length:n},()=>Array(n).fill(0));for(let i=0;i<n;i++)for(let j=0;j<n;j++){if(norm==='raw'||norm==='self')P[i][j]=A[i][j];else if(norm==='rw')P[i][j]=deg[i]?A[i][j]/deg[i]:0;else P[i][j]=A[i][j]/Math.sqrt((deg[i]||1)*(deg[j]||1));}return {P,A,deg}}
+    function propagate(g){const x0=initialSignal(g),m=matrix(g),layers=Number(controls.layers.value),res=Number(controls.residual.value)/100;let states=[x0.slice()],x=x0.slice();for(let l=0;l<layers;l++){const y=m.P.map(row=>row.reduce((sum,v,j)=>sum+v*x[j],0));const max=Math.max(...y.map(Math.abs),1);x=y.map((v,i)=>(1-res)*(v/max)+res*x0[i]);states.push(x.slice())}return {x0,states,x:states[states.length-1],...m}}
+    function stats(g,p){const x=p.x,mean=x.reduce((a,b)=>a+b,0)/x.length;const variance=x.reduce((a,b)=>a+(b-mean)*(b-mean),0)/x.length;let energy=0,totalW=0;g.edges.forEach(([a,b,w],idx)=>{if(idx%2===0){energy+=w*(x[a]-x[b])*(x[a]-x[b]);totalW+=w}});const hub=g.nodes.findIndex(n=>n.kind==='hub');let hubInfluence=0;if(hub>=0){const row=p.P.map(r=>r[hub]);hubInfluence=row.reduce((a,b)=>a+b,0)/(row.length||1)}const radius=x.filter(v=>Math.abs(v-mean)>.08).length;return {variance,energy:energy/(totalW||1),hubInfluence,radius,mean}}
+    function resize(){const r=canvas.parentElement.getBoundingClientRect();const d=Math.min(devicePixelRatio||1,2);canvas.width=Math.max(320,Math.floor(r.width*d));canvas.height=Math.max(300,Math.floor(r.height*d));canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';ctx.setTransform(d,0,0,d,0,0);draw()}
+    function draw(){if(!canvas.width)return;const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);const g=buildGraph(),p=propagate(g),s=stats(g,p);if(w<540)drawMobile(g,p,s,w,h);else drawDesktop(g,p,s,w,h);updatePanel(g,p,s)}
+    function box(x,y,w,h,title){ctx.fillStyle='#0a1720';ctx.strokeStyle='#24485d';ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(x,y,w,h,14);ctx.fill();ctx.stroke();ctx.fillStyle='#dff3f7';ctx.font='800 14px Segoe UI';ctx.textAlign='left';ctx.fillText(title,x+14,y+26)}
+    function color(v){v=clamp(v,0,1);const r=Math.round(255*(.25+v*.55)),g=Math.round(95+v*120),b=Math.round(140+v*80);return `rgb(${r},${g},${b})`}
+    function drawDesktop(g,p,s,w,h){const top=102;box(24,top,360,310,'Gene graph signal after diffusion');drawGraph(g,p,44,top+42,320,224);box(406,top,260,310,'Propagation matrix P');drawMatrix(g,p,436,top+50,200);box(688,top,300,310,'Smoothing trace');drawCurves(p,722,top+56,220,166);box(24,top+335,964,112,'Formula and diagnostic reading');drawFormula(s,54,top+381,900)}
+    function drawMobile(g,p,s,w,h){const top=74;box(12,top,w-24,156,'Graph');drawGraph(g,p,24,top+36,w-48,96);const y=top+168,cw=(w-36)/2;box(12,y,cw,94,'Matrix');drawMatrix(g,p,28,y+30,cw-32);box(24+cw,y,cw,94,'Trace');drawCurves(p,40+cw,y+32,cw-42,42)}
+    function pos(n,x,y,w,h){return [x+n.x*w,y+n.y*h]}
+    function drawGraph(g,p,x,y,w,h){ctx.lineCap='round';g.edges.forEach(([a,b,ew],idx)=>{if(idx%2)return;const A=pos(g.nodes[a],x,y,w,h),B=pos(g.nodes[b],x,y,w,h);ctx.strokeStyle='rgba(153,190,204,.45)';ctx.lineWidth=2+ew;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke()});g.nodes.forEach((n,i)=>{const P=pos(n,x,y,w,h),r=n.kind==='hub'?18:n.kind==='tf'?17:14;ctx.fillStyle=color(p.x[i]);ctx.strokeStyle=n.kind==='hub'?'#e8b857':n.kind==='tf'?'#58e0d3':'#d7edf3';ctx.lineWidth=n.kind==='hub'?4:2;ctx.beginPath();ctx.arc(P[0],P[1],r,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#eaf7fb';ctx.font='700 10px Segoe UI';ctx.textAlign='center';ctx.fillText(n.label,P[0],P[1]+r+14)})}
+    function drawMatrix(g,p,x,y,size){const n=g.nodes.length,cell=Math.min(22,size/n),ox=x,oy=y;let max=Math.max(...p.P.flat().map(Math.abs),1e-6);for(let i=0;i<n;i++)for(let j=0;j<n;j++){const v=Math.abs(p.P[i][j])/max;ctx.fillStyle=`rgba(${80+Math.round(120*v)},${150+Math.round(80*v)},${210},${.14+.76*v})`;ctx.fillRect(ox+j*cell,oy+i*cell,Math.max(2,cell-1),Math.max(2,cell-1))}ctx.strokeStyle='#315b70';ctx.strokeRect(ox,oy,n*cell,n*cell);ctx.fillStyle='#9fb9c6';ctx.font='10px Segoe UI';ctx.fillText(controls.norm.options[controls.norm.selectedIndex].text,ox,oy+n*cell+18)}
+    function traceStats(g,p){return p.states.map(x=>{const mean=x.reduce((a,b)=>a+b,0)/x.length;const variance=x.reduce((a,b)=>a+(b-mean)*(b-mean),0)/x.length;let energy=0,total=0;g.edges.forEach(([a,b,w],idx)=>{if(idx%2===0){energy+=w*(x[a]-x[b])*(x[a]-x[b]);total+=w}});return {variance,energy:energy/(total||1)}})}
+    function drawCurves(p,x,y,w,h){const g=buildGraph(),ts=traceStats(g,p),maxV=Math.max(...ts.map(d=>d.variance),.001),maxE=Math.max(...ts.map(d=>d.energy),.001);ctx.strokeStyle='#294f62';ctx.strokeRect(x,y,w,h);function line(key,max,c){ctx.strokeStyle=c;ctx.lineWidth=3;ctx.beginPath();ts.forEach((d,i)=>{const px=x+(i/Math.max(1,ts.length-1))*w,py=y+h-(d[key]/max)*h;if(i)ctx.lineTo(px,py);else ctx.moveTo(px,py)});ctx.stroke()}line('variance',maxV,'#58e0d3');line('energy',maxE,'#e8b857');ctx.fillStyle='#9fb9c6';ctx.font='11px Segoe UI';ctx.fillText('variance',x+8,y+16);ctx.fillText('energy',x+80,y+16)}
+    function drawFormula(s,x,y,w){ctx.fillStyle='#eaf7fb';ctx.font='800 18px Segoe UI';ctx.textAlign='left';ctx.fillText('H^(l+1) = sigma(P H^(l) W^(l)),   P = D_hat^-1/2 A_hat D_hat^-1/2',x,y);ctx.fillStyle='#9fb9c6';ctx.font='14px Segoe UI';wrap('Read the display: node colors are the current signal, the heatmap is P, and the curves show how variance and Dirichlet energy shrink as diffusion repeats. If they collapse too fast, the GCN is erasing biology instead of using it.',x,y+30,w,19)}
+    function wrap(text,x,y,w,line){const words=text.split(' ');let s='',yy=y;for(const word of words){const t=s?`${s} ${word}`:word;if(ctx.measureText(t).width>w){ctx.fillText(s,x,yy);s=word;yy+=line}else s=t}if(s)ctx.fillText(s,x,yy)}
+    function updatePanel(g,p,s){out.layers.textContent=controls.layers.value;out.hub.textContent=controls.hub.value;out.res.textContent=controls.residual.value;out.variance.textContent=s.variance.toFixed(3);out.energy.textContent=s.energy.toFixed(3);out.hubMetric.textContent=Math.round(s.hubInfluence*100)+'%';out.radius.textContent=String(s.radius);out.subtitle.textContent=controls.preset.options[controls.preset.selectedIndex].text+' under '+controls.norm.options[controls.norm.selectedIndex].text+'.';out.bars.innerHTML='';const rows=[['Layer depth',Number(controls.layers.value)/8,'#54a8ff'],['Signal variance',Math.min(1,s.variance/.12),'#58e0d3'],['Edge energy',Math.min(1,s.energy/.22),'#e8b857'],['Hub influence',Math.min(1,s.hubInfluence*2.5),'#ff6d8b'],['Residual memory',Number(controls.residual.value)/70,'#a78bfa']];rows.forEach(row=>{const el=document.createElement('div');el.className='bar-row';el.innerHTML='<b>'+row[0]+'</b><div class="track"><div class="fill" style="width:'+Math.round(row[1]*100)+'%;background:'+row[2]+'"></div></div><em>'+Math.round(row[1]*100)+'%</em>';out.bars.appendChild(el)});let text='Symmetric GCN normalization asks each message to pay for the degree of its source and target. That keeps hubs useful without letting them overwhelm every nearby gene.';if(controls.norm.value==='raw')text='Raw adjacency shows the failure case: high-degree nodes can dominate simply because they send or receive many messages.';if(Number(controls.layers.value)>5)text='With many layers the signal becomes smooth. In biology this can erase cell-state or regulatory specificity, so depth needs diagnostics.';if(controls.preset.value==='modules')text='Two modules show why local smoothing can help within a cell program but hurt when bridges mix distinct biological states.';out.insight.textContent=text;snapshot={kind:'operator',labId:'B01',title:'GCN as normalized diffusion',status:'ready',normalization:controls.norm.value,layers:Number(controls.layers.value),hubDegree:Number(controls.hub.value),residual:Number(controls.residual.value)/100,nodeCount:g.nodes.length,edgeCount:g.edges.length/2,metrics:{variance:s.variance,energy:s.energy,hubInfluence:s.hubInfluence,mixingRadius:s.radius},visualKind:'canvas-graph-matrix-curves',visualQuality:'topic-specific responsive Obsidian lab',stateText:text,revision:'2026-06-02-b01'}}
+    if(!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);return this}}
+    Object.values(controls).forEach(el=>el.addEventListener('input',draw));window.addEventListener('resize',resize);window.__B01LabSnapshot=()=>snapshot;window.__B01LabReady=true;resize();
+  </script>
+</body>
+</html>

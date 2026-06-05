@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true" data-topic-specific="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Chapter 02 - Sheaf Variants and Scalable Biology - topic-specific visual</title>
+  <link rel="stylesheet" href="../shared/topic-visual-core.css">
+</head>
+<body>
+  <main class="topic-lab">
+    <section class="stage" aria-label="Topic-specific interactive visualization">
+      <canvas id="viz"></canvas>
+      <div class="topbar">
+        <div class="chip"><span>Topic visual</span><strong data-family>Sheaf restriction map</strong></div>
+        <div class="chip formula"><span>Formal hook</span><strong data-formula></strong></div>
+      </div>
+      <div class="legend"></div>
+    </section>
+    <aside class="controls">
+      <header>
+        <p class="eyebrow">Generated from this note</p>
+        <h1 data-title>Chapter 02 - Sheaf Variants and Scalable Biology</h1>
+        <p class="subtitle" data-question></p>
+      </header>
+      <div class="mode-grid">
+        <select data-mode aria-label="View mode">
+          <option value="object">Object view</option>
+          <option value="process">Process view</option>
+          <option value="formal">Formal view</option>
+          <option value="failure">Failure mode</option>
+        </select>
+        <button type="button" data-action="simulate">Simulate</button>
+        <button type="button" data-action="stress">Stress failure</button>
+        <button type="button" data-action="reset">Reset</button>
+      </div>
+      <div class="control-grid"></div>
+      <div class="metric-grid"></div>
+      <div class="explain">
+        <h2>How to read it</h2>
+        <p data-state></p>
+      </div>
+      <p class="footer">Portable local HTML: no CDN. The iframe and full-screen link use relative vault paths, so the visual can travel with an Obsidian sync folder.</p>
+    </aside>
+  </main>
+  <script id="topic-config" type="application/json">{"title": "Chapter 02 - Sheaf Variants and Scalable Biology", "path": "01_Book/Part 07 - Sheaf GNN For Biology/Chapter 02 - Sheaf Variants and Scalable Biology.md", "family": "sheaf", "subtype": "sheaf-restriction", "subtypeName": "Sheaf restriction map", "familyName": "Sheaf restriction map", "formula": "rho_(v,e) x_v ~= rho_(u,e) x_u", "question": "Which local states must agree on an edge, and which restriction map translates them?", "terms": ["sheaf", "variants", "scalable", "biology", "one", "lab", "next", "biological"], "parameters": [{"name": "restriction strength", "value": 64, "min": 0, "max": 100}, {"name": "frame rotation", "value": 35, "min": 0, "max": 100}, {"name": "prior confidence", "value": 70, "min": 0, "max": 100}, {"name": "mismatch noise", "value": 22, "min": 0, "max": 100}], "metrics": ["consistency", "frame shift", "prior fit", "mismatch"], "initialExplanation": "This visual was generated from this exact note: 'Chapter 02 - Sheaf Variants and Scalable Biology'. It uses the Sheaf restriction map representation and highlights sheaf, variants, scalable, biology."}</script>
+  <script src="../shared/topic-visual-core.js"></script>
+  <script>
+    try { createTopicVisual(); }
+    catch (error) {
+      document.body.innerHTML = '<pre style="color:white;background:#05090d;padding:16px;white-space:pre-wrap">Topic visual failed: ' + error.message + '</pre>';
+      console.error(error);
+    }
+  </script>
+</body>
+</html>

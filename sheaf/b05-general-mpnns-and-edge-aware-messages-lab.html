@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>B05 - Edge-aware MPNN Message Lab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#071015;--line:#25485b;--text:#edf9fb;--muted:#a8c1cb;--cyan:#58e0d3;--blue:#54a8ff;--gold:#e8b857;--pink:#ff6d8b;--green:#6ee7a8;--red:#ff817d}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.42 Inter,Segoe UI,system-ui,Arial,sans-serif}
+    .shell{height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:12px;padding:12px;background:radial-gradient(circle at 20% 8%,rgba(88,224,211,.15),transparent 32%),radial-gradient(circle at 76% 55%,rgba(84,168,255,.12),transparent 28%),linear-gradient(135deg,#050b10,#0b1720 64%,#05090d)}
+    .stage,.panel{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(11,27,37,.97),rgba(6,15,21,.98));box-shadow:0 18px 52px rgba(0,0,0,.34);min-width:0;min-height:0}
+    .stage{display:grid;grid-template-rows:minmax(0,1fr) auto;overflow:hidden;position:relative}.canvas-wrap{position:relative;min-height:0}canvas{display:block;width:100%;height:100%;min-height:340px;touch-action:none}
+    .overlay{position:absolute;left:14px;right:14px;top:14px;display:flex;gap:10px;justify-content:space-between;pointer-events:none}.badge,.formula{border:1px solid rgba(143,216,242,.25);background:rgba(7,16,21,.78);backdrop-filter:blur(8px);border-radius:12px;padding:9px 11px}.badge span,.formula span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.badge strong{font-size:18px}.formula{max-width:780px;color:#cfe5ec}.formula code{color:var(--cyan);font-weight:800}
+    .controls{display:grid;grid-template-columns:1.02fr .95fr .76fr .76fr .76fr .76fr;gap:10px;padding:10px;border-top:1px solid var(--line);background:#091720}.control{min-width:0;overflow:hidden}.control label{display:flex;justify-content:space-between;margin-bottom:4px;color:var(--muted);font-size:12px}.control output{color:var(--text);font-weight:800}select,input{width:100%;min-width:0;border:1px solid #315b70;border-radius:10px;background:#102838;color:var(--text);font:inherit}select{height:38px;padding:0 10px}input[type=range]{height:38px;accent-color:var(--cyan)}
+    .panel{display:flex;flex-direction:column;gap:12px;padding:14px;overflow:auto}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--cyan)!important}.panel h1{font-size:22px;line-height:1.1;margin:0}.panel p{margin:0;color:var(--muted)}
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:10px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;margin-top:4px;font-size:19px}
+    .bars{display:grid;gap:7px}.bar-row{display:grid;grid-template-columns:132px minmax(0,1fr) 58px;gap:8px;align-items:center}.track{height:13px;border:1px solid #203c4d;background:#08131a;border-radius:999px;overflow:hidden}.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),var(--blue));width:0}.bar-row b{font-size:12px}.bar-row em{font-style:normal;text-align:right;color:var(--muted);font-size:12px}
+    .card{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:12px}.card h2{font-size:15px;margin:0 0 6px}.legend{display:flex;flex-wrap:wrap;gap:7px}.legend span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:var(--muted)}.dot{width:9px;height:9px;border-radius:99px;display:inline-block}
+    @media(max-width:920px){html,body{height:100%;overflow:hidden;max-width:100vw}.shell{width:100vw;height:100vh;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,55vh) minmax(0,1fr);gap:8px;padding:8px;overflow:hidden}.stage,.panel{width:100%;max-width:100%;overflow:hidden}.canvas-wrap{min-height:0}canvas{min-height:230px}.overlay{display:none}.controls{grid-template-columns:repeat(3,minmax(0,1fr));max-height:166px;overflow:hidden;padding:8px;gap:7px}.control label{display:block;font-size:11px;line-height:1.15}.control output{float:right;font-size:11px}select,input[type=range]{height:30px}select{font-size:12px;padding:0 6px;text-overflow:ellipsis}.panel{min-height:0;padding:10px;gap:9px;overflow:auto}.panel h1{font-size:17px;line-height:1.14;overflow-wrap:break-word}.metric-grid{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:8px}.metric strong{font-size:17px}.legend{display:none}.card:nth-of-type(2){display:none}}
+    @media(max-width:480px){.shell{grid-template-rows:minmax(0,55vh) minmax(0,1fr)}.controls{grid-template-columns:repeat(2,minmax(0,1fr));max-height:190px}.metric-grid{grid-template-columns:1fr}.panel header p:not(.eyebrow){display:none}.bars .bar-row:nth-child(n+6){display:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="stage" aria-label="Interactive edge-aware MPNN message visualization">
+      <div class="canvas-wrap">
+        <canvas id="scene" aria-label="Edge-aware message passing canvas"></canvas>
+        <div class="overlay">
+          <div class="badge"><span>Chapter lab</span><strong>B05</strong></div>
+          <div class="formula"><span>MPNN update</span><code>m_{j->i}=phi(h_i,h_j,e_{j,i}); h'_i=gamma(h_i,sum_j m_{j->i})</code></div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control"><label>Scenario</label><select id="scenario"><option value="grn">GRN TF-target edges</option><option value="molecule">Molecular bonds</option><option value="cell">Cell-cell signaling</option><option value="ppi">PPI confidence graph</option></select></div>
+        <div class="control"><label>Message mode</label><select id="mode"><option value="edge_mlp">edge MLP filter</option><option value="typed_basis">typed basis</option><option value="scalar">scalar edge weight</option><option value="blind">edge-blind</option></select></div>
+        <div class="control"><label>Threshold <output id="thrOut">0.35</output></label><input id="thr" type="range" min="0" max="90" value="35"></div>
+        <div class="control"><label>Sign use <output id="signOut">100</output></label><input id="sign" type="range" min="0" max="100" value="100"></div>
+        <div class="control"><label>Direction <output id="dirOut">100</output></label><input id="dir" type="range" min="0" max="100" value="100"></div>
+        <div class="control"><label>Noise <output id="noiseOut">15</output></label><input id="noise" type="range" min="0" max="70" value="15"></div>
+      </div>
+    </section>
+    <aside class="panel">
+      <header><p class="eyebrow">Edge-aware MPNN lab</p><h1>What changes when the edge is allowed to speak?</h1><p id="subtitle">Switch the message function and inspect which biological evidence survives.</p></header>
+      <div class="metric-grid">
+        <div class="metric"><span>Edge sensitivity</span><strong id="edgeSensitivity">0%</strong></div>
+        <div class="metric"><span>Sign retained</span><strong id="signMetric">0%</strong></div>
+        <div class="metric"><span>Direction retained</span><strong id="directionMetric">0%</strong></div>
+        <div class="metric"><span>Evidence loss risk</span><strong id="riskMetric">0%</strong></div>
+      </div>
+      <div class="card"><h2>Incoming message magnitudes</h2><div id="bars" class="bars"></div></div>
+      <div class="card"><h2>Interpretation</h2><p id="insight">Move a control to compare edge-blind and edge-aware message functions.</p></div>
+      <div class="legend"><span><i class="dot" style="background:var(--green)"></i> activation/support</span><span><i class="dot" style="background:var(--pink)"></i> repression/inhibition</span><span><i class="dot" style="background:var(--gold)"></i> context/proximity</span><span><i class="dot" style="background:var(--blue)"></i> binding/assay evidence</span></div>
+    </aside>
+  </main>
+  <script>
+    const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
+    const controls={scenario:document.getElementById('scenario'),mode:document.getElementById('mode'),thr:document.getElementById('thr'),sign:document.getElementById('sign'),dir:document.getElementById('dir'),noise:document.getElementById('noise')};
+    const out={thr:document.getElementById('thrOut'),sign:document.getElementById('signOut'),dir:document.getElementById('dirOut'),noise:document.getElementById('noiseOut'),edgeSensitivity:document.getElementById('edgeSensitivity'),signMetric:document.getElementById('signMetric'),directionMetric:document.getElementById('directionMetric'),riskMetric:document.getElementById('riskMetric'),bars:document.getElementById('bars'),insight:document.getElementById('insight'),subtitle:document.getElementById('subtitle')};
+    const palettes={activation:'#6ee7a8',repression:'#ff6d8b',context:'#e8b857',binding:'#54a8ff'};
+    const scenarios={
+      grn:{target:'Target gene',node:'TF',edges:[['TF A','activation',.92,1,.84],['TF B','repression',.76,-1,.67],['TF C','binding',.58,1,.45],['TF D','context',.41,1,.34],['TF E','repression',.28,-1,.23]],why:'GRN edges differ by sign, motif support, chromatin access, perturbation support, and prior provenance.'},
+      molecule:{target:'Atom C',node:'Atom',edges:[['N','binding',.88,1,.76],['O','repression',.71,-1,.69],['H','context',.43,1,.32],['Ring','activation',.82,1,.58],['Cl','binding',.36,-1,.41]],why:'Molecular messages should not treat single, double, aromatic, and spatial context edges as the same relation.'},
+      cell:{target:'Receiver cell',node:'Neighbor',edges:[['Ligand cell','activation',.81,1,.72],['Inhibitory cell','repression',.66,-1,.61],['Stromal cell','context',.58,1,.37],['Spatial spot','context',.44,1,.28],['Noisy neighbor','binding',.25,1,.22]],why:'Cell-cell graphs need ligand-receptor evidence, spatial distance, and condition context to shape messages.'},
+      ppi:{target:'Protein P',node:'Protein',edges:[['Partner A','activation',.73,1,.59],['Partner B','binding',.91,1,.81],['Partner C','context',.46,1,.39],['Assay hit','binding',.62,1,.52],['Weak hit','repression',.31,-1,.26]],why:'PPI confidence and assay source matter because edges often mix direct binding, functional association, and literature bias.'}
+    };
+    let snapshot={};
+    function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
+    function params(){return {scenario:controls.scenario.value,mode:controls.mode.value,thr:Number(controls.thr.value)/100,sign:Number(controls.sign.value)/100,dir:Number(controls.dir.value)/100,noise:Number(controls.noise.value)/100}}
+    function message(edge,p,index){
+      const [name,type,conf,sgn,nodeVal]=edge;
+      if(conf<p.thr)return 0;
+      const typeBoost={activation:1.15,repression:1.05,context:.72,binding:.96}[type]||1;
+      const signFactor=1+p.sign*(sgn<0?-1.35:.35);
+      const dirFactor=.45+.55*p.dir;
+      const noisePenalty=1-p.noise*.35;
+      if(p.mode==='blind')return nodeVal*(1-p.noise*.12);
+      if(p.mode==='scalar')return nodeVal*conf*noisePenalty;
+      if(p.mode==='typed_basis')return nodeVal*conf*typeBoost*(.55+.45*p.sign*Math.abs(sgn))*dirFactor*noisePenalty;
+      const gate=1/(1+Math.exp(-4*(conf-.45)));
+      return nodeVal*gate*typeBoost*signFactor*dirFactor*noisePenalty;
+    }
+    function model(){
+      const p=params(),s=scenarios[p.scenario],msgs=s.edges.map((e,i)=>message(e,p,i)),abs=msgs.map(Math.abs);
+      const baseline=s.edges.map(e=>message(e,{...p,mode:'blind'},0));
+      const edgeSens=clamp(abs.reduce((a,b)=>a+b,0)/(baseline.map(Math.abs).reduce((a,b)=>a+b,0)+.001)-.55,0,1);
+      const signRetained=p.mode==='blind'||p.mode==='scalar'?0:p.sign;
+      const dirRetained=p.mode==='blind'?0:p.dir;
+      let risk=0;if(p.mode==='blind')risk+=.45;if(p.mode==='scalar')risk+=.24;if(signRetained<.5)risk+=.22;if(dirRetained<.5)risk+=.18;risk+=p.noise*.22;risk+=p.thr>.65?.16:0;risk=clamp(risk,0,1);
+      return {p,s,msgs,edgeSens,signRetained,dirRetained,risk,total:msgs.reduce((a,b)=>a+b,0)};
+    }
+    function resize(){const r=canvas.parentElement.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=Math.max(320,Math.floor(r.width*d));canvas.height=Math.max(300,Math.floor(r.height*d));canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';ctx.setTransform(d,0,0,d,0,0);draw()}
+    function rr(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
+    function box(x,y,w,h,title){ctx.fillStyle='#0a1720';ctx.strokeStyle='#25485b';ctx.lineWidth=1;rr(x,y,w,h,14);ctx.fill();ctx.stroke();ctx.fillStyle='#dff3f7';ctx.font='800 14px Segoe UI';ctx.textAlign='left';ctx.fillText(title,x+14,y+26)}
+    function arrow(x1,y1,x2,y2,color,width){const ang=Math.atan2(y2-y1,x2-x1),head=10;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-Math.cos(ang-.48)*head,y2-Math.sin(ang-.48)*head);ctx.lineTo(x2-Math.cos(ang+.48)*head,y2-Math.sin(ang+.48)*head);ctx.closePath();ctx.fill()}
+    function drawNetwork(m,x,y,w,h){box(x,y,w,h,'Edge-conditioned messages');const compact=w<620;const cx=x+w*(compact?.58:.62),cy=y+h*.55,targetR=compact?23:31;ctx.fillStyle='#e8b857';ctx.strokeStyle='#f6d37d';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,cy,targetR,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#061018';ctx.font='800 '+(compact?10:12)+'px Segoe UI';ctx.textAlign='center';ctx.fillText(compact?'target':m.s.target,cx,cy+4);const radius=Math.min(w*.34,h*.34);m.s.edges.forEach((e,i)=>{const [name,type,conf,sgn]=e;if(conf<m.p.thr)return;const n=m.s.edges.length,ang=-Math.PI*.85+i*(Math.PI*1.7/(n-1)),px=cx+Math.cos(ang)*radius,py=cy+Math.sin(ang)*radius;const col=palettes[type]||'#9fd7e9';arrow(px,py,cx-Math.cos(ang)*targetR,cy-Math.sin(ang)*targetR,col,2+Math.abs(m.msgs[i])*6);ctx.fillStyle=col;ctx.strokeStyle='#eaf7fb';ctx.lineWidth=2;ctx.beginPath();ctx.arc(px,py,compact?18:23,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#061018';ctx.font='800 '+(compact?9:11)+'px Segoe UI';ctx.textAlign='center';ctx.fillText(name.split(' ')[0],px,py+4);if(!compact){ctx.fillStyle='#cfe5ec';ctx.font='12px Segoe UI';ctx.fillText(type+' '+conf.toFixed(2),px,py+38)}});ctx.fillStyle='#9fb9c6';ctx.font=(compact?11:13)+'px Segoe UI';ctx.textAlign='left';ctx.fillText('visible edges pass threshold; arrow width = |message|',x+16,y+h-18)}
+    function drawFunction(m,x,y,w,h){box(x,y,w,h,'Message function microscope');const rows=[['edge-blind','m = psi(h_j)','loses type/sign/source'],['scalar','m = w_e psi(h_j)','keeps confidence only'],['typed basis','m = B_type h_j','keeps relation family'],['edge MLP','m = phi(h_i,h_j,e)','uses full edge evidence']];rows.forEach((r,i)=>{const yy=y+52+i*((h-68)/4);ctx.fillStyle=m.p.mode===r[0].replace(' ','_')||m.p.mode===r[0]?'#102f3b':'#08131a';ctx.strokeStyle=m.p.mode===r[0].replace(' ','_')||m.p.mode===r[0]?'#58e0d3':'#25485b';rr(x+18,yy,w-36,34,10);ctx.fill();ctx.stroke();ctx.fillStyle='#eaf7fb';ctx.font='800 12px Segoe UI';ctx.textAlign='left';ctx.fillText(r[0],x+32,yy+22);ctx.fillStyle='#a9c7d3';ctx.font='12px Segoe UI';ctx.fillText(r[1],x+126,yy+22);ctx.textAlign='right';ctx.fillText(r[2],x+w-30,yy+22)});}
+    function drawMatrix(m,x,y,w,h){box(x,y,w,h,'Edge feature panel');const labels=['type','sign','conf','source'];const cellW=(w-56)/4;labels.forEach((lab,i)=>{ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.textAlign='center';ctx.fillText(lab,x+42+i*cellW+cellW/2,y+54)});m.s.edges.slice(0,5).forEach((e,r)=>{const yy=y+70+r*31;ctx.fillStyle='#cfe5ec';ctx.font='11px Segoe UI';ctx.textAlign='left';ctx.fillText(e[0],x+18,yy+17);const vals=[e[1],e[3]<0?'-':'+',e[2].toFixed(2),r%2?'prior':'assay'];vals.forEach((v,c)=>{ctx.fillStyle=e[2]<m.p.thr?'#26303a':(c===0?palettes[e[1]]:'#102838');ctx.strokeStyle='#25485b';ctx.fillRect(x+82+c*cellW,yy,cellW-6,22);ctx.strokeRect(x+82+c*cellW,yy,cellW-6,22);ctx.fillStyle=c===0?'#061018':'#eaf7fb';ctx.font='800 10px Segoe UI';ctx.textAlign='center';ctx.fillText(v,x+82+c*cellW+(cellW-6)/2,yy+15)})});}
+    function drawDesktop(m,w,h){const top=96,margin=24,gap=18,inner=w-margin*2;if(w<980){const aH=Math.max(220,h*.44);drawNetwork(m,margin,top,inner,aH);drawFunction(m,margin,top+aH+gap,inner,142);return}const left=inner*.58;drawNetwork(m,margin,top,left,Math.max(380,h-top-140));drawFunction(m,margin+left+gap,top,inner-left-gap,218);drawMatrix(m,margin+left+gap,top+236,inner-left-gap,Math.max(252,h-top-376));}
+    function drawMobile(m,w,h){const top=72,inner=w-24;drawNetwork(m,12,top,inner,Math.max(180,h-top-16))}
+    function draw(){if(!canvas.width)return;const m=model(),w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);if(w<560)drawMobile(m,w,h);else drawDesktop(m,w,h);updatePanel(m)}
+    function updatePanel(m){out.thr.textContent=m.p.thr.toFixed(2);out.sign.textContent=Math.round(m.p.sign*100);out.dir.textContent=Math.round(m.p.dir*100);out.noise.textContent=Math.round(m.p.noise*100);out.edgeSensitivity.textContent=Math.round(m.edgeSens*100)+'%';out.signMetric.textContent=Math.round(m.signRetained*100)+'%';out.directionMetric.textContent=Math.round(m.dirRetained*100)+'%';out.riskMetric.textContent=Math.round(m.risk*100)+'%';out.subtitle.textContent=controls.scenario.options[controls.scenario.selectedIndex].text+' using '+controls.mode.options[controls.mode.selectedIndex].text+'.';out.bars.innerHTML='';m.s.edges.forEach((e,i)=>{const val=Math.abs(m.msgs[i]);const el=document.createElement('div');el.className='bar-row';el.innerHTML='<b>'+e[0]+'</b><div class="track"><div class="fill" style="width:'+Math.round(clamp(val,0,1)*100)+'%;background:'+(palettes[e[1]]||'#58e0d3')+'"></div></div><em>'+m.msgs[i].toFixed(2)+'</em>';out.bars.appendChild(el)});let text=m.s.why+' ';if(m.p.mode==='blind')text+='Edge-blind mode makes every relation speak with the same grammar; this is usually too crude for GRNs.';else if(m.p.mode==='scalar')text+='Scalar weighting keeps confidence but still collapses sign and relation type.';else if(m.p.mode==='typed_basis')text+='Typed basis messages preserve relation family and are useful when edge types are discrete and trusted.';else text+='Edge MLP mode uses the full edge feature vector, which is powerful but easier to overfit if provenance is noisy.';if(m.risk>.55)text+=' The current setting has high evidence-loss or evidence-noise risk.';out.insight.textContent=text;snapshot={kind:'edge-aware-mpnn-message-lab',labId:'B05',title:'General MPNNs and edge-aware messages',status:'ready',controls:m.p,metrics:{edgeSensitivity:m.edgeSens,signRetained:m.signRetained,directionRetained:m.dirRetained,evidenceLossRisk:m.risk,totalMessage:m.total},visualKind:'topic-specific canvas edge-feature message microscope',stateText:text,revision:'2026-06-02-b05'};}
+    if(!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);return this}}
+    Object.values(controls).forEach(el=>el.addEventListener('input',draw));window.addEventListener('resize',resize);window.__B05LabSnapshot=()=>snapshot;window.__B05LabReady=true;resize();
+  </script>
+</body>
+</html>

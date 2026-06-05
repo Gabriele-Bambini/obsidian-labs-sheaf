@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E07 VAE Latent Space</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=e06-e07-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e07" data-keywords="VAE variational autoencoder latent space ELBO KL reparameterization prior posterior decoder">
+    <section class="visual-stack" aria-label="Interactive 3D VAE latent-space visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E07 VAE latent space 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E07</strong></div>
+          <div class="formula-chip"><span>VAE sketch</span>Encoder predicts q(z|x); z = mu + sigma epsilon is decoded, while beta KL pulls the posterior toward the standard normal prior.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected latent</span><strong>VAE latent objective is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.7fr) minmax(0,.68fr) repeat(7,minmax(0,.76fr)) repeat(3,minmax(0,.56fr));">
+        <select id="sampleMode" data-control="sampleMode" aria-label="Sampling mode">
+          <option value="encode">Encode</option>
+          <option value="prior">Prior</option>
+          <option value="traverse">Traverse</option>
+        </select>
+        <select id="inputClass" aria-label="Input class">
+          <option value="digit">Digit</option>
+          <option value="loop">Loop</option>
+          <option value="slant">Slant</option>
+          <option value="wide">Wide</option>
+        </select>
+        <div class="command-control">
+          <label for="beta">Beta <output data-output="beta">1.00</output></label>
+          <input id="beta" data-param="beta" type="range" min="0" max="4" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="latentSpread">Spread <output data-output="latentSpread">1.00</output></label>
+          <input id="latentSpread" data-param="latentSpread" type="range" min="0.25" max="2" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="reconstructionWeight">Recon <output data-output="reconstructionWeight">0.85</output></label>
+          <input id="reconstructionWeight" data-param="reconstructionWeight" type="range" min="0.2" max="1.2" step="0.05" value="0.85">
+        </div>
+        <div class="command-control">
+          <label for="epsilon">Eps <output data-output="epsilon">0.40</output></label>
+          <input id="epsilon" data-param="epsilon" type="range" min="-2" max="2" step="0.05" value="0.4">
+        </div>
+        <div class="command-control">
+          <label for="decoderSharpness">Decode <output data-output="decoderSharpness">0.72</output></label>
+          <input id="decoderSharpness" data-param="decoderSharpness" type="range" min="0.2" max="1.2" step="0.01" value="0.72">
+        </div>
+        <div class="command-control">
+          <label for="traversalAxis">Axis <output data-output="traversalAxis">0.45</output></label>
+          <input id="traversalAxis" data-param="traversalAxis" type="range" min="0" max="1" step="0.05" value="0.45">
+        </div>
+        <div class="command-control">
+          <label for="klAnneal">Anneal <output data-output="klAnneal">1.00</output></label>
+          <input id="klAnneal" data-param="klAnneal" type="range" min="0" max="1" step="0.05" value="1">
+        </div>
+        <button id="sampleLatent" class="primary" data-action="step" type="button">Sample z path</button>
+        <button id="traverseLatent" data-action="pulse" type="button">Traverse latent</button>
+        <button id="resetVae" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E07 VAE Latent Space</h1>
+        <p class="subtitle">Rotate the posterior ellipses, prior bowl, reparameterization bridge, decoder manifold, ELBO seesaw, collapse funnel, and traversal rail.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Recon"><span>Recon</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="KL"><span>KL</span><strong id="klLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="ELBO"><span>ELBO</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Prior overlap"><span>Overlap</span><strong>0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading VAE latent geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: beta changes KL pressure, spread changes posterior uncertainty, epsilon moves the sampled z, and prior sampling exposes holes.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=e06-e07-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=e06-e07-canonical-clarity-v2"></script>
+  <script>
+    window.__e07LabSnapshot = window.__e07LabSnapshot || function () { return null; };
+    // __e07LabReady = true is set by createE07VaeLatentSpaceLab after the first render setup.
+    createE07VaeLatentSpaceLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

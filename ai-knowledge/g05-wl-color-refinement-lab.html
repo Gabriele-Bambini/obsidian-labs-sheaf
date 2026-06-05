@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G05 Weisfeiler-Leman Refinement Lab</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g05-wl-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="wl" data-lab-id="g05" data-keywords="weisfeiler color refinement histogram graph isomorphism gin multiset">
+    <section class="visual-stack" aria-label="Interactive 3D Weisfeiler-Leman color refinement comparison">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G05 Weisfeiler-Leman 3D color refinement visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G05</strong></div>
+          <div class="formula-chip"><span id="formulaText">c_v' = HASH(c_v, multiset(c_u : u in N(v)))</span>Color refinement compares graph histograms after each local multiset update.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected WL comparison</span><strong>Cycle and two-triangle histograms are loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.58fr)) repeat(5,minmax(0,.58fr)) repeat(4,minmax(0,.48fr));">
+        <select id="graphPair" data-control="graphPair" aria-label="Graph pair">
+          <option value="cycle-triangles">C6 vs 2 triangles</option>
+          <option value="seeded">Seeded comparison</option>
+          <option value="degree">Degree-labeled pair</option>
+        </select>
+        <select id="initialLabels" data-control="initialLabels" aria-label="Initial labels">
+          <option value="uniform">Uniform labels</option>
+          <option value="oneSeed">One seed</option>
+          <option value="degree">Degree labels</option>
+        </select>
+        <select id="aggregator" data-control="aggregator" aria-label="GNN aggregator analogy">
+          <option value="mean">Mean aggregator</option>
+          <option value="max">Max aggregator</option>
+          <option value="sum">Sum embedding</option>
+          <option value="gin">GIN sum + MLP</option>
+        </select>
+        <div class="command-control">
+          <label for="roundBudget">Rounds <output data-output="roundBudget">3</output></label>
+          <input id="roundBudget" data-param="roundBudget" type="range" min="1" max="8" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="hashSharpness">Hash <output data-output="hashSharpness">1.20</output></label>
+          <input id="hashSharpness" data-param="hashSharpness" type="range" min="0.2" max="2.8" step="0.01" value="1.20">
+        </div>
+        <div class="command-control">
+          <label for="seedStrength">Seed <output data-output="seedStrength">0.00</output></label>
+          <input id="seedStrength" data-param="seedStrength" type="range" min="0" max="1" step="0.01" value="0.00">
+        </div>
+        <div class="command-control">
+          <label for="colorCapacity">Colors <output data-output="colorCapacity">5</output></label>
+          <input id="colorCapacity" data-param="colorCapacity" type="range" min="2" max="12" step="1" value="5">
+        </div>
+        <div class="command-control">
+          <label for="selfWeight">Self <output data-output="selfWeight">0.50</output></label>
+          <input id="selfWeight" data-param="selfWeight" type="range" min="0" max="1" step="0.01" value="0.50">
+        </div>
+        <button id="refineColors" class="primary" data-action="pulse" type="button">Refine colors</button>
+        <button id="seedFeature" data-action="step" type="button">Seed feature</button>
+        <button id="compareAggregators" data-action="step" type="button">Compare GIN</button>
+        <button id="runToStable" data-action="reset" type="button">Run stable</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G05 Weisfeiler-Leman Test</h1>
+        <p class="subtitle">Rotate the 6-cycle and two-triangle pair, then step WL colors, seed symmetry, compare histograms, and test mean versus GIN-style multiset aggregation.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Color classes"><span>Color classes</span><strong id="colorClassesLabel">1</strong></div>
+        <div class="metric" data-role="metric" data-metric="Histogram gap"><span>Histogram gap</span><strong id="histogramGapLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Distinguished score"><span>Distinguished</span><strong id="distinguishedLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Stable round"><span>Round</span><strong id="roundLabel">0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading WL histogram diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: refinement rounds update node colors, seeding breaks symmetry, color capacity can force hash collisions, and aggregator mode exposes why mean loses multiset counts while GIN uses a sum-style update.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g05-wl-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=g05-wl-v3"></script>
+  <script>
+    window.__g05LabSnapshot = window.__g05LabSnapshot || function () { return null; };
+    createG05WlColorRefinementLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

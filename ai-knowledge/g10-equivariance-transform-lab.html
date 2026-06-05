@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G10 Equivariance And Invariance Contract Lab</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g10-equivariance-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="equivariance" data-lab-id="g10" data-keywords="equivariance rotation symmetry invariance molecule force">
+    <section class="visual-stack" aria-label="Interactive 3D equivariance and invariance contract visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G10 equivariance and invariance contract 3D visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G10</strong></div>
+          <div class="formula-chip"><span id="formulaText">f(g x) versus g f(x)</span>Scalar energy should stay invariant; vector forces should transform with the molecule.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected contract</span><strong>Symmetry test rig is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.58fr)) repeat(5,minmax(0,.58fr)) repeat(5,minmax(0,.42fr));">
+        <select id="transformType" data-control="transformType" aria-label="Group action">
+          <option value="rotation">Rotation SO(3)</option>
+          <option value="translation">Translation SE(3)</option>
+          <option value="reflection">Reflection E(3)</option>
+        </select>
+        <select id="outputRule" data-control="outputRule" aria-label="Output rule">
+          <option value="invariant">Invariant scalar</option>
+          <option value="equivariant">Equivariant vector</option>
+          <option value="mixed">Energy plus force</option>
+        </select>
+        <select id="architectureMode" data-control="architectureMode" aria-label="Architecture mode">
+          <option value="egnn">EGNN relative vectors</option>
+          <option value="distances">Distance invariants</option>
+          <option value="tensor">Tensor channels</option>
+          <option value="naive">Naive coordinates</option>
+        </select>
+        <div class="command-control">
+          <label for="transformAngle">Angle <output data-output="transformAngle">42</output></label>
+          <input id="transformAngle" data-param="transformAngle" type="range" min="0" max="120" step="1" value="42">
+        </div>
+        <div class="command-control">
+          <label for="translationSize">Shift <output data-output="translationSize">0.80</output></label>
+          <input id="translationSize" data-param="translationSize" type="range" min="0" max="2.2" step="0.01" value="0.80">
+        </div>
+        <div class="command-control">
+          <label for="coordinateNoise">Noise <output data-output="coordinateNoise">0.04</output></label>
+          <input id="coordinateNoise" data-param="coordinateNoise" type="range" min="0" max="0.42" step="0.01" value="0.04">
+        </div>
+        <div class="command-control">
+          <label for="frameSamples">Samples <output data-output="frameSamples">6</output></label>
+          <input id="frameSamples" data-param="frameSamples" type="range" min="2" max="12" step="1" value="6">
+        </div>
+        <div class="command-control">
+          <label for="invariantMix">Scalar <output data-output="invariantMix">0.68</output></label>
+          <input id="invariantMix" data-param="invariantMix" type="range" min="0" max="1" step="0.01" value="0.68">
+        </div>
+        <button id="applyTransform" class="primary" data-action="pulse" type="button">Apply group</button>
+        <button id="testInvariant" data-action="step" type="button">Scalar test</button>
+        <button id="testEquivariant" data-action="step" type="button">Force test</button>
+        <button id="breakContract" data-action="step" type="button">Break rule</button>
+        <button id="resetG10" data-action="reset" type="button">Reset</button>
+        <button id="toggleOutput" data-action="step" type="button" style="display:none;">Toggle</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G10 Equivariance And Invariance Contract Lab</h1>
+        <p class="subtitle">Rotate the molecule, compare scalar energy with vector forces, and watch the error grow when the architecture uses the wrong symmetry rule.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Equivariance error"><span id="modeLabel">equivariant</span><strong id="equivarianceLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Invariance error"><span>Invariant</span><strong id="invarianceLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Distance drift"><span>Distances</span><strong id="distanceLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Contract score"><span>Contract</span><strong id="contractLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading symmetry contract diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: transform type changes the group action, architecture changes the admissible features, and scalar/vector tests compare model(g x) against the expected transformed output.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g10-equivariance-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=g10-equivariance-v3"></script>
+  <script>
+    window.__g10LabSnapshot = window.__g10LabSnapshot || function () { return null; };
+    createG10EquivarianceContractLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

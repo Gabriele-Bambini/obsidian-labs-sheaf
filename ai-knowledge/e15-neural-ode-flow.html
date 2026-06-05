@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E15 Neural ODE Flow</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=e15-ode-canonical-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e15" data-keywords="neural ODE continuous depth solver adjoint stiffness augmented flow">
+    <section class="visual-stack" aria-label="Interactive 3D Neural ODE solver and adjoint visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E15 Neural ODE Flow 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E15</strong></div>
+          <div class="formula-chip"><span>ODE sketch</span>Hidden state follows a learned vector field; solver choice, tolerance, stiffness, and adjoint reconstruction change compute and gradients.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected trajectory</span><strong>Neural ODE solver geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.72fr) minmax(0,.72fr) repeat(6,minmax(0,.74fr)) repeat(4,minmax(0,.56fr));">
+        <select id="solverMode" data-control="solverMode" aria-label="ODE solver mode">
+          <option value="euler">Euler</option>
+          <option value="midpoint">Midpoint</option>
+          <option value="adaptive">Adaptive RK</option>
+        </select>
+        <select id="fieldType" data-control="fieldType" aria-label="Vector field type">
+          <option value="smooth">Smooth field</option>
+          <option value="time">Time-varying</option>
+          <option value="stiff">Stiff field</option>
+          <option value="augmented">Augmented</option>
+        </select>
+        <div class="command-control">
+          <label for="finalTime">Time <output data-output="finalTime">1.60</output></label>
+          <input id="finalTime" data-param="finalTime" type="range" min="0.6" max="3.2" step="0.05" value="1.6">
+        </div>
+        <div class="command-control">
+          <label for="stepCount">Steps <output data-output="stepCount">6</output></label>
+          <input id="stepCount" data-param="stepCount" type="range" min="3" max="16" step="1" value="6">
+        </div>
+        <div class="command-control">
+          <label for="tolerance">Tol <output data-output="tolerance">0.55</output></label>
+          <input id="tolerance" data-param="tolerance" type="range" min="0.1" max="1" step="0.01" value="0.55">
+        </div>
+        <div class="command-control">
+          <label for="stiffness">Stiff <output data-output="stiffness">0.35</output></label>
+          <input id="stiffness" data-param="stiffness" type="range" min="0" max="1" step="0.01" value="0.35">
+        </div>
+        <div class="command-control">
+          <label for="augmentationDim">Aug <output data-output="augmentationDim">0.25</output></label>
+          <input id="augmentationDim" data-param="augmentationDim" type="range" min="0" max="1" step="0.01" value="0.25">
+        </div>
+        <div class="command-control">
+          <label for="adjointTradeoff">Adjoint <output data-output="adjointTradeoff">0.40</output></label>
+          <input id="adjointTradeoff" data-param="adjointTradeoff" type="range" min="0" max="1" step="0.01" value="0.4">
+        </div>
+        <button id="solveForward" class="primary" data-action="pulse" type="button">Solve ODE</button>
+        <button id="traceAdjoint" data-action="step" type="button">Trace adjoint</button>
+        <button id="compareResnet" data-action="pulse" type="button">Compare ResNet</button>
+        <button id="resetOde" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E15 Neural ODE Flow</h1>
+        <p class="subtitle">Rotate the learned vector field, continuous trajectory, discrete solver steps, adaptive gates, adjoint sensitivity, stiffness warning, augmented overpass, and CNF log-density rail.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="NFE"><span>NFE</span><strong id="nfeLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Endpoint error"><span>Error</span><strong id="endpointErrorLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Memory"><span>Memory</span><strong id="memoryLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Stiffness"><span>Stiff</span><strong id="stiffnessLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading Neural ODE solver geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: solver mode changes step geometry, tolerance changes adaptive gates and NFE, stiffness compresses steps, augmentation lifts trajectories, and adjoint shows memory versus reconstruction error.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=e15-ode-canonical-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=e15-ode-canonical-v3"></script>
+  <script>
+    window.__e15LabSnapshot = window.__e15LabSnapshot || function () { return null; };
+    // __e15LabReady = true is set by createE15NeuralOdeFlowLab after the first render setup.
+    createE15NeuralOdeFlowLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

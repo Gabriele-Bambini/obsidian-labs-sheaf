@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G15 Over-Smoothing And Bottlenecks</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g15-depth-v4">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="over-smoothing" data-lab-id="g15" data-keywords="oversmoothing oversquashing depth diffusion bottleneck residual rewiring jumping">
+    <section class="visual-stack" aria-label="Interactive 3D over-smoothing and over-squashing visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G15 over-smoothing over-squashing depth bottleneck 3D lab"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G15</strong></div>
+          <div class="formula-chip"><span id="formulaText">P^L shrinks high-frequency signal</span>Depth is useful only while feature differences can still survive diffusion and narrow cuts.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected diagnostic</span><strong>Depth and bottleneck system is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(2,minmax(0,.6fr)) repeat(5,minmax(0,.52fr)) repeat(5,minmax(0,.42fr));">
+        <select id="graphShape" data-control="mode" aria-label="Graph family">
+          <option value="barbell">Barbell cut</option>
+          <option value="path">Path chain</option>
+          <option value="complete">Complete mix</option>
+        </select>
+        <select id="propagationRule" data-control="propagationRule" aria-label="Propagation rule">
+          <option value="plain">Plain GCN</option>
+          <option value="residual">Residual</option>
+          <option value="jumping">Jump readout</option>
+          <option value="rewired">Rewired</option>
+        </select>
+        <div class="command-control">
+          <label for="layerDepth">Depth <output data-output="layerDepth">5</output></label>
+          <input id="layerDepth" data-param="layerDepth" type="range" min="1" max="16" step="1" value="5">
+        </div>
+        <div class="command-control">
+          <label for="mixingStrength">Mix <output data-output="mixingStrength">0.62</output></label>
+          <input id="mixingStrength" data-param="mixingStrength" type="range" min="0.05" max="1.25" step="0.01" value="0.62">
+        </div>
+        <div class="command-control">
+          <label for="bottleneckWidth">Cut <output data-output="bottleneckWidth">2</output></label>
+          <input id="bottleneckWidth" data-param="bottleneckWidth" type="range" min="1" max="6" step="1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="residualWeight">Res <output data-output="residualWeight">0.28</output></label>
+          <input id="residualWeight" data-param="residualWeight" type="range" min="0" max="1" step="0.01" value="0.28">
+        </div>
+        <div class="command-control">
+          <label for="rewireAmount">Wire <output data-output="rewireAmount">0.12</output></label>
+          <input id="rewireAmount" data-param="rewireAmount" type="range" min="0" max="1" step="0.01" value="0.12">
+        </div>
+        <button id="addLayer" class="primary" data-action="step" type="button">Add layer</button>
+        <button id="runFive" data-action="pulse" type="button">Squeeze</button>
+        <button id="rewireGraph" data-action="step" type="button">Shortcut</button>
+        <button id="jumpReadout" data-action="step" type="button">JK read</button>
+        <button id="resetG15" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G15 Over-Smoothing And Bottlenecks</h1>
+        <p class="subtitle">Rotate a barbell, path, or complete graph; add layers; widen cuts; preserve initial features; and compare over-smoothing against over-squashing.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Pairwise distance"><span>Similarity</span><strong id="similarityLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Dirichlet energy"><span>Energy</span><strong id="energyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Bottleneck load"><span>Cut load</span><strong id="bottleneckLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Class separation"><span>Accuracy</span><strong id="accuracyLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading depth diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: depth increases diffusion, cut width changes over-squashing, residual preserves initial signal, rewiring creates shortcuts, and Jumping Knowledge reads multiple depths.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g15-depth-v4"></script>
+  <script src="shared/ml-lab-core.js?math3d=g15-depth-v4"></script>
+  <script>
+    window.__g15LabSnapshot = window.__g15LabSnapshot || function () { return null; };
+    createG15OversmoothingBottleneckLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

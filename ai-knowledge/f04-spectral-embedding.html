@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>F04 Spectral Graph Theory</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=f04-spectral-graph-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="graph" data-lab-id="f04" data-keywords="spectral graph theory Fiedler lambda2 eigenvectors Cheeger embedding">
+    <section class="visual-stack" aria-label="Interactive 3D spectral graph theory visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="F04 spectral graph theory 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>F04</strong></div>
+          <div class="formula-chip"><span>Spectral sketch</span>Eigenvectors are graph vibration modes: lambda2 and the Fiedler vector reveal bottlenecks, embeddings, cut conductance, and heat decay rates.</div>
+        </div>
+        <div class="concept-rail" data-visual-key="f04 physical legend" style="grid-template-columns:repeat(6,minmax(0,1fr));">
+          <span>Fiedler conveyor u2 coordinate</span>
+          <span>Embedding floor u2,u3</span>
+          <span>Lambda ladder lambda2 gap</span>
+          <span>Sign cut u2=0</span>
+          <span>Conductance phi(S)</span>
+          <span>Heat decay exp(-lambda t)</span>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected mode</span><strong>Spectral graph geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.62fr)) repeat(5,minmax(0,.66fr)) repeat(3,minmax(0,.52fr));">
+        <select id="graphSelect" data-control="graphSelect" aria-label="Graph family">
+          <option value="Bridge">Bridge</option>
+          <option value="Chain">Chain</option>
+          <option value="Ring">Ring</option>
+          <option value="Complete">Complete</option>
+        </select>
+        <select id="laplacianSelect" data-control="laplacianSelect" aria-label="Laplacian">
+          <option value="combinatorial">Combinatorial</option>
+          <option value="normalized">Normalized</option>
+          <option value="randomWalk">Random walk</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="Spectral view">
+          <option value="embedding">Graph -> spectral embedding</option>
+          <option value="spectrum">Eigenvalue ladder</option>
+          <option value="diffusion">Heat decay exp(-lambda t)</option>
+        </select>
+        <div class="command-control">
+          <label for="bridgeWeight">Bridge <output data-output="bridgeWeight">0.35</output></label>
+          <input id="bridgeWeight" data-param="bridgeWeight" type="range" min="0.05" max="1.6" step="0.05" value="0.35">
+        </div>
+        <div class="command-control">
+          <label for="modeMix">Mode mix <output data-output="modeMix">0.55</output></label>
+          <input id="modeMix" data-param="modeMix" type="range" min="0" max="1" step="0.01" value="0.55">
+        </div>
+        <div class="command-control">
+          <label for="heatSlider">Heat t <output data-output="heatSlider">0.12</output></label>
+          <input id="heatSlider" data-param="heatSlider" type="range" min="0.02" max="0.5" step="0.01" value="0.12">
+        </div>
+        <div class="command-control">
+          <label for="cutThreshold">Cut <output data-output="cutThreshold">0.00</output></label>
+          <input id="cutThreshold" data-param="cutThreshold" type="range" min="-0.6" max="0.6" step="0.02" value="0">
+        </div>
+        <div class="command-control">
+          <label for="embeddingScale">Embed <output data-output="embeddingScale">1.00</output></label>
+          <input id="embeddingScale" data-param="embeddingScale" type="range" min="0.55" max="1.45" step="0.01" value="1">
+        </div>
+        <button id="cut" class="primary" data-action="pulse" type="button">Fiedler cut</button>
+        <button id="heat" data-action="step" type="button">Heat mode</button>
+        <button id="resetF04" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block F 3D lab</p>
+        <h1>F04 Spectral Graph Theory</h1>
+        <p class="subtitle">Rotate the graph, Fiedler coordinates, spectral embedding plane, eigenvalue ladder, Cheeger-style cut meter, high-frequency vibration, and heat-decay mode trail.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Lambda2"><span>lambda2</span><strong id="lambdaLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Cut"><span>Cut</span><strong id="cutLabel">Cut off</strong></div>
+        <div class="metric" data-role="metric" data-metric="Energy"><span>Energy</span><strong id="energyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Gap"><span>Gap</span><strong id="gapLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading spectral graph geometry.</p>
+        <p id="stateBox" class="state-box"><span id="stateText">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: bridge weight moves lambda2, graph family changes interpretation, Fiedler cut shows conductance, and heat damps each eigenmode by exp(-lambda t).</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=f04-spectral-graph-v1"></script>
+  <script src="shared/ml-lab-core.js?math3d=f04-spectral-graph-v1"></script>
+  <script>
+    window.__f04LabSnapshot = window.__f04LabSnapshot || function () { return null; };
+    createF04SpectralGraphTheoryLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

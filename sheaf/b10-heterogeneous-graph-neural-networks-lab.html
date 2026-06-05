@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>B10 - Heterogeneous GNN Relation Routing Lab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#071015;--line:#25485b;--text:#edf9fb;--muted:#a8c1cb;--cyan:#58e0d3;--blue:#54a8ff;--gold:#e8b857;--pink:#ff6d8b;--green:#6ee7a8}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.42 Inter,Segoe UI,system-ui,Arial,sans-serif}
+    .shell{height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:12px;padding:12px;background:radial-gradient(circle at 18% 10%,rgba(88,224,211,.14),transparent 30%),radial-gradient(circle at 78% 55%,rgba(232,184,87,.10),transparent 28%),linear-gradient(135deg,#050b10,#0b1720 64%,#05090d)}
+    .stage,.panel{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(11,27,37,.97),rgba(6,15,21,.98));box-shadow:0 18px 52px rgba(0,0,0,.34);min-width:0;min-height:0}
+    .stage{display:grid;grid-template-rows:minmax(0,1fr) auto;overflow:hidden;position:relative}.canvas-wrap{position:relative;min-height:0}canvas{display:block;width:100%;height:100%;min-height:340px;touch-action:none}
+    .overlay{position:absolute;left:14px;right:14px;top:14px;display:flex;gap:10px;justify-content:space-between;pointer-events:none}.badge,.formula{border:1px solid rgba(143,216,242,.25);background:rgba(7,16,21,.78);backdrop-filter:blur(8px);border-radius:12px;padding:9px 11px}.badge span,.formula span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.badge strong{font-size:18px}.formula{max-width:820px;color:#cfe5ec}.formula code{color:var(--cyan);font-weight:800}
+    .controls{display:grid;grid-template-columns:1fr .86fr .78fr .78fr .78fr .78fr;gap:10px;padding:10px;border-top:1px solid var(--line);background:#091720}.control{min-width:0;overflow:hidden}.control label{display:flex;justify-content:space-between;margin-bottom:4px;color:var(--muted);font-size:12px}.control output{color:var(--text);font-weight:800}select,input{width:100%;min-width:0;border:1px solid #315b70;border-radius:10px;background:#102838;color:var(--text);font:inherit}select{height:38px;padding:0 10px}input[type=range]{height:38px;accent-color:var(--cyan)}
+    .panel{display:flex;flex-direction:column;gap:12px;padding:14px;overflow:auto}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--cyan)!important}.panel h1{font-size:22px;line-height:1.1;margin:0}.panel p{margin:0;color:var(--muted)}
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:10px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;margin-top:4px;font-size:19px}
+    .bars{display:grid;gap:7px}.bar-row{display:grid;grid-template-columns:126px minmax(0,1fr) 56px;gap:8px;align-items:center}.track{height:13px;border:1px solid #203c4d;background:#08131a;border-radius:999px;overflow:hidden}.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),var(--blue));width:0}.bar-row b{font-size:12px}.bar-row em{font-style:normal;text-align:right;color:var(--muted);font-size:12px}
+    .card{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:12px}.card h2{font-size:15px;margin:0 0 6px}.legend{display:flex;flex-wrap:wrap;gap:7px}.legend span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:var(--muted)}.dot{width:9px;height:9px;border-radius:99px;display:inline-block}
+    @media(max-width:920px){html,body{height:100%;overflow:hidden;max-width:100vw}.shell{width:100vw;height:100vh;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,55vh) minmax(0,1fr);gap:8px;padding:8px;overflow:hidden}.stage,.panel{width:100%;max-width:100%;overflow:hidden}.canvas-wrap{min-height:0}canvas{min-height:230px}.overlay{display:none}.controls{grid-template-columns:repeat(3,minmax(0,1fr));max-height:166px;overflow:hidden;padding:8px;gap:7px}.control label{display:block;font-size:11px;line-height:1.15}.control output{float:right;font-size:11px}select,input[type=range]{height:30px}select{font-size:12px;padding:0 6px;text-overflow:ellipsis}.panel{min-height:0;padding:10px;gap:9px;overflow:auto}.panel h1{font-size:17px;line-height:1.14;overflow-wrap:break-word}.metric-grid{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:8px}.metric strong{font-size:17px}.legend{display:none}.card:nth-of-type(2){display:none}}
+    @media(max-width:480px){.shell{grid-template-rows:minmax(0,55vh) minmax(0,1fr)}.controls{grid-template-columns:repeat(2,minmax(0,1fr));max-height:190px}.metric-grid{grid-template-columns:1fr}.panel header p:not(.eyebrow){display:none}.bars .bar-row:nth-child(n+6){display:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="stage" aria-label="Interactive heterogeneous GNN relation routing visualization">
+      <div class="canvas-wrap">
+        <canvas id="scene" aria-label="Heterogeneous GNN canvas"></canvas>
+        <div class="overlay">
+          <div class="badge"><span>Chapter lab</span><strong>B10</strong></div>
+          <div class="formula"><span>Typed message passing</span><code>h'_v = sigma( sum_r sum_{u in N_r(v)} alpha_r W_r h_u )</code></div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control"><label>Biology schema</label><select id="schema"><option value="grn" selected>GRN multi-evidence</option><option value="kg">biomedical KG</option><option value="drug">drug interaction graph</option><option value="cell">single-cell multimodal</option></select></div>
+        <div class="control"><label>Model</label><select id="model"><option value="rgcn">R-GCN</option><option value="han">HAN metapaths</option><option value="hgt" selected>HGT typed attention</option><option value="collapse">homogeneous collapse</option></select></div>
+        <div class="control"><label>Target</label><select id="target"><option value="gene" selected>target gene</option><option value="drug">drug node</option><option value="disease">disease node</option><option value="cell">cell node</option></select></div>
+        <div class="control"><label>Regulatory <output id="regOut">80</output></label><input id="reg" type="range" min="0" max="100" value="80"></div>
+        <div class="control"><label>Drug/KG <output id="kgOut">55</output></label><input id="kg" type="range" min="0" max="100" value="55"></div>
+        <div class="control"><label>Meta-path <output id="metaOut">65</output></label><input id="meta" type="range" min="0" max="100" value="65"></div>
+      </div>
+    </section>
+    <aside class="panel">
+      <header><p class="eyebrow">Heterogeneous GNN lab</p><h1>Which typed relation channel is carrying the biological claim?</h1><p id="subtitle">Switch schema and model to compare relation-specific routing against homogeneous type collapse.</p></header>
+      <div class="metric-grid">
+        <div class="metric"><span>Type fidelity</span><strong id="typeMetric">0%</strong></div>
+        <div class="metric"><span>Useful relation diversity</span><strong id="divMetric">0%</strong></div>
+        <div class="metric"><span>Meta-path signal</span><strong id="metaMetric">0%</strong></div>
+        <div class="metric"><span>Type-collapse risk</span><strong id="riskMetric">0%</strong></div>
+      </div>
+      <div class="card"><h2>Relation channel contributions</h2><div id="bars" class="bars"></div></div>
+      <div class="card"><h2>Interpretation</h2><p id="insight">Typed graphs are useful only when relation labels change computation and interpretation.</p></div>
+      <div class="legend"><span><i class="dot" style="background:var(--green)"></i> regulatory relation</span><span><i class="dot" style="background:var(--gold)"></i> drug/KG relation</span><span><i class="dot" style="background:var(--pink)"></i> disease/context relation</span><span><i class="dot" style="background:var(--blue)"></i> expression/cell relation</span></div>
+    </aside>
+  </main>
+  <script>
+    const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
+    const controls={schema:document.getElementById('schema'),model:document.getElementById('model'),target:document.getElementById('target'),reg:document.getElementById('reg'),kg:document.getElementById('kg'),meta:document.getElementById('meta')};
+    const out={reg:document.getElementById('regOut'),kg:document.getElementById('kgOut'),meta:document.getElementById('metaOut'),type:document.getElementById('typeMetric'),div:document.getElementById('divMetric'),metaMetric:document.getElementById('metaMetric'),risk:document.getElementById('riskMetric'),bars:document.getElementById('bars'),insight:document.getElementById('insight'),subtitle:document.getElementById('subtitle')};
+    const colors={reg:'#6ee7a8',kg:'#e8b857',ctx:'#ff6d8b',expr:'#54a8ff',tf:'#58e0d3',muted:'#213b4b'};
+    const schemas={
+      grn:{nodes:[['TF','tf'],['target','gene'],['peak','ctx'],['drug','drug'],['cell','cell'],['path','ctx']],edges:[[0,1,'reg'],[2,1,'ctx'],[3,1,'kg'],[4,1,'expr'],[5,0,'ctx'],[5,1,'ctx']],why:'GRN multi-evidence graphs mix regulatory, chromatin, drug, cell-state, and pathway relations.'},
+      kg:{nodes:[['drug','drug'],['disease','ctx'],['gene','gene'],['protein','gene'],['path','ctx'],['cell','cell']],edges:[[0,2,'kg'],[2,1,'ctx'],[3,2,'reg'],[4,2,'ctx'],[5,2,'expr'],[0,1,'kg']],why:'Biomedical KGs need relation-specific reasoning across drug, disease, gene, protein, pathway, and cell nodes.'},
+      drug:{nodes:[['drugA','drug'],['drugB','drug'],['protein','gene'],['side','ctx'],['path','ctx'],['cell','cell']],edges:[[0,2,'kg'],[1,2,'kg'],[0,3,'ctx'],[1,3,'ctx'],[2,4,'reg'],[5,2,'expr']],why:'Drug interaction graphs separate drug-target, side-effect, pathway, and cellular-context evidence.'},
+      cell:{nodes:[['cell','cell'],['gene','gene'],['peak','ctx'],['TF','tf'],['ligand','drug'],['state','ctx']],edges:[[0,1,'expr'],[2,1,'ctx'],[3,1,'reg'],[4,0,'kg'],[5,0,'ctx'],[3,2,'reg']],why:'Single-cell multimodal graphs connect cells, genes, peaks, TFs, ligand signals, and state nodes.'}
+    };
+    let state={};
+    function params(){return {schema:controls.schema.value,model:controls.model.value,target:controls.target.value,reg:Number(controls.reg.value)/100,kg:Number(controls.kg.value)/100,meta:Number(controls.meta.value)/100}}
+    function compute(){
+      const p=params(),s=schemas[p.schema];
+      const base={reg:p.reg,kg:p.kg,ctx:.48+.42*p.meta,expr:.62};
+      const modelBoost={rgcn:{type:.82,div:.72,meta:.42,risk:.22},han:{type:.78,div:.68,meta:.92,risk:.25},hgt:{type:.94,div:.86,meta:.72,risk:.12},collapse:{type:.18,div:.28,meta:.18,risk:.84}}[p.model];
+      const channels=['reg','kg','ctx','expr'].map(k=>({k,w:Math.max(.04,base[k]*(p.model==='collapse'?.45:1)*(k==='ctx'?1:.96))}));
+      const total=channels.reduce((a,b)=>a+b.w,0);channels.forEach(c=>c.p=c.w/total);
+      const diversity=1-channels.reduce((a,b)=>a+b.p*b.p,0);
+      const typeF= modelBoost.type*(p.model==='collapse'?.7:1);
+      const relDiv=Math.min(1,diversity*1.45*modelBoost.div);
+      const metaSig=Math.min(1,p.meta*modelBoost.meta+(p.model==='han'?.18:0));
+      const risk=Math.min(1,modelBoost.risk+(p.model==='collapse'?.2:0)+(p.reg<.2?.1:0));
+      state={p,s,channels,metrics:{typeF,relDiv,metaSig,risk}};
+      return state;
+    }
+    function fit(){const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));const r=canvas.getBoundingClientRect();canvas.width=Math.max(320,Math.floor(r.width*dpr));canvas.height=Math.max(240,Math.floor(r.height*dpr));ctx.setTransform(dpr,0,0,dpr,0,0)}
+    function roundedRect(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}}
+    function line(x1,y1,x2,y2,c,w=2){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+    function positions(x,y,w,h,n){const cx=x+w/2,cy=y+h*.55,rx=w*.32,ry=h*.25;return Array.from({length:n},(_,i)=>({x:cx+Math.cos(-Math.PI/2+i*2*Math.PI/n)*rx,y:cy+Math.sin(-Math.PI/2+i*2*Math.PI/n)*ry}))}
+    function draw(){
+      const s=compute(),w=canvas.clientWidth,h=canvas.clientHeight;
+      ctx.clearRect(0,0,w,h);
+      const pad=w<720?14:24,gap=w<720?10:18,top=w<720?16:64,colW=(w-pad*2-gap*2)/3,panelH=h-top-24;
+      const labels=colW<180?['schema','routes','mix']:['typed biological schema','relation-specific routes','relation contribution mix'];
+      labels.forEach((t,k)=>{const x=pad+k*(colW+gap);roundedRect(x,top,colW,panelH,18,'rgba(7,20,28,.88)','#244a5d');ctx.fillStyle='#dff7fb';ctx.font='700 15px Segoe UI';ctx.fillText(t,x+14,top+28)});
+      drawSchema(pad,top,colW,panelH,s);
+      drawRoutes(pad+colW+gap,top,colW,panelH,s);
+      drawBars(pad+2*(colW+gap),top,colW,panelH,s);
+      window.__B10_LAB_READY__=true;window.__B10LabReady=true;window.__B10_LAST_METRICS__=s.metrics;window.__B10LabSnapshot=s.metrics;
+    }
+    function drawSchema(x,y,w,h,s){
+      const pos=positions(x,y,w,h,s.s.nodes.length);
+      s.s.edges.forEach(e=>line(pos[e[0]].x,pos[e[0]].y,pos[e[1]].x,pos[e[1]].y,colors[e[2]],3));
+      s.s.nodes.forEach((n,i)=>{const p=pos[i];ctx.beginPath();ctx.arc(p.x,p.y,13,0,Math.PI*2);ctx.fillStyle=colors[n[1]]||colors.expr;ctx.fill();ctx.strokeStyle='#dff7fb';ctx.stroke();ctx.fillStyle='#061018';ctx.font='800 9px Segoe UI';ctx.textAlign='center';ctx.fillText(n[0].slice(0,5),p.x,p.y+3)});
+      if(w>190){ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.textAlign='left';ctx.fillText('typed nodes + typed edges',x+14,y+h-28);}
+    }
+    function drawRoutes(x,y,w,h,s){
+      const cx=x+w/2,cy=y+h*.53;
+      ['reg','kg','ctx','expr'].forEach((k,i)=>{const yy=cy-96+i*52;roundedRect(x+28,yy,w-56,34,12,'#07131a','#294f62');ctx.fillStyle=colors[k];ctx.font='800 13px Segoe UI';ctx.textAlign='left';ctx.fillText(k.toUpperCase()+' channel',x+46,yy+22);line(x+w-66,yy+17,x+w-26,cy,colors[k],2+8*s.channels.find(c=>c.k===k).p)});
+      ctx.beginPath();ctx.arc(x+w-26,cy,16,0,Math.PI*2);ctx.fillStyle=colors.tf;ctx.fill();ctx.strokeStyle='#dff7fb';ctx.stroke();ctx.fillStyle='#061018';ctx.font='800 10px Segoe UI';ctx.textAlign='center';ctx.fillText('target',x+w-26,cy+3);
+      if(w>190){ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.fillText('relation transform W_r',x+14,y+h-28);}
+    }
+    function drawBars(x,y,w,h,s){
+      const base=y+h*.76,maxH=h*.42,cx=x+w/2;
+      s.channels.forEach((v,i)=>{const bw=w*.15,gap=w*.055,bx=cx-(s.channels.length*bw+(s.channels.length-1)*gap)/2+i*(bw+gap),bh=maxH*v.p;roundedRect(bx,base-bh,bw,bh,8,colors[v.k],'rgba(255,255,255,.2)');ctx.fillStyle='#dff7fb';ctx.font=w<190?'700 9px Segoe UI':'700 11px Segoe UI';ctx.textAlign='center';ctx.fillText(v.k[0].toUpperCase(),bx+bw/2,base+16);ctx.fillText(Math.round(v.p*100)+'%',bx+bw/2,base-bh-8)});
+      ctx.strokeStyle='#244a5d';ctx.beginPath();ctx.moveTo(x+22,base);ctx.lineTo(x+w-22,base);ctx.stroke();
+      if(w>190){ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.textAlign='left';ctx.fillText('relation dominance audit',x+14,y+h-28);}
+    }
+    function updatePanel(){
+      const s=state,p=s.p,m=s.metrics;
+      out.reg.textContent=Math.round(p.reg*100);out.kg.textContent=Math.round(p.kg*100);out.meta.textContent=Math.round(p.meta*100);
+      out.type.textContent=Math.round(m.typeF*100)+'%';out.div.textContent=Math.round(m.relDiv*100)+'%';out.metaMetric.textContent=Math.round(m.metaSig*100)+'%';out.risk.textContent=Math.round(m.risk*100)+'%';
+      out.subtitle.textContent=s.s.why;
+      out.bars.innerHTML=s.channels.map(c=>`<div class="bar-row"><b>${c.k} channel</b><span class="track"><span class="fill" style="width:${Math.round(c.p*100)}%;background:${colors[c.k]}"></span></span><em>${Math.round(c.p*100)}%</em></div>`).join('');
+      const modelText=p.model==='rgcn'?'R-GCN uses relation-specific transformations or bases, making it a strong baseline for multi-relational biomedical KGs.':p.model==='han'?'HAN uses semantic attention over metapaths; it is useful when curated metapaths match the biological question.':p.model==='hgt'?'HGT uses typed attention across node and edge types, a natural fit when relation schema is rich.':'Homogeneous collapse ignores type labels; it may run faster but can destroy the biological meaning of messages.';
+      out.insight.textContent=modelText+' For GRNs, never let a drug-target edge, disease-gene edge, and TF-target edge become the same message unless the claim truly permits it.';
+    }
+    function render(){draw();updatePanel()}
+    Object.values(controls).forEach(el=>el.addEventListener('input',render));
+    window.addEventListener('resize',()=>{fit();render()});
+    fit();render();
+  </script>
+</body>
+</html>

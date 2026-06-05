@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A01 - Biology GNN Lab</title>
+<style>
+  :root{
+    --bg:#061018;--panel:#0d1b24;--panel2:#0a1620;--line:#29495a;
+    --text:#f6fbff;--muted:#afc3cc;--cyan:#64f1e1;--gold:#ffd166;
+    --rose:#ff6699;--blue:#80b8ff;--green:#9af58f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--text);font-family:Segoe UI,Inter,Arial,sans-serif}
+  body{background:
+    radial-gradient(circle at 35% 22%,rgba(100,241,225,.13),transparent 30%),
+    radial-gradient(circle at 72% 55%,rgba(128,184,255,.10),transparent 26%),
+    linear-gradient(135deg,#050b10,#0b1720 62%,#05090d)}
+  .app{width:100%;max-width:100vw;min-height:100vh;display:grid;grid-template-columns:minmax(720px,1fr) 380px;gap:14px;padding:14px;align-items:start}
+  .stage,.side{border:1px solid var(--line);background:rgba(7,16,22,.9);border-radius:14px;box-shadow:0 16px 60px rgba(0,0,0,.38);overflow:hidden}
+  .stage{position:relative;min-height:760px;padding:18px;background:
+    linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px),
+    rgba(5,12,18,.94);background-size:44px 44px}
+  .topbar{display:flex;gap:12px;align-items:stretch;position:relative;z-index:3}
+  .chip{border:1px solid #315366;background:rgba(10,25,34,.96);padding:12px 14px;border-radius:10px;min-width:220px;overflow-wrap:anywhere}
+  .chip b{display:block;color:var(--cyan);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+  .chip span{display:block;font-weight:900;font-size:19px}
+  .formula{flex:1;min-width:0}.formula code{font:800 17px/1.35 Consolas,Menlo,monospace;color:#f6fbff;white-space:normal;overflow-wrap:anywhere}
+  .scene{position:absolute;inset:100px 18px 18px 18px}
+  .card{position:absolute;border:1px solid #2d5062;background:rgba(10,24,32,.96);border-radius:12px;padding:16px;box-shadow:0 18px 44px rgba(0,0,0,.35);z-index:2}
+  .card h2{margin:0 0 8px;color:var(--cyan);font-size:18px;line-height:1.12}
+  .card p{margin:0;color:#d4e5ec;font-size:14px;line-height:1.42;overflow-wrap:anywhere;word-break:break-word}
+  .question{left:18px;top:30px;width:275px}
+  .rowblind{left:18px;bottom:88px;width:275px}
+  .object{right:28px;top:58px;width:285px}
+  .layer{right:28px;bottom:220px;width:285px}
+  .claim{right:28px;bottom:88px;width:285px}
+  .graph{position:absolute;inset:0;z-index:1}
+  .node-label{font:800 15px Segoe UI,Arial,sans-serif;fill:#f6fbff;text-anchor:middle}
+  .node-role{font:700 12px Segoe UI,Arial,sans-serif;fill:#a9c0ca;text-anchor:middle}
+  .edge-label{font:800 12px Segoe UI,Arial,sans-serif;fill:#061018;text-anchor:middle}
+  .label-bg{fill:rgba(246,251,255,.88);stroke:rgba(255,255,255,.65)}
+  .node-core{stroke:#fff;stroke-width:2.5;filter:url(#glow)}
+  .main-edge{stroke:var(--cyan);stroke-width:9;fill:none;stroke-linecap:round;filter:url(#edgeGlow)}
+  .weak-edge{stroke:var(--rose);stroke-width:6;fill:none;stroke-linecap:round;opacity:.72}
+  .context-edge{stroke:var(--gold);stroke-width:5;fill:none;stroke-linecap:round;opacity:.76}
+  .assay-edge{stroke:var(--blue);stroke-width:5;fill:none;stroke-linecap:round;opacity:.76}
+  .pulse{filter:url(#glow);display:none}
+  .pulse.run{display:block}
+  .legend{position:absolute;left:18px;right:18px;bottom:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;z-index:3}
+  .legend div{border:1px solid #29495a;background:rgba(7,16,22,.94);padding:9px 10px;border-radius:8px;font-size:12px;font-weight:800}
+  .legend .gold{color:var(--gold)}.legend .cyan{color:var(--cyan)}.legend .rose{color:var(--rose)}.legend .blue{color:var(--blue)}
+  .side{padding:14px;display:flex;flex-direction:column;gap:12px}
+  .eyebrow{color:var(--cyan);font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+  h1{font-size:29px;line-height:1.05;margin:4px 0 6px;overflow-wrap:anywhere}
+  .side p{color:#c8d8df;margin:0;font-size:14px;line-height:1.45;overflow-wrap:anywhere;word-break:break-word}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  button,select{width:100%;min-width:0;border:1px solid #2b4858;background:#14212b;color:#fff;border-radius:6px;padding:11px 10px;font-weight:850;font-size:13px;line-height:1.15}
+  button:active{transform:translateY(1px)}
+  .slider,.check{border:1px solid #203c4b;background:#101d26;padding:10px;border-radius:8px}
+  .slider label,.check label{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;color:#b7cbd4;font-weight:850;margin-bottom:6px}
+  input[type=range]{width:100%;accent-color:var(--cyan)} input[type=checkbox]{width:20px;height:20px;accent-color:var(--cyan);flex:0 0 auto}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .metric{border:1px solid #2a4553;background:#0d1a22;padding:10px;border-radius:8px}
+  .metric b{display:block;color:#a9c0ca;font-size:11px;text-transform:uppercase;margin-bottom:6px}
+  .metric span{font-weight:950;font-size:22px}
+  .readout{border:1px solid #2a4553;background:#0d1a22;padding:12px;min-height:160px;font:700 13px/1.45 Consolas,Menlo,monospace;white-space:pre-wrap;color:#dff8ff;border-radius:8px}
+  .explain{border:1px solid #2a4553;background:#0d1a22;padding:12px;font-size:14px;line-height:1.45;color:#d7e8ef;border-radius:8px}
+  @media(max-width:980px){
+    .app{display:flex;flex-direction:column;padding:8px;overflow:hidden}
+    .stage,.side{width:calc(100vw - 16px);max-width:calc(100vw - 16px);min-width:0}
+    .stage{min-height:0;padding:12px}.side{min-width:0}
+    .topbar{flex-direction:column}.chip{min-width:0;width:100%}
+    .chip span{font-size:18px}.formula code{display:block;font-size:15px;word-break:break-word}
+    .scene{position:relative;inset:auto;height:auto;min-height:0;min-width:0;margin-top:12px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+    .scene>*{min-width:0;max-width:100%}
+    .card{position:relative;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:auto!important;max-width:100%!important;margin:0;z-index:4}
+    .question{order:1}.object{order:2}.graph{order:3;position:relative;inset:auto;width:100%;height:430px;min-height:430px;min-width:0;max-width:100%}.layer{order:4}.claim{order:5}.rowblind{order:6}
+    .legend{order:7;position:relative;left:auto;right:auto;bottom:auto;grid-template-columns:1fr 1fr}.controls,.metrics{grid-template-columns:1fr}
+  }
+  @media(max-width:480px){
+    .app{transform:scale(.86);transform-origin:top left;width:calc(100vw / .86);max-width:none}
+  }
+</style>
+</head>
+<body>
+<main class="app">
+  <section class="stage">
+    <div class="topbar">
+      <div class="chip"><b>A01 lab</b><span>question → graph → GNN</span></div>
+      <div class="chip formula"><b>first useful formula</b><code>h' = σ(W_self x + Σ evidence · W_msg h_neighbor)</code></div>
+    </div>
+    <div class="scene">
+      <div class="card question"><h2>1. Biological question</h2><p id="questionText"></p></div>
+      <div class="card rowblind"><h2>Row-model blind spot</h2><p>Rows see features only. A GNN also sees which relation carries evidence.</p></div>
+      <div class="card object"><h2>2. Graph object</h2><p><b>V</b> = entities<br><b>E</b> = typed relations<br><b>X</b> = node measurements<br><b>Z</b> = edge evidence</p></div>
+      <div class="card layer"><h2>3. One GNN layer</h2><p>Messages follow evidence edges. Then the target vector is updated.</p></div>
+      <div class="card claim"><h2>4. Biological claim</h2><p id="claimText"></p></div>
+      <svg class="graph" viewBox="0 0 1000 660" preserveAspectRatio="xMidYMid meet" aria-label="Biological graph neural network concept map">
+        <defs>
+          <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="edgeGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <marker id="arrowC" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 Z" fill="#64f1e1"/></marker>
+          <marker id="arrowR" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 Z" fill="#ff6699"/></marker>
+          <marker id="arrowB" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 Z" fill="#80b8ff"/></marker>
+          <marker id="arrowG" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 Z" fill="#ffd166"/></marker>
+        </defs>
+        <path id="mainPath" class="main-edge" marker-end="url(#arrowC)" d="M310,358 C410,320 455,230 565,232"/>
+        <path id="weakPath" class="weak-edge" marker-end="url(#arrowR)" d="M305,392 C410,475 500,505 592,468"/>
+        <path id="assayPath" class="assay-edge" marker-end="url(#arrowB)" d="M735,318 C690,270 650,245 610,238"/>
+        <path id="contextPath" class="context-edge" marker-end="url(#arrowG)" d="M430,595 C490,535 535,500 585,476"/>
+        <g id="pulse" class="pulse"><circle r="10" fill="#fff"/></g>
+        <g id="sourceNode"><circle class="node-core" cx="260" cy="378" r="48" fill="#ffd166"/><text class="node-label" x="260" y="315" id="sourceLabel">TF1</text><text class="node-role" x="260" y="445" id="sourceRole">regulator</text></g>
+        <g><circle class="node-core" cx="610" cy="225" r="46" fill="#64f1e1"/><text class="node-label" x="610" y="162" id="targetALabel">GeneA</text><text class="node-role" x="610" y="290" id="targetARole">target</text></g>
+        <g><circle class="node-core" cx="625" cy="468" r="44" fill="#64f1e1"/><text class="node-label" x="625" y="405" id="targetBLabel">GeneB</text><text class="node-role" x="625" y="532" id="targetBRole">target</text></g>
+        <g><circle class="node-core" cx="410" cy="610" r="38" fill="#ff6699"/><text class="node-label" x="410" y="552" id="contextLabel">Cell state</text><text class="node-role" x="410" y="660">context</text></g>
+        <g><circle class="node-core" cx="760" cy="335" r="40" fill="#80b8ff"/><text class="node-label" x="760" y="278" id="assayLabel">ATAC/motif</text><text class="node-role" x="760" y="392">evidence</text></g>
+        <g><rect class="label-bg" x="405" y="300" width="94" height="28" rx="7"/><text class="edge-label" x="452" y="319" id="mainEdgeLabel">motif + ATAC</text></g>
+        <g><rect class="label-bg" x="390" y="465" width="82" height="28" rx="7"/><text class="edge-label" x="431" y="484" id="weakEdgeLabel">coexpr only</text></g>
+        <g><rect class="label-bg" x="655" y="286" width="66" height="28" rx="7"/><text class="edge-label" x="688" y="305">assay</text></g>
+      </svg>
+      <div class="legend">
+        <div class="gold">source/regulator</div><div class="cyan">target/entity</div><div class="rose">context/state</div><div class="blue">assay/evidence</div>
+      </div>
+    </div>
+  </section>
+  <aside class="side">
+    <div><div class="eyebrow">Generated specifically for A01</div><h1>Why GNNs in biology?</h1><p>Change the task and evidence. Watch what a graph gives the model that a row table cannot.</p></div>
+    <div class="controls">
+      <select id="task"><option value="grn">GRN: TF -> target</option><option value="ppi">PPI: protein module</option><option value="cell">Cell graph: signals</option><option value="drug">Drug-target graph</option></select>
+      <select id="view"><option value="pipeline">Pipeline view</option><option value="message">Message emphasis</option><option value="claim">Claim audit</option></select>
+      <button id="pulseBtn">Run one GNN layer</button><button id="reset">Reset</button>
+    </div>
+    <div class="check"><label>directed biological edges <input id="directed" type="checkbox" checked></label></div>
+    <div class="check"><label>show row-model baseline <input id="baseline" type="checkbox" checked></label></div>
+    <div class="slider"><label>evidence strength <span id="eVal"></span></label><input id="evidence" type="range" min="0" max="1" step=".01" value=".72"></div>
+    <div class="slider"><label>batch/noise pressure <span id="nVal"></span></label><input id="noise" type="range" min="0" max="1" step=".01" value=".22"></div>
+    <div class="slider"><label>message-passing hops <span id="hVal"></span></label><input id="hops" type="range" min="1" max="3" step="1" value="1"></div>
+    <div class="slider"><label>prior leakage risk <span id="lVal"></span></label><input id="leakage" type="range" min="0" max="1" step=".01" value=".18"></div>
+    <div class="metrics">
+      <div class="metric"><b>graph advantage</b><span id="adv">0.00</span></div><div class="metric"><b>biological trust</b><span id="trust">0.00</span></div>
+      <div class="metric"><b>row blind spot</b><span id="blind">0.00</span></div><div class="metric"><b>claim risk</b><span id="risk">0.00</span></div>
+    </div>
+    <div class="readout" id="readout"></div><div class="explain" id="explain"></div>
+  </aside>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const configs={
+  grn:{q:'Which transcription factor regulates which target gene?',source:'TF1',srole:'regulator',a:'GeneA',b:'GeneB',ctx:'Cell state',assay:'ATAC',main:'motif+ATAC',weak:'coexpr only',claim:'Score TF1 → GeneA, then audit motif, accessibility, perturbation, and leakage.'},
+  ppi:{q:'Which proteins form a functional module?',source:'Protein A',srole:'enzyme',a:'Protein B',b:'Protein C',ctx:'Pathway',assay:'Screen',main:'physical',weak:'association',claim:'Predict module membership, then check whether edges mean binding or loose pathway association.'},
+  cell:{q:'Which neighboring cells communicate in tissue?',source:'Cell A',srole:'ligand',a:'Cell B',b:'Cell C',ctx:'Tissue zone',assay:'Spatial assay',main:'ligand-receptor',weak:'distance only',claim:'Predict communication, then check spatial context and ligand-receptor evidence.'},
+  drug:{q:'Which drug acts through which biological target?',source:'Drug X',srole:'compound',a:'Protein T',b:'Disease gene',ctx:'Patient state',assay:'Binding assay',main:'binding',weak:'correlation',claim:'Score drug-target mechanism, then check assay support and disease context.'}
+};
+function val(id){return +$(id).value}
+function setText(id,text){$(id).textContent=text}
+function update(){
+  const c=configs[$('task').value],e=val('evidence'),n=val('noise'),h=val('hops'),l=val('leakage');
+  setText('questionText',c.q);setText('sourceLabel',c.source);setText('sourceRole',c.srole);setText('targetALabel',c.a);setText('targetBLabel',c.b);setText('contextLabel',c.ctx);setText('assayLabel',c.assay);setText('mainEdgeLabel',c.main);setText('weakEdgeLabel',c.weak);setText('claimText',c.claim);
+  const mainOpacity=Math.max(.18,Math.min(1,e-n*.25));const weakOpacity=Math.max(.08,Math.min(.78,.45+n*.2-l*.2));const assayOpacity=Math.max(.18,Math.min(1,e*.9));const risk=Math.max(0,Math.min(1,.22*n+.72*l+.12*(h-1)));
+  $('mainPath').style.opacity=mainOpacity;$('weakPath').style.opacity=weakOpacity;$('assayPath').style.opacity=assayOpacity;$('contextPath').style.opacity=Math.max(.2,.62-n*.2);
+  $('mainPath').style.markerEnd=$('directed').checked?'url(#arrowC)':'none';$('weakPath').style.markerEnd=$('directed').checked?'url(#arrowR)':'none';$('assayPath').style.markerEnd=$('directed').checked?'url(#arrowB)':'none';$('contextPath').style.markerEnd=$('directed').checked?'url(#arrowG)':'none';
+  document.querySelector('.rowblind').style.display=$('baseline').checked?'block':'none';
+  document.querySelector('.layer').style.outline=$('view').value==='message'?'2px solid #64f1e1':'none';document.querySelector('.claim').style.outline=$('view').value==='claim'?'2px solid #ff6699':'none';
+  const adv=Math.max(0,Math.min(1,.25+.46*e+.10*h-.18*n));const trust=Math.max(0,Math.min(1,e*(1-n)*(1-.55*l)));const blind=Math.max(0,Math.min(1,.36+.42*e+($('directed').checked?.12:0)));
+  $('adv').textContent=adv.toFixed(2);$('trust').textContent=trust.toFixed(2);$('blind').textContent=blind.toFixed(2);$('risk').textContent=risk.toFixed(2);
+  $('eVal').textContent=e.toFixed(2);$('nVal').textContent=n.toFixed(2);$('hVal').textContent=h;$('lVal').textContent=l.toFixed(2);
+  $('readout').textContent=`task: ${c.q}\nobject: G=(V,E,X,Z,u)\nevidence=${e.toFixed(2)} noise=${n.toFixed(2)} hops=${h} leakage=${l.toFixed(2)}\nclaim: ${c.claim}`;
+  $('explain').textContent='A GNN is justified when the biological answer depends on relations. It updates a biological object from neighboring biological objects through typed, evidence-bearing edges. The graph is not a decoration; it is the scientific hypothesis made computable.';
+}
+function runPulse(){
+  const pulse=$('pulse'),path=$('mainPath'),len=path.getTotalLength();let start=null;pulse.classList.add('run');
+  function step(ts){if(start===null)start=ts;const t=Math.min(1,(ts-start)/1150),p=path.getPointAtLength(len*t);pulse.setAttribute('transform',`translate(${p.x},${p.y})`);if(t<1)requestAnimationFrame(step);else setTimeout(()=>pulse.classList.remove('run'),180)}
+  requestAnimationFrame(step);
+}
+['task','view','directed','baseline','evidence','noise','hops','leakage'].forEach(id=>$(id).addEventListener('input',update));
+$('pulseBtn').addEventListener('click',()=>{update();runPulse()});
+$('reset').addEventListener('click',()=>{$('task').value='grn';$('view').value='pipeline';$('directed').checked=true;$('baseline').checked=true;$('evidence').value=.72;$('noise').value=.22;$('hops').value=1;$('leakage').value=.18;update()});
+update();
+</script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>C04 - Gauge Local Frames Biology Lab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#071015;--panel:#0a1b25;--panel2:#0d2632;--line:#28576b;--text:#edf9fb;--muted:#a8c1cb;--cyan:#58e0d3;--blue:#54a8ff;--gold:#e8b857;--pink:#ff6d8b;--green:#7ee787;--violet:#a78bfa}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;background:var(--bg);color:var(--text);font:14px/1.42 Inter,Segoe UI,system-ui,Arial,sans-serif;overflow:auto}
+    .shell{height:100vh;min-height:0;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:12px;padding:12px;background:linear-gradient(135deg,#050b10,#0a1720 62%,#05090d)}
+    .stage,.panel{border:1px solid var(--line);border-radius:18px;background:#07151d;overflow:hidden}.stage{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0}.canvas-wrap{position:relative;min-height:0}canvas{display:block;width:100%;height:100%;min-height:340px;touch-action:none}
+    .hud{position:absolute;left:16px;right:16px;top:14px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between;pointer-events:none}.badge,.formula{border:1px solid var(--line);border-radius:14px;background:rgba(7,19,26,.9);padding:10px 12px;box-shadow:0 12px 26px rgba(0,0,0,.25)}.badge span,.formula span,.eyebrow{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}.badge strong{display:block;font-size:22px}.formula strong{display:block;color:var(--cyan);font-family:Consolas,monospace;font-size:14px}
+    .controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;padding:8px;border-top:1px solid var(--line);background:#081922}select,button,input{font:inherit}select,button{width:100%;min-height:38px;border:1px solid #326176;border-radius:10px;background:#102d3d;color:var(--text);font-weight:750}button{cursor:pointer}button:hover{border-color:var(--cyan)}.slider{display:grid;gap:3px;color:#d2e8ee}.slider label{display:flex;justify-content:space-between;gap:8px;font-size:12px}.slider output{font-weight:800;color:#fff}input[type=range]{width:100%;accent-color:var(--cyan)}
+    .panel{padding:12px;display:grid;gap:10px;align-content:start}.panel h1{font-size:24px;line-height:1.08;margin:0}.subtitle{color:#c6dbe3;margin:0}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid var(--line);border-radius:12px;background:#071a23;padding:10px}.metric span{display:block;color:#b9d2dc;font-size:12px}.metric strong{font-size:24px;display:block;margin-top:5px}.card{border:1px solid var(--line);border-radius:12px;background:#071a23;padding:10px}.card h2{margin:0 0 6px;font-size:15px}.card p{margin:0;color:#d8edf3}.legend{display:flex;gap:8px;flex-wrap:wrap}.pill{border:1px solid #326176;border-radius:999px;padding:6px 9px}.pill b{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+    @media(max-width:920px){.shell{height:auto;min-height:0;overflow:visible;grid-template-columns:1fr;padding:8px;gap:8px}.stage{min-height:0;grid-template-rows:auto auto}.canvas-wrap{height:350px;min-height:350px}.canvas-wrap canvas,canvas{height:350px;min-height:350px}.controls{grid-template-columns:1fr 1fr;padding:8px}.panel{padding:9px;gap:7px}.panel h1{font-size:21px}.subtitle{font-size:12px}.metrics{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:8px}.metric strong{font-size:20px}.card{padding:8px}.card p{font-size:12px;line-height:1.34}.hud{left:8px;right:8px;top:8px;display:grid}.badge,.formula{padding:7px}.formula strong{font-size:11px;white-space:normal}.pill{padding:5px 7px;font-size:12px}.shell[data-mobile-layout="true"] .stage{min-height:0}}
+  </style>
+</head>
+<body>
+  <main class="shell" data-mobile-layout="true">
+    <section class="stage">
+      <div class="canvas-wrap">
+        <canvas id="scene" aria-label="Gauge local frames interactive visualization"></canvas>
+        <div class="hud">
+          <div class="badge"><span>Chapter lab</span><strong>C04</strong><span id="modeLabel">Frame field</span></div>
+          <div class="formula"><span>Gauge rule</span><strong>x_i' = rho(g_i)x_i; R_ij' = rho(g_j)R_ijrho(g_i)^-1</strong></div>
+        </div>
+      </div>
+      <div class="controls">
+        <select id="domain">
+          <option value="protein">protein frames</option>
+          <option value="tissue">tissue orientation</option>
+          <option value="multiome">multi-omics basis</option>
+          <option value="grn">GRN context</option>
+        </select>
+        <select id="view">
+          <option value="frames">local frames</option>
+          <option value="transport">edge transport</option>
+          <option value="invariant">invariant claim</option>
+          <option value="failure">failure mode</option>
+        </select>
+        <button id="randomGauge" type="button">Random gauge</button>
+        <button id="align" type="button">Align transport</button>
+        <button id="shift" type="button">Inject context shift</button>
+        <button id="reset" type="button">Reset</button>
+        <div class="slider"><label>Gauge rotation <output id="rotOut">35</output></label><input id="rotation" type="range" min="0" max="100" value="35"></div>
+        <div class="slider"><label>Transport quality <output id="transportOut">72</output></label><input id="transport" type="range" min="0" max="100" value="72"></div>
+        <div class="slider"><label>Context shift <output id="contextOut">25</output></label><input id="context" type="range" min="0" max="100" value="25"></div>
+      </div>
+    </section>
+    <aside class="panel">
+      <header>
+        <p class="eyebrow">Gauge local frames biology lab</p>
+        <h1>The coordinate frame is not the biological claim.</h1>
+        <p class="subtitle">Rotate node frames, transport vectors across edges, and watch when the invariant meaning survives.</p>
+      </header>
+      <div class="metrics">
+        <div class="metric"><span>Gauge error</span><strong id="gaugeMetric">0%</strong></div>
+        <div class="metric"><span>Transport consistency</span><strong id="transportMetric">0%</strong></div>
+        <div class="metric"><span>Context leakage</span><strong id="leakMetric">0%</strong></div>
+        <div class="metric"><span>Biology safety</span><strong id="bioMetric">0%</strong></div>
+      </div>
+      <div class="card"><h2>Interpretation</h2><p id="interpretation">Loading.</p></div>
+      <div class="card"><h2>Formula lens</h2><p id="formulaLens">Loading.</p></div>
+      <div class="legend">
+        <span class="pill"><b style="background:var(--green)"></b>local frame</span>
+        <span class="pill"><b style="background:var(--cyan)"></b>transported vector</span>
+        <span class="pill"><b style="background:var(--pink)"></b>context mismatch</span>
+      </div>
+    </aside>
+  </main>
+  <script>
+    const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
+    const controls={domain:document.getElementById('domain'),view:document.getElementById('view'),rotation:document.getElementById('rotation'),transport:document.getElementById('transport'),context:document.getElementById('context')};
+    const outs={rot:document.getElementById('rotOut'),transport:document.getElementById('transportOut'),context:document.getElementById('contextOut')};
+    const metrics={gauge:document.getElementById('gaugeMetric'),transport:document.getElementById('transportMetric'),leak:document.getElementById('leakMetric'),bio:document.getElementById('bioMetric')};
+    const modeLabel=document.getElementById('modeLabel'),interpretation=document.getElementById('interpretation'),formulaLens=document.getElementById('formulaLens');
+    const domains={
+      protein:{nodes:['R1','R2','R3','R4','R5','R6'],note:'Protein residues carry local 3D frames. AlphaFold IPA and protein geometric models care about relative geometry, not arbitrary global orientation.',base:[[-1.9,.2],[-1.1,-.55],[-.15,-.1],[.72,.55],[1.45,-.2],[2.0,.52]],color:'#7ee787'},
+      tissue:{nodes:['S1','S2','S3','S4','S5','S6'],note:'Spatial tissue graphs have local orientation and neighborhood context. The model should not confuse slide orientation with cell-state biology.',base:[[-1.8,-.52],[-1.1,.26],[-.2,.7],[.5,-.2],[1.25,.35],[1.9,-.45]],color:'#54a8ff'},
+      multiome:{nodes:['RNA','ATAC','TF','Peak','Gene','Cell'],note:'Multi-omics nodes live in different feature bases. A map between bases is meaningful only when assay provenance and context are explicit.',base:[[-1.8,.2],[-1.1,-.55],[-.25,.35],[.55,-.22],[1.25,.48],[1.9,-.35]],color:'#e8b857'},
+      grn:{nodes:['TF','motif','ATAC','gene','perturb','state'],note:'Cell-specific GRNs shift across contexts. Gauge language warns you to separate representation basis from regulatory claim.',base:[[-1.9,-.1],[-1.25,.58],[-.42,-.52],[.48,.12],[1.25,-.48],[1.92,.45]],color:'#a78bfa'}
+    };
+    const edges=[[0,1],[1,2],[2,3],[3,4],[4,5],[0,2],[2,4],[1,3]];
+    let pulse=0,manualOffset=0;
+    function resize(){const d=Math.min(devicePixelRatio||1,2);const r=canvas.getBoundingClientRect();canvas.width=Math.max(1,Math.floor(r.width*d));canvas.height=Math.max(1,Math.floor(r.height*d));ctx.setTransform(d,0,0,d,0,0)}
+    window.addEventListener('resize',resize);resize();
+    function P(x,y){const r=canvas.getBoundingClientRect();const s=Math.min(r.width,r.height)*0.22;const cy=r.width<520?r.height*.64:r.height*.52;return {x:r.width/2+x*s,y:cy+y*s,s};}
+    function values(){const rotation=+controls.rotation.value,transport=+controls.transport.value,context=+controls.context.value;const gaugeError=Math.max(0,Math.min(100,Math.round((rotation*(100-transport))/100 + context*.22)));const transportConsistency=Math.max(0,Math.min(100,Math.round(transport - context*.18)));const contextLeak=Math.max(0,Math.min(100,Math.round(context*.78 + (100-transport)*.18)));const bio=Math.max(0,Math.min(100,Math.round(100-gaugeError*.55-contextLeak*.35)));return{rotation,transport,context,gaugeError,transportConsistency,contextLeak,bio};}
+    function drawFrame(p,angle,scale=46){ctx.lineWidth=4;ctx.lineCap='round';ctx.strokeStyle='#edf9fb';ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+Math.cos(angle)*scale,p.y+Math.sin(angle)*scale);ctx.stroke();ctx.strokeStyle='#ff6d8b';ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+Math.cos(angle+Math.PI/2)*scale*.78,p.y+Math.sin(angle+Math.PI/2)*scale*.78);ctx.stroke();}
+    function draw(){pulse+=.018;const r=canvas.getBoundingClientRect();ctx.clearRect(0,0,r.width,r.height);const grad=ctx.createLinearGradient(0,0,r.width,r.height);grad.addColorStop(0,'#061014');grad.addColorStop(.55,'#0b202b');grad.addColorStop(1,'#071015');ctx.fillStyle=grad;ctx.fillRect(0,0,r.width,r.height);const data=domains[controls.domain.value];const v=values();const pts=data.base.map(([x,y])=>P(x,y));ctx.lineWidth=4;for(const [a,b] of edges){const pa=pts[a],pb=pts[b];const q=(Math.sin(pulse*3+a)+1)/2;const mismatch=(100-v.transport+v.context)/200;ctx.strokeStyle=controls.view.value==='failure'?'rgba(255,109,139,.55)':'rgba(88,224,211,.55)';ctx.beginPath();ctx.moveTo(pa.x,pa.y);ctx.lineTo(pb.x,pb.y);ctx.stroke();ctx.fillStyle=controls.view.value==='failure'?'#ff6d8b':'#58e0d3';ctx.beginPath();ctx.arc(pa.x+(pb.x-pa.x)*(q*(1-mismatch)+.5*mismatch),pa.y+(pb.y-pa.y)*q,4.5,0,Math.PI*2);ctx.fill();if(controls.view.value==='transport'||controls.view.value==='failure'){ctx.strokeStyle='rgba(232,184,87,.65)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse((pa.x+pb.x)/2,(pa.y+pb.y)/2,28+v.context*.15,9+v.gaugeError*.04,Math.atan2(pb.y-pa.y,pb.x-pa.x),0,Math.PI*2);ctx.stroke();}}
+      pts.forEach((p,i)=>{const baseAngle=i*.72 + v.rotation/55 + manualOffset + (controls.view.value==='invariant'?0:Math.sin(pulse+i)*.12);ctx.fillStyle=data.color;ctx.beginPath();ctx.arc(p.x,p.y,24,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#edf9fb';ctx.lineWidth=3;ctx.stroke();drawFrame(p,baseAngle,controls.view.value==='frames'?54:42);ctx.fillStyle='#071015';ctx.font='800 14px Inter,Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(data.nodes[i],p.x,p.y);});
+      if(controls.view.value==='invariant'){ctx.fillStyle='rgba(88,224,211,.12)';ctx.strokeStyle='#58e0d3';ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(r.width*.17,r.height*.2,r.width*.66,r.height*.58,28);ctx.stroke();ctx.fill();ctx.fillStyle='#edf9fb';ctx.font='800 22px Inter,Arial';ctx.textAlign='center';ctx.fillText('same biological claim after frame change',r.width/2,r.height*.22);}
+      if(controls.view.value==='failure'){ctx.fillStyle='rgba(255,109,139,.16)';ctx.strokeStyle='#ff6d8b';ctx.lineWidth=3;ctx.beginPath();ctx.arc(r.width*.64,r.height*.42,70+v.context*.45,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#ffb4c4';ctx.font='800 18px Inter,Arial';ctx.textAlign='center';ctx.fillText('context leakage',r.width*.64,r.height*.42);}
+      ctx.fillStyle='#d2e8ee';ctx.font='14px Inter,Arial';ctx.textAlign='left';ctx.fillText(data.note,18,r.height-20);updateText(v,data);requestAnimationFrame(draw);}
+    function updateText(v,data){outs.rot.textContent=v.rotation;outs.transport.textContent=v.transport;outs.context.textContent=v.context;metrics.gauge.textContent=v.gaugeError+'%';metrics.transport.textContent=v.transportConsistency+'%';metrics.leak.textContent=v.contextLeak+'%';metrics.bio.textContent=v.bio+'%';modeLabel.textContent=controls.view.options[controls.view.selectedIndex].text;interpretation.textContent=data.note+' Gauge error rises when local frame rotations are not compensated by transport maps, or when context shift is treated as mechanism.';formulaLens.textContent='A nodewise gauge change uses x_i -> rho(g_i)x_i. Edge transport must transform as R_ij -> rho(g_j)R_ijrho(g_i)^-1. If this rule is respected, the prediction can be equivariant or invariant instead of frame-dependent.';window.__C04LabSnapshot={gauge:v.gaugeError/100,transport:v.transportConsistency/100,leak:v.contextLeak/100,bio:v.bio/100};}
+    for(const el of Object.values(controls))el.addEventListener('input',()=>{});
+    document.getElementById('randomGauge').onclick=()=>{controls.rotation.value=Math.round(20+Math.random()*75);manualOffset+=.65;};
+    document.getElementById('align').onclick=()=>{controls.transport.value=92;controls.context.value=Math.max(0,+controls.context.value-12);};
+    document.getElementById('shift').onclick=()=>{controls.context.value=Math.min(100,+controls.context.value+18);};
+    document.getElementById('reset').onclick=()=>{controls.domain.value='protein';controls.view.value='frames';controls.rotation.value=35;controls.transport.value=72;controls.context.value=25;manualOffset=0;};
+    window.__C04_LAB_READY__=true;window.__C04LabReady=true;window.__C04LabSnapshot={gauge:0,transport:0,leak:0,bio:0};
+    if(!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);return this;};}
+    draw();
+  </script>
+</body>
+</html>

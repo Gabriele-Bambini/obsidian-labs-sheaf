@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>F09 - AttentionGRN and graph transformer GRN reconstruction</title>
+  <link rel="stylesheet" href="shared/gnn-bio-lab-core.css">
+</head>
+<body>
+  <main class="gnn-bio-lab lab-shell lab-3d-shell" data-lab-kind="grn" data-lab-id="f09">
+    <section class="visual-stack" aria-label="Interactive 3D graph biology visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="F09 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>F09</strong></div>
+          <div class="formula-chip"><span id="formulaText">score(TF -&gt; gene) = evidence x model x validation</span>A GRN prediction is useful only when direction, evidence, sign, and validation are explicit.</div>
+        </div>
+        <div class="concept-rail"></div>
+        <div class="selected-chip" data-role="selected"><span>Selected mechanism</span><strong>Loading lab.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Command bar under the 3D visualization">
+        <select data-mode aria-label="View mode">
+          <option value="object">Object view</option>
+          <option value="process">Process view</option>
+          <option value="formal">Formal view</option>
+          <option value="diagnostic">Diagnostic view</option>
+        </select>
+        <button type="button" data-command="Orient TF edge">Orient TF edge</button>
+<button type="button" data-command="Sweep threshold">Sweep threshold</button>
+<button type="button" data-command="Add motif prior">Add motif prior</button>
+<button type="button" data-command="Validate perturbation">Validate perturbation</button>
+        <div class="command-control"><label>Depth <output data-output="depth">3</output></label><input data-param="depth" type="range" min="1" max="12" step="1" value="3"></div>
+        <div class="command-control"><label>Evidence <output data-output="evidence">0.62</output></label><input data-param="evidence" type="range" min="0" max="100" step="1" value="62"></div>
+        <div class="command-control"><label>Noise <output data-output="noise">0.18</output></label><input data-param="noise" type="range" min="0" max="100" step="1" value="18"></div>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">GRN Inference</p>
+        <h1>F09 - AttentionGRN and graph transformer GRN reconstruction</h1>
+        <p class="subtitle">AI Knowledge style lab: 3D object, command bar, metrics, state explanation, direct controls, mobile srcdoc compatibility.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Precision"><span>Precision</span><strong>0.00</strong></div>
+<div class="metric" data-role="metric" data-metric="Recall"><span>Recall</span><strong>0.00</strong></div>
+<div class="metric" data-role="metric" data-metric="False positives"><span>False positives</span><strong>0.00</strong></div>
+<div class="metric" data-role="metric" data-metric="Perturb support"><span>Perturb support</span><strong>0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading.</p>
+        <p id="state" class="state-box">Waiting for first render.</p>
+      </div>
+      <p class="hint">Drag the scene, use mode and mechanism controls, then watch node geometry, edge transport, matrix cells, bars, metrics, and state text change together.</p>
+    </aside>
+  </main>
+  <script id="lab-config" type="application/json">{"lessonId": "F09", "title": "AttentionGRN and graph transformer GRN reconstruction", "section": "GRN Inference", "category": "grn-inference", "kind": "grn", "formula": "score(TF -> gene) = evidence x model x validation", "insight": "A GRN prediction is useful only when direction, evidence, sign, and validation are explicit.", "controls": ["Orient TF edge", "Sweep threshold", "Add motif prior", "Validate perturbation"], "metrics": ["Precision", "Recall", "False positives", "Perturb support"], "nodes": ["TF", "motif", "accessibility", "target gene", "expression", "edge score", "validation", "condition"], "colors": ["#e8b857", "#58e0d3", "#54a8ff", "#ff6d8b"]}</script>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-bio-lab-core.js"></script>
+  <script>
+    try {
+      createGnnBioLab();
+    } catch (error) {
+      console.error(error);
+      const selected = document.querySelector("[data-role='selected'] strong");
+      const state = document.getElementById("state");
+      if (selected) selected.textContent = "Lab error: " + error.message;
+      if (state) state.textContent = "Interactive render failed. Open the direct HTML link or check the Obsidian interactive-lab-server plugin.";
+    }
+  </script>
+</body>
+</html>

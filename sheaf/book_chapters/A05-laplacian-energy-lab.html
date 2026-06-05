@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A05 - Graph Laplacian Energy Lab</title>
+<style>
+  :root{--bg:#061018;--panel:#0c1c26;--line:#2d5061;--text:#f7fbff;--muted:#b8cbd3;--cyan:#64f1e1;--gold:#ffd166;--rose:#ff6d96;--blue:#80b8ff;--green:#9af58f}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--text);font-family:Segoe UI,Inter,Arial,sans-serif}
+  body{background:radial-gradient(circle at 22% 12%,rgba(100,241,225,.14),transparent 30%),radial-gradient(circle at 78% 58%,rgba(128,184,255,.10),transparent 30%),linear-gradient(135deg,#050b10,#0c1821)}
+  .app{width:100%;min-height:100vh;display:grid;grid-template-columns:minmax(790px,1fr) 390px;gap:14px;padding:14px;align-items:start}
+  .stage,.side{border:1px solid var(--line);background:rgba(7,16,22,.92);border-radius:14px;box-shadow:0 18px 64px rgba(0,0,0,.38);overflow:hidden}
+  .stage{min-height:780px;padding:18px;background:linear-gradient(rgba(255,255,255,.026) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.026) 1px,transparent 1px),rgba(5,12,18,.95);background-size:44px 44px}
+  .topbar{display:grid;grid-template-columns:280px 1fr;gap:12px;margin-bottom:14px}
+  .chip{border:1px solid #315466;background:#0a1922;padding:12px 14px;border-radius:10px}.chip b{display:block;color:var(--cyan);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}.chip span{font-weight:950;font-size:18px;line-height:1.25}
+  .formula code{font:850 15px/1.35 Consolas,Menlo,monospace;color:#f6fbff;white-space:normal;overflow-wrap:anywhere}
+  .workspace{display:grid;grid-template-columns:1.05fr 1.15fr;gap:12px}.panel{border:1px solid #2a4c5d;background:rgba(9,21,29,.94);border-radius:12px;padding:12px;min-width:0}.panel h2{margin:0 0 8px;color:var(--cyan);font-size:17px;line-height:1.15}.panel p{margin:0 0 8px;color:#c7dbe3;font-size:13px;line-height:1.35}
+  .graphBox{height:360px}svg{display:block;width:100%;height:100%}.edge{fill:none;stroke-linecap:round;opacity:.72}.edge.hot{filter:url(#edgeGlow);opacity:1}.node text{font:850 12px Segoe UI,Arial,sans-serif;fill:#f6fbff;text-anchor:middle}.role{font:700 10px Segoe UI,Arial,sans-serif!important;fill:#aac0ca!important}.node circle{stroke:#fff;stroke-width:2.2;filter:url(#glow)}
+  .matrix{display:grid;gap:4px;align-items:center;justify-content:start;max-width:100%;overflow:auto;padding-bottom:4px}.cell,.head,.rowhead,.corner{width:58px;height:35px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:850}.head,.rowhead{background:#0a1620;border:1px solid #203946;color:#b8ccd5}.cell{font-family:Consolas,Menlo,monospace;background:#0b1921;border:1px solid #1f3947;color:#9fb4bd}.cell.diag{background:#153443;color:#f7fbff}.cell.neg{background:#3a1828;color:#ffdce8}.cell.hot{background:var(--cyan);color:#061017;border-color:#e4fffb}
+  .bars{display:grid;gap:8px}.barRow{display:grid;grid-template-columns:80px 1fr 64px;align-items:center;gap:8px;font-size:12px;color:#dceff5}.barShell{height:25px;border-radius:8px;background:#102a36;border:1px solid #2d5364;overflow:hidden}.bar{height:100%;border-radius:7px;transition:width .25s ease}
+  .readout{margin:0;border:1px solid #244554;background:#08151d;border-radius:9px;padding:10px;color:#e8fbff;font:750 12px/1.45 Consolas,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+  .side{padding:14px;display:flex;flex-direction:column;gap:12px}.eyebrow{color:var(--cyan);font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:11px}h1{font-size:28px;line-height:1.05;margin:4px 0 6px}.side p{color:#c8d8df;margin:0;font-size:14px;line-height:1.45}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}button,select{width:100%;min-width:0;border:1px solid #2b4858;background:#14212b;color:#fff;border-radius:7px;padding:10px 9px;font-weight:850;font-size:13px;line-height:1.15}button:active{transform:translateY(1px)}
+  .slider,.check{border:1px solid #203c4b;background:#101d26;padding:10px;border-radius:8px}.slider label,.check label{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:#b7cbd4;font-weight:850;margin-bottom:6px}input[type=range]{width:100%;accent-color:var(--cyan)}input[type=checkbox]{width:20px;height:20px;accent-color:var(--cyan)}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid #2a4553;background:#0d1a22;padding:10px;border-radius:8px}.metric b{display:block;color:#a9c0ca;font-size:11px;text-transform:uppercase;margin-bottom:6px}.metric span{font-weight:950;font-size:21px}.explain{border:1px solid #2a4553;background:#0d1a22;padding:12px;font-size:14px;line-height:1.45;color:#d7e8ef;border-radius:8px}
+  @media(max-width:980px){.app{display:flex;flex-direction:column;padding:8px;overflow:hidden}.stage,.side{width:calc(100vw - 16px);max-width:calc(100vw - 16px);min-width:0}.stage{min-height:0;padding:12px}.topbar{grid-template-columns:1fr}.workspace{grid-template-columns:1fr}.graphBox{height:330px}.controls,.metrics{grid-template-columns:1fr}.chip span{font-size:17px}.formula code{font-size:14px}}
+  @media(max-width:480px){.app{transform:scale(.88);transform-origin:top left;width:calc(100vw / .88);max-width:none}}
+</style>
+</head>
+<body>
+<main class="app">
+  <section class="stage">
+    <div class="topbar"><div class="chip"><b>A05 lab</b><span>signal -> Laplacian -> energy</span></div><div class="chip formula"><b>active formula</b><code id="formula">E(x) = x^T L x = sum_edges w_ij (x_i - x_j)^2</code></div></div>
+    <div class="workspace">
+      <div class="panel"><h2>1. Biological graph signal</h2><p>Node height/color is a biological signal. Hot edges are where connected nodes disagree.</p><div class="graphBox"><svg id="graph" viewBox="0 0 520 360"><defs><filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="edgeGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g id="edges"></g><g id="nodes"></g></svg></div></div>
+      <div class="panel"><h2>2. Laplacian matrix</h2><p>`L = D - A`: diagonal degree, negative off-diagonal edges.</p><div id="matrix" class="matrix"></div></div>
+      <div class="panel"><h2>3. Edge energy terms</h2><p>Each edge contributes `w_ij(x_i - x_j)^2`.</p><div class="bars" id="bars"></div></div>
+      <div class="panel"><h2>4. Smoothing and spectral reading</h2><pre class="readout" id="readout"></pre></div>
+    </div>
+  </section>
+  <aside class="side">
+    <div><div class="eyebrow">Generated specifically for A05</div><h1>Where is the graph signal rough?</h1><p>Move expression/activity values, switch Laplacian type, and apply smoothing. Energy drops when connected biological nodes become more consistent.</p></div>
+    <div class="controls"><select id="preset"><option value="grn">GRN expression signal</option><option value="cell">Cell-state tissue signal</option><option value="ppi">PPI activity module</option></select><select id="lapType"><option value="unnormalized">Unnormalized L = D - A</option><option value="symmetric">Normalized L_sym</option><option value="randomwalk">Random-walk L_rw</option></select><button id="smooth">Apply smoothing step</button><button id="reset">Reset</button></div>
+    <div class="slider"><label>TF1 signal <span id="v0"></span></label><input id="x0" type="range" min="0" max="100" value="90"></div>
+    <div class="slider"><label>GeneA signal <span id="v1"></span></label><input id="x1" type="range" min="0" max="100" value="82"></div>
+    <div class="slider"><label>GeneB signal <span id="v2"></span></label><input id="x2" type="range" min="0" max="100" value="18"></div>
+    <div class="slider"><label>State signal <span id="v3"></span></label><input id="x3" type="range" min="0" max="100" value="25"></div>
+    <div class="slider"><label>bridge edge weight <span id="bridgeVal"></span></label><input id="bridge" type="range" min="0" max="100" value="45"></div>
+    <div class="slider"><label>smoothing eta <span id="etaVal"></span></label><input id="eta" type="range" min="1" max="40" value="12"></div>
+    <div class="metrics"><div class="metric"><b>energy</b><span id="energyVal">0</span></div><div class="metric"><b>roughest edge</b><span id="roughVal">0</span></div><div class="metric"><b>smoothness</b><span id="smoothVal">0</span></div><div class="metric"><b>lambda intuition</b><span id="lambdaVal">0</span></div></div>
+    <div class="explain" id="explain"></div>
+  </aside>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const presets={grn:{nodes:['TF1','GeneA','GeneB','State'],roles:['regulator','target','target','context']},cell:{nodes:['CellA','CellB','CellC','Niche'],roles:['state high','state high','state low','context']},ppi:{nodes:['ProtA','ProtB','ProtC','Pathway'],roles:['active','active','inactive','module']}};
+const pos=[{x:120,y:150},{x:330,y:105},{x:330,y:245},{x:170,y:285}];
+const baseEdges=[[0,1,.92],[0,2,.76],[1,2,.35],[2,3,.45],[1,3,.22]];
+function values(){return [0,1,2,3].map(i=>Number($('x'+i).value)/100)}
+function edges(){return baseEdges.map((e,i)=>[e[0],e[1],i===3?Number($('bridge').value)/100:e[2]])}
+function matrices(){
+  const n=4,E=edges(),A=Array.from({length:n},()=>Array(n).fill(0));
+  for(const [i,j,w] of E){A[i][j]=w;A[j][i]=w}
+  const d=A.map(r=>r.reduce((a,b)=>a+b,0));
+  let L=Array.from({length:n},()=>Array(n).fill(0));
+  const type=$('lapType').value;
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){
+    if(type==='unnormalized') L[i][j]=(i===j?d[i]:0)-A[i][j];
+    if(type==='symmetric') L[i][j]=(i===j?1:0)-(A[i][j]?A[i][j]/Math.sqrt(Math.max(d[i]*d[j],1e-9)):0);
+    if(type==='randomwalk') L[i][j]=(i===j?1:0)-(A[i][j]?A[i][j]/Math.max(d[i],1e-9):0);
+  }
+  return {A,d,L,E};
+}
+function matVec(L,x){return L.map(r=>r.reduce((s,v,j)=>s+v*x[j],0))}
+function energy(E,x){return E.reduce((s,[i,j,w])=>s+w*Math.pow(x[i]-x[j],2),0)}
+function edgeTerms(E,x){return E.map(([i,j,w])=>({i,j,w,val:w*Math.pow(x[i]-x[j],2)}))}
+function compute(){const x=values(),M=matrices(),Lx=matVec(M.L,x),en=energy(M.E,x),terms=edgeTerms(M.E,x);terms.sort((a,b)=>b.val-a.val);return {x,...M,Lx,en,terms,p:preset()}}
+function preset(){return presets[$('preset').value]}
+function color(v){const r=Math.round(255*v), b=Math.round(255*(1-v)), g=Math.round(105+95*(1-Math.abs(v-.5)*2));return `rgb(${r},${g},${b})`}
+function drawGraph(s){const p=s.p; $('edges').innerHTML=s.E.map(([i,j,w],k)=>{const a=pos[i],b=pos[j],term=w*Math.pow(s.x[i]-s.x[j],2),hot=term>.12;return `<line class="edge ${hot?'hot':''}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${hot?'#ff6d96':'#64f1e1'}" stroke-width="${4+10*w}"/><text x="${(a.x+b.x)/2}" y="${(a.y+b.y)/2-8}" fill="#f7fbff" font-size="11" font-weight="850" text-anchor="middle">${term.toFixed(2)}</text>`}).join('');
+  $('nodes').innerHTML=p.nodes.map((n,i)=>`<g class="node"><circle cx="${pos[i].x}" cy="${pos[i].y}" r="${34+22*s.x[i]}" fill="${color(s.x[i])}"/><text x="${pos[i].x}" y="${pos[i].y-4}">${n}</text><text class="role" x="${pos[i].x}" y="${pos[i].y+20}">${p.roles[i]}</text></g>`).join('');
+}
+function drawMatrix(s){const names=s.p.nodes; $('matrix').style.gridTemplateColumns='repeat(5,58px)'; let html='<div class="corner"></div>'+names.map(n=>`<div class="head">${n}</div>`).join(''); for(let i=0;i<4;i++){html+=`<div class="rowhead">${names[i]}</div>`; for(let j=0;j<4;j++){const v=s.L[i][j];let cls='cell'; if(i===j)cls+=' diag'; if(v<0)cls+=' neg'; if(Math.abs(s.Lx[i])>.25&&i===j)cls+=' hot'; html+=`<div class="${cls}">${Math.abs(v)<.005?'0':v.toFixed(2)}</div>`}} $('matrix').innerHTML=html}
+function drawBars(s){const max=Math.max(.001,...s.terms.map(t=>t.val));$('bars').innerHTML=s.terms.map(t=>`<div class="barRow"><b>${s.p.nodes[t.i]}-${s.p.nodes[t.j]}</b><div class="barShell"><div class="bar" style="width:${Math.max(2,100*t.val/max)}%;background:${t.val>.12?'#ff6d96':'#64f1e1'}"></div></div><span>${t.val.toFixed(3)}</span></div>`).join('')}
+function updateText(s){const rough=s.terms[0];$('formula').textContent=$('lapType').value==='unnormalized'?'L = D - A; E(x)=x^T L x':'normalized Laplacian rescales disagreement by degree';$('energyVal').textContent=s.en.toFixed(2);$('roughVal').textContent=`${s.p.nodes[rough.i]}-${s.p.nodes[rough.j]}`;$('smoothVal').textContent=(1/(1+s.en)).toFixed(2);$('lambdaVal').textContent=(s.en/Math.max(.001,s.x.reduce((a,b)=>a+b*b,0))).toFixed(2);[0,1,2,3].forEach(i=>$('v'+i).textContent=s.x[i].toFixed(2));$('bridgeVal').textContent=(Number($('bridge').value)/100).toFixed(2);$('etaVal').textContent=(Number($('eta').value)/100).toFixed(2);$('readout').textContent=`x = [${s.x.map(v=>v.toFixed(2)).join(', ')}]\nLx = [${s.Lx.map(v=>v.toFixed(3)).join(', ')}]\nenergy = sum_edges w_ij(x_i-x_j)^2 = ${s.en.toFixed(4)}\nroughest edge = ${s.p.nodes[rough.i]}-${s.p.nodes[rough.j]} (${rough.val.toFixed(4)})`;$('explain').textContent='The Laplacian is a disagreement operator. If connected biological nodes have similar signals, energy is low. If a TF-target edge connects high and low expression/activity, that edge becomes a hot disagreement. Smoothing subtracts eta * Lx, reducing roughness, but biology may contain true sharp boundaries.'}
+function render(){const s=compute();drawGraph(s);drawMatrix(s);drawBars(s);updateText(s);window.__A05LabReady=true;window.__A05LabSnapshot={type:$('lapType').value,energy:s.en,roughest:s.terms[0].val}}
+function smooth(){const s=compute(),eta=Number($('eta').value)/100;const nx=s.x.map((v,i)=>Math.max(0,Math.min(1,v-eta*s.Lx[i])));nx.forEach((v,i)=>$('x'+i).value=Math.round(v*100));render()}
+['preset','lapType','x0','x1','x2','x3','bridge','eta'].forEach(id=>$(id).addEventListener('input',render));$('smooth').addEventListener('click',smooth);$('reset').addEventListener('click',()=>{$('preset').value='grn';$('lapType').value='unnormalized';['90','82','18','25'].forEach((v,i)=>$('x'+i).value=v);$('bridge').value=45;$('eta').value=12;render()});render();
+</script>
+</body>
+</html>

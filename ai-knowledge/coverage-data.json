@@ -1,0 +1,1726 @@
+{
+  "generatedAt": "2026-06-01T02:49:38.113Z",
+  "summary": {
+    "totalNotes": 136,
+    "learningModuleNotes": 113,
+    "interactiveLabs": 113,
+    "uncoveredNotes": 0,
+    "qualityFlaggedFiles": 0,
+    "qualityFlagInstances": 0
+  },
+  "byBlock": {
+    "A": {
+      "total": 15,
+      "labs": 15,
+      "missing": 0,
+      "qualityFlaggedFiles": 0
+    },
+    "B": {
+      "total": 10,
+      "labs": 10,
+      "missing": 0,
+      "qualityFlaggedFiles": 0
+    },
+    "C": {
+      "total": 10,
+      "labs": 10,
+      "missing": 0,
+      "qualityFlaggedFiles": 0
+    },
+    "D": {
+      "total": 10,
+      "labs": 10,
+      "missing": 0,
+      "qualityFlaggedFiles": 0
+    },
+    "E": {
+      "total": 18,
+      "labs": 18,
+      "missing": 0,
+      "qualityFlaggedFiles": 0
+    },
+    "F": {
+      "total": 12,
+      "labs": 12,
+      "missing": 0,
+      "qualityFlaggedFiles": 0
+    },
+    "G": {
+      "total": 17,
+      "labs": 17,
+      "missing": 0,
+      "qualityFlaggedFiles": 0
+    },
+    "H": {
+      "total": 15,
+      "labs": 15,
+      "missing": 0,
+      "qualityFlaggedFiles": 0
+    },
+    "I": {
+      "total": 6,
+      "labs": 6,
+      "missing": 0,
+      "qualityFlaggedFiles": 0
+    }
+  },
+  "existingLabs": [
+    {
+      "note": "A01- Linear Algebra Fundamentals.md",
+      "block": "A",
+      "lab": "a01-linear-algebra-foundations-lab.html"
+    },
+    {
+      "note": "A02 - Vectors, Spaces and Linear Maps.md",
+      "block": "A",
+      "lab": "a02-linear-map-grid.html"
+    },
+    {
+      "note": "A03- Multivariable Calculus.md",
+      "block": "A",
+      "lab": "a03-eigen-quadratic-form.html"
+    },
+    {
+      "note": "A04- Real Analysis and Measure Theory.md",
+      "block": "A",
+      "lab": "a04-measure-convergence-lab.html"
+    },
+    {
+      "note": "A05- Functional Analysis.md",
+      "block": "A",
+      "lab": "a05-functional-analysis-operator-lab.html"
+    },
+    {
+      "note": "A06- Topology Basics.md",
+      "block": "A",
+      "lab": "a06-topology-neighborhood-lab.html"
+    },
+    {
+      "note": "A07- Differential Geometry.md",
+      "block": "A",
+      "lab": "a07-measure-integration.html"
+    },
+    {
+      "note": "A08- Abstract Algebra Fundamentals.md",
+      "block": "A",
+      "lab": "a08-algebra-structure-lab.html"
+    },
+    {
+      "note": "A09- Category Theory Basics.md",
+      "block": "A",
+      "lab": "a09-category-theory-diagram-lab.html"
+    },
+    {
+      "note": "A10- Advanced Category Theory.md",
+      "block": "A",
+      "lab": "a10-category-limits-adjunctions-lab.html"
+    },
+    {
+      "note": "A11- Information Theory.md",
+      "block": "A",
+      "lab": "a11-information-theory-lab.html"
+    },
+    {
+      "note": "A12- Algebraic Topology.md",
+      "block": "A",
+      "lab": "a12-algebraic-topology-lab.html"
+    },
+    {
+      "note": "A13- Differential Equations.md",
+      "block": "A",
+      "lab": "a13-differential-equations-flow-lab.html"
+    },
+    {
+      "note": "A14- Complex Analysis.md",
+      "block": "A",
+      "lab": "a14-complex-contour-residue-lab.html"
+    },
+    {
+      "note": "A15- Numerical Methods.md",
+      "block": "A",
+      "lab": "a15-numerical-methods-stability-lab.html"
+    },
+    {
+      "note": "B01- Probability Theory Foundations.md",
+      "block": "B",
+      "lab": "b01-probability-foundations-lab.html"
+    },
+    {
+      "note": "B02- Multivariate Probability.md",
+      "block": "B",
+      "lab": "b02-multivariate-probability-lab.html"
+    },
+    {
+      "note": "B03- Statistical Estimation.md",
+      "block": "B",
+      "lab": "b03-estimator-likelihood-lab.html"
+    },
+    {
+      "note": "B04- Hypothesis Testing.md",
+      "block": "B",
+      "lab": "b04-hypothesis-testing-lab.html"
+    },
+    {
+      "note": "B05- Bayesian Inference.md",
+      "block": "B",
+      "lab": "b05-bayesian-updating.html"
+    },
+    {
+      "note": "B06- Stochastic Processes.md",
+      "block": "B",
+      "lab": "b06-markov-chain-lab.html"
+    },
+    {
+      "note": "B07- Advanced Stochastic Calculus.md",
+      "block": "B",
+      "lab": "b07-advanced-stochastic-calculus-lab.html"
+    },
+    {
+      "note": "B08- Information Geometry.md",
+      "block": "B",
+      "lab": "b08-information-geometry-lab.html"
+    },
+    {
+      "note": "B09- Non-parametric Statistics.md",
+      "block": "B",
+      "lab": "b09-nonparametric-statistics-lab.html"
+    },
+    {
+      "note": "B10- Causal Inference.md",
+      "block": "B",
+      "lab": "b10-causal-inference-lab.html"
+    },
+    {
+      "note": "C01- Convex Analysis.md",
+      "block": "C",
+      "lab": "c01-convex-analysis-lab.html"
+    },
+    {
+      "note": "C02- Unconstrained Optimization.md",
+      "block": "C",
+      "lab": "c02-optimization-landscape.html"
+    },
+    {
+      "note": "C03- Constrained Optimization.md",
+      "block": "C",
+      "lab": "c03-constrained-optimization.html"
+    },
+    {
+      "note": "C04- Stochastic Optimization.md",
+      "block": "C",
+      "lab": "c04-stochastic-optimization-lab.html"
+    },
+    {
+      "note": "C05- Calculus of Variations.md",
+      "block": "C",
+      "lab": "c05-euler-lagrange-action-lab.html"
+    },
+    {
+      "note": "C06- Optimal Control Theory.md",
+      "block": "C",
+      "lab": "c06-optimal-control-lab.html"
+    },
+    {
+      "note": "C07- Duality Theory.md",
+      "block": "C",
+      "lab": "c07-duality-theory-lab.html"
+    },
+    {
+      "note": "C08- Proximal Methods.md",
+      "block": "C",
+      "lab": "c08-proximal-methods-lab.html"
+    },
+    {
+      "note": "C09- Non-convex Optimization.md",
+      "block": "C",
+      "lab": "c09-nonconvex-optimization-lab.html"
+    },
+    {
+      "note": "C10- Optimal Transport.md",
+      "block": "C",
+      "lab": "c10-optimal-transport-lab.html"
+    },
+    {
+      "note": "D01- Linear Models.md",
+      "block": "D",
+      "lab": "d01-linear-models-lab.html"
+    },
+    {
+      "note": "D02- Support Vector Machines.md",
+      "block": "D",
+      "lab": "d02-svm-margin-kernel-lab.html"
+    },
+    {
+      "note": "D03- Tree-Based Models.md",
+      "block": "D",
+      "lab": "d03-tree-models-lab.html"
+    },
+    {
+      "note": "D04- Dimensionality Reduction.md",
+      "block": "D",
+      "lab": "d04-dimensionality-reduction-lab.html"
+    },
+    {
+      "note": "D05- Clustering Algorithms.md",
+      "block": "D",
+      "lab": "d05-clustering-algorithms-lab.html"
+    },
+    {
+      "note": "D06- Ensemble Methods.md",
+      "block": "D",
+      "lab": "d06-ensemble-methods-lab.html"
+    },
+    {
+      "note": "D07- Metric Learning.md",
+      "block": "D",
+      "lab": "d07-metric-learning-lab.html"
+    },
+    {
+      "note": "D08- Learning Theory.md",
+      "block": "D",
+      "lab": "d08-learning-theory-lab.html"
+    },
+    {
+      "note": "D09- Regularization Techniques.md",
+      "block": "D",
+      "lab": "d09-regularization-lab.html"
+    },
+    {
+      "note": "D10- Model Selection and Evaluation.md",
+      "block": "D",
+      "lab": "d10-model-selection-evaluation-lab.html"
+    },
+    {
+      "note": "E03- Convolutional Neural Networks (CNNs).md",
+      "block": "E",
+      "lab": "e03-convolution-kernel-lab.html"
+    },
+    {
+      "note": "E04- Recurrent Neural Networks (RNNs).md",
+      "block": "E",
+      "lab": "e04-rnn-hidden-state-lab.html"
+    },
+    {
+      "note": "E07- Variational Autoencoders (VAEs).md",
+      "block": "E",
+      "lab": "e07-vae-latent-space-lab.html"
+    },
+    {
+      "note": "E08- Generative Adversarial Networks (GANs).md",
+      "block": "E",
+      "lab": "e08-gan-minimax-game.html"
+    },
+    {
+      "note": "E10- Normalizing Flows.md",
+      "block": "E",
+      "lab": "e10-normalizing-flow-density.html"
+    },
+    {
+      "note": "E11- Reinforcement Learning Foundations.md",
+      "block": "E",
+      "lab": "e11-gridworld-bellman-lab.html"
+    },
+    {
+      "note": "E12- Deep Reinforcement Learning.md",
+      "block": "E",
+      "lab": "e12-dqn-target-update-lab.html"
+    },
+    {
+      "note": "E13- Meta-Learning.md",
+      "block": "E",
+      "lab": "e13-meta-learning-inner-loop.html"
+    },
+    {
+      "note": "E14- Self-Supervised Learning.md",
+      "block": "E",
+      "lab": "e14-contrastive-representation-lab.html"
+    },
+    {
+      "note": "E15- Neural ODEs.md",
+      "block": "E",
+      "lab": "e15-neural-ode-flow.html"
+    },
+    {
+      "note": "E16- Energy-Based Models.md",
+      "block": "E",
+      "lab": "e16-energy-langevin-lab.html"
+    },
+    {
+      "note": "E18- Physics-Informed Neural Networks (PINNs).md",
+      "block": "E",
+      "lab": "e18-pinn-residual-lab.html"
+    },
+    {
+      "note": "E01- Neural Network Foundations.md",
+      "block": "E",
+      "lab": "e01-mlp-decision-regions.html"
+    },
+    {
+      "note": "E02- Backpropagation and Automatic Differentiation.md",
+      "block": "E",
+      "lab": "e02-backprop-computational-graph.html"
+    },
+    {
+      "note": "E05- Attention Mechanisms and Transformers.md",
+      "block": "E",
+      "lab": "e05-attention-flow.html"
+    },
+    {
+      "note": "E09- Diffusion Models.md",
+      "block": "E",
+      "lab": "e09-diffusion-denoising.html"
+    },
+    {
+      "note": "E17- State Space Models (SSMs).md",
+      "block": "E",
+      "lab": "e17-ssm-scan.html"
+    },
+    {
+      "note": "F01- Graph Theory and Spectral Algebra Fundamentals.md",
+      "block": "F",
+      "lab": "f01-graph-spectral-algebra-lab.html"
+    },
+    {
+      "note": "F02 - Algebraic Graph Theory.md",
+      "block": "F",
+      "lab": "f02-algebraic-graph-matrices.html"
+    },
+    {
+      "note": "F03 - Graph Laplacians.md",
+      "block": "F",
+      "lab": "f03-graph-laplacian-energy.html"
+    },
+    {
+      "note": "F04 - Spectral Graph Theory.md",
+      "block": "F",
+      "lab": "f04-spectral-embedding.html"
+    },
+    {
+      "note": "F05 - Graph Clustering.md",
+      "block": "F",
+      "lab": "f05-graph-clustering-lab.html"
+    },
+    {
+      "note": "F07 - Graph Signal Processing (GSP).md",
+      "block": "F",
+      "lab": "f07-graph-signal-filtering.html"
+    },
+    {
+      "note": "F08 - Network Science.md",
+      "block": "F",
+      "lab": "f08-network-centrality-communities.html"
+    },
+    {
+      "note": "F09 - Hypergraphs.md",
+      "block": "F",
+      "lab": "f09-hypergraph-incidence-lab.html"
+    },
+    {
+      "note": "F10 - Topological Data Analysis (TDA).md",
+      "block": "F",
+      "lab": "f10-persistent-homology-filtration.html"
+    },
+    {
+      "note": "F11 - Discrete Calculus on Graphs.md",
+      "block": "F",
+      "lab": "f11-discrete-calculus-lab.html"
+    },
+    {
+      "note": "F12 - Graph Limits (Graphons).md",
+      "block": "F",
+      "lab": "f12-graphon-sampling-lab.html"
+    },
+    {
+      "note": "F06 - Random Graphs.md",
+      "block": "F",
+      "lab": "f06-random-graph-models-lab.html"
+    },
+    {
+      "note": "G09 - Temporal GNNs.md",
+      "block": "G",
+      "lab": "g09-temporal-gnn-memory-lab.html"
+    },
+    {
+      "note": "G11 - Geometric Deep Learning.md",
+      "block": "G",
+      "lab": "g11-geometric-domain-symmetry-lab.html"
+    },
+    {
+      "note": "G12 - GNNs for Molecules.md",
+      "block": "G",
+      "lab": "g12-molecular-message-passing-lab.html"
+    },
+    {
+      "note": "G13 - GNNs for Knowledge Graphs.md",
+      "block": "G",
+      "lab": "g13-knowledge-graph-relations-lab.html"
+    },
+    {
+      "note": "G14 - Robustness and Adversarial Attacks on GNNs.md",
+      "block": "G",
+      "lab": "g14-gnn-adversarial-perturbation-lab.html"
+    },
+    {
+      "note": "G15 - Over-Smoothing and Bottlenecks in GNNs.md",
+      "block": "G",
+      "lab": "g15-over-smoothing-depth-lab.html"
+    },
+    {
+      "note": "G30- Heterophilic Graph Neural Networks.md",
+      "block": "G",
+      "lab": "g30-heterophilic-gnn-lab.html"
+    },
+    {
+      "note": "G32- AI Foundations.md",
+      "block": "G",
+      "lab": "g32-ai-foundations-lab.html"
+    },
+    {
+      "note": "H01- Introduction to Sheaf Theory.md",
+      "block": "H",
+      "lab": "h01-introduction-sheaf-theory-lab.html"
+    },
+    {
+      "note": "H02 - Sheaves on Topological Spaces.md",
+      "block": "H",
+      "lab": "h02-sheaf-gluing-lab.html"
+    },
+    {
+      "note": "H04 - Cellular Sheaves on Graphs.md",
+      "block": "H",
+      "lab": "h04-cellular-sheaf-on-graph-lab.html"
+    },
+    {
+      "note": "H07 - Sheaf Neural Networks.md",
+      "block": "H",
+      "lab": "h07-sheaf-neural-networks-lab.html"
+    },
+    {
+      "note": "H08 - Neural Sheaf Diffusion.md",
+      "block": "H",
+      "lab": "h08-neural-sheaf-diffusion-lab.html"
+    },
+    {
+      "note": "H10 - Sheaves and Heterophily.md",
+      "block": "H",
+      "lab": "h10-heterophily-restriction-lab.html"
+    },
+    {
+      "note": "H09 - Sheaf GNNs with Connection Laplacians.md",
+      "block": "H",
+      "lab": "h09-connection-laplacian-transport-lab.html"
+    },
+    {
+      "note": "H11 - Sheaf Theory and Gauge Theory.md",
+      "block": "H",
+      "lab": "h11-sheaf-gauge-transformation-lab.html"
+    },
+    {
+      "note": "H13 - Directed Sheaves and Sheaves on Hypergraphs.md",
+      "block": "H",
+      "lab": "h13-directed-hypergraph-sheaf-lab.html"
+    },
+    {
+      "note": "H14 - Sheaves and Persistent Topology.md",
+      "block": "H",
+      "lab": "h14-persistent-sheaf-topology-lab.html"
+    },
+    {
+      "note": "H15 - Research Frontier in Sheaf GNNs.md",
+      "block": "H",
+      "lab": "h15-sheaf-research-frontier-lab.html"
+    },
+    {
+      "note": "H12 - Applications of Sheaf GNNs.md",
+      "block": "H",
+      "lab": "h12-sheaf-applications-domain-lab.html"
+    },
+    {
+      "note": "G01- Introduction to Graph Neural Networks.md",
+      "block": "G",
+      "lab": "g01-message-passing-playground.html"
+    },
+    {
+      "note": "G02 - Graph Convolutional Networks.md",
+      "block": "G",
+      "lab": "g02-gcn-message-passing.html"
+    },
+    {
+      "note": "G04 - GraphSAGE and Inductive Learning.md",
+      "block": "G",
+      "lab": "g04-graphsage-sampling-lab.html"
+    },
+    {
+      "note": "G05 - The Weisfeiler-Leman Test.md",
+      "block": "G",
+      "lab": "g05-wl-color-refinement-lab.html"
+    },
+    {
+      "note": "G03 - Graph Attention Networks.md",
+      "block": "G",
+      "lab": "g03-graph-attention-coefficients-lab.html"
+    },
+    {
+      "note": "G06 - Higher-Order GNNs.md",
+      "block": "G",
+      "lab": "g06-higher-order-gnn-lab.html"
+    },
+    {
+      "note": "G07 - GNNs for Link Prediction and Graph Classification.md",
+      "block": "G",
+      "lab": "g07-link-graph-readout-lab.html"
+    },
+    {
+      "note": "G08 - Scalable GNNs.md",
+      "block": "G",
+      "lab": "g08-scalable-gnn-sampling-lab.html"
+    },
+    {
+      "note": "G10 - Equivariance and Invariance in GNNs.md",
+      "block": "G",
+      "lab": "g10-equivariance-transform-lab.html"
+    },
+    {
+      "note": "H05 - The Sheaf Laplacian.md",
+      "block": "H",
+      "lab": "h05-sheaf-laplacian-builder.html"
+    },
+    {
+      "note": "H03 - Cellular Sheaves and Cohomology.md",
+      "block": "H",
+      "lab": "h03-cellular-sheaf-cohomology.html"
+    },
+    {
+      "note": "H06 - Sheaf Diffusion.md",
+      "block": "H",
+      "lab": "h06-sheaf-diffusion.html"
+    },
+    {
+      "note": "I01- Quantum Mechanics Foundations.md",
+      "block": "I",
+      "lab": "i01-quantum-state-measurement.html"
+    },
+    {
+      "note": "I02 - Qubits, Quantum Gates and Circuits.md",
+      "block": "I",
+      "lab": "i02-qubit-bloch-sphere.html"
+    },
+    {
+      "note": "I03 - Fundamental Quantum Algorithms.md",
+      "block": "I",
+      "lab": "i03-quantum-algorithm-interference-lab.html"
+    },
+    {
+      "note": "I04 - Quantum Machine Learning.md",
+      "block": "I",
+      "lab": "i04-variational-quantum-circuit-lab.html"
+    },
+    {
+      "note": "I05 - Quantum Graph Neural Networks.md",
+      "block": "I",
+      "lab": "i05-quantum-graph-circuit-lab.html"
+    },
+    {
+      "note": "I06 - Quantum Advantage and Computational Limits.md",
+      "block": "I",
+      "lab": "i06-quantum-advantage-boundary-lab.html"
+    },
+    {
+      "note": "E06- Large Language Models (LLMs).md",
+      "block": "E",
+      "lab": "e06-llm-token-prediction.html"
+    }
+  ],
+  "noteRecords": [
+    {
+      "file": "00_BIBLIOGRAPHY.md",
+      "block": "Structural",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "00_GLOSSARY.md",
+      "block": "Structural",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "00_HOME.md",
+      "block": "Structural",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "00_INTERACTIVE_LABS.md",
+      "block": "Structural",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "00_NOTATION.md",
+      "block": "Structural",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "00_ROADMAP.md",
+      "block": "Structural",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "A01- Linear Algebra Fundamentals.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a01-linear-algebra-foundations-lab.html",
+      "flags": []
+    },
+    {
+      "file": "A02 - Vectors, Spaces and Linear Maps.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a02-linear-map-grid.html",
+      "flags": []
+    },
+    {
+      "file": "A03- Multivariable Calculus.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a03-eigen-quadratic-form.html",
+      "flags": []
+    },
+    {
+      "file": "A04- Real Analysis and Measure Theory.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a04-measure-convergence-lab.html",
+      "flags": []
+    },
+    {
+      "file": "A05- Functional Analysis.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a05-functional-analysis-operator-lab.html",
+      "flags": []
+    },
+    {
+      "file": "A06- Topology Basics.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a06-topology-neighborhood-lab.html",
+      "flags": []
+    },
+    {
+      "file": "A07- Differential Geometry.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a07-measure-integration.html",
+      "flags": []
+    },
+    {
+      "file": "A08- Abstract Algebra Fundamentals.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a08-algebra-structure-lab.html",
+      "flags": []
+    },
+    {
+      "file": "A09- Category Theory Basics.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a09-category-theory-diagram-lab.html",
+      "flags": []
+    },
+    {
+      "file": "A10- Advanced Category Theory.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a10-category-limits-adjunctions-lab.html",
+      "flags": []
+    },
+    {
+      "file": "A11- Information Theory.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a11-information-theory-lab.html",
+      "flags": []
+    },
+    {
+      "file": "A12- Algebraic Topology.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a12-algebraic-topology-lab.html",
+      "flags": []
+    },
+    {
+      "file": "A13- Differential Equations.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a13-differential-equations-flow-lab.html",
+      "flags": []
+    },
+    {
+      "file": "A14- Complex Analysis.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a14-complex-contour-residue-lab.html",
+      "flags": []
+    },
+    {
+      "file": "A15- Numerical Methods.md",
+      "block": "A",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "a15-numerical-methods-stability-lab.html",
+      "flags": []
+    },
+    {
+      "file": "AGENTS.md",
+      "block": "Other",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "AI_Math_Vault_Master_Prompt.md",
+      "block": "Other",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "B01- Probability Theory Foundations.md",
+      "block": "B",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "b01-probability-foundations-lab.html",
+      "flags": []
+    },
+    {
+      "file": "B02- Multivariate Probability.md",
+      "block": "B",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "b02-multivariate-probability-lab.html",
+      "flags": []
+    },
+    {
+      "file": "B03- Statistical Estimation.md",
+      "block": "B",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "b03-estimator-likelihood-lab.html",
+      "flags": []
+    },
+    {
+      "file": "B04- Hypothesis Testing.md",
+      "block": "B",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "b04-hypothesis-testing-lab.html",
+      "flags": []
+    },
+    {
+      "file": "B05- Bayesian Inference.md",
+      "block": "B",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "b05-bayesian-updating.html",
+      "flags": []
+    },
+    {
+      "file": "B06- Stochastic Processes.md",
+      "block": "B",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "b06-markov-chain-lab.html",
+      "flags": []
+    },
+    {
+      "file": "B07- Advanced Stochastic Calculus.md",
+      "block": "B",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "b07-advanced-stochastic-calculus-lab.html",
+      "flags": []
+    },
+    {
+      "file": "B08- Information Geometry.md",
+      "block": "B",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "b08-information-geometry-lab.html",
+      "flags": []
+    },
+    {
+      "file": "B09- Non-parametric Statistics.md",
+      "block": "B",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "b09-nonparametric-statistics-lab.html",
+      "flags": []
+    },
+    {
+      "file": "B10- Causal Inference.md",
+      "block": "B",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "b10-causal-inference-lab.html",
+      "flags": []
+    },
+    {
+      "file": "Block A- Mathematical Foundations.md",
+      "block": "A",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "Block B- Probability, Statistics and Inference.md",
+      "block": "B",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "Block C- Optimization and Variational Calculus.md",
+      "block": "C",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "Block D- Classical Machine Learning.md",
+      "block": "D",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "Block E- Deep Learning and Architectures.md",
+      "block": "E",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "Block F- Graph Theory and Spectral Algebra.md",
+      "block": "F",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "Block G- Graph Neural Networks and Geometric Deep Learning.md",
+      "block": "G",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "Block H- Sheaf Theory and Sheaf Neural Networks.md",
+      "block": "H",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "Block I- Quantum Computing and Quantum AI.md",
+      "block": "I",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "C01- Convex Analysis.md",
+      "block": "C",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "c01-convex-analysis-lab.html",
+      "flags": []
+    },
+    {
+      "file": "C02- Unconstrained Optimization.md",
+      "block": "C",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "c02-optimization-landscape.html",
+      "flags": []
+    },
+    {
+      "file": "C03- Constrained Optimization.md",
+      "block": "C",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "c03-constrained-optimization.html",
+      "flags": []
+    },
+    {
+      "file": "C04- Stochastic Optimization.md",
+      "block": "C",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "c04-stochastic-optimization-lab.html",
+      "flags": []
+    },
+    {
+      "file": "C05- Calculus of Variations.md",
+      "block": "C",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "c05-euler-lagrange-action-lab.html",
+      "flags": []
+    },
+    {
+      "file": "C06- Optimal Control Theory.md",
+      "block": "C",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "c06-optimal-control-lab.html",
+      "flags": []
+    },
+    {
+      "file": "C07- Duality Theory.md",
+      "block": "C",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "c07-duality-theory-lab.html",
+      "flags": []
+    },
+    {
+      "file": "C08- Proximal Methods.md",
+      "block": "C",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "c08-proximal-methods-lab.html",
+      "flags": []
+    },
+    {
+      "file": "C09- Non-convex Optimization.md",
+      "block": "C",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "c09-nonconvex-optimization-lab.html",
+      "flags": []
+    },
+    {
+      "file": "C10- Optimal Transport.md",
+      "block": "C",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "c10-optimal-transport-lab.html",
+      "flags": []
+    },
+    {
+      "file": "CLAUDE.md",
+      "block": "Other",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "D01- Linear Models.md",
+      "block": "D",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "d01-linear-models-lab.html",
+      "flags": []
+    },
+    {
+      "file": "D02- Support Vector Machines.md",
+      "block": "D",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "d02-svm-margin-kernel-lab.html",
+      "flags": []
+    },
+    {
+      "file": "D03- Tree-Based Models.md",
+      "block": "D",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "d03-tree-models-lab.html",
+      "flags": []
+    },
+    {
+      "file": "D04- Dimensionality Reduction.md",
+      "block": "D",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "d04-dimensionality-reduction-lab.html",
+      "flags": []
+    },
+    {
+      "file": "D05- Clustering Algorithms.md",
+      "block": "D",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "d05-clustering-algorithms-lab.html",
+      "flags": []
+    },
+    {
+      "file": "D06- Ensemble Methods.md",
+      "block": "D",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "d06-ensemble-methods-lab.html",
+      "flags": []
+    },
+    {
+      "file": "D07- Metric Learning.md",
+      "block": "D",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "d07-metric-learning-lab.html",
+      "flags": []
+    },
+    {
+      "file": "D08- Learning Theory.md",
+      "block": "D",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "d08-learning-theory-lab.html",
+      "flags": []
+    },
+    {
+      "file": "D09- Regularization Techniques.md",
+      "block": "D",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "d09-regularization-lab.html",
+      "flags": []
+    },
+    {
+      "file": "D10- Model Selection and Evaluation.md",
+      "block": "D",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "d10-model-selection-evaluation-lab.html",
+      "flags": []
+    },
+    {
+      "file": "E01- Neural Network Foundations.md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e01-mlp-decision-regions.html",
+      "flags": []
+    },
+    {
+      "file": "E02- Backpropagation and Automatic Differentiation.md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e02-backprop-computational-graph.html",
+      "flags": []
+    },
+    {
+      "file": "E03- Convolutional Neural Networks (CNNs).md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e03-convolution-kernel-lab.html",
+      "flags": []
+    },
+    {
+      "file": "E04- Recurrent Neural Networks (RNNs).md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e04-rnn-hidden-state-lab.html",
+      "flags": []
+    },
+    {
+      "file": "E05- Attention Mechanisms and Transformers.md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e05-attention-flow.html",
+      "flags": []
+    },
+    {
+      "file": "E06- Large Language Models (LLMs).md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e06-llm-token-prediction.html",
+      "flags": []
+    },
+    {
+      "file": "E07- Variational Autoencoders (VAEs).md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e07-vae-latent-space-lab.html",
+      "flags": []
+    },
+    {
+      "file": "E08- Generative Adversarial Networks (GANs).md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e08-gan-minimax-game.html",
+      "flags": []
+    },
+    {
+      "file": "E09- Diffusion Models.md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e09-diffusion-denoising.html",
+      "flags": []
+    },
+    {
+      "file": "E10- Normalizing Flows.md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e10-normalizing-flow-density.html",
+      "flags": []
+    },
+    {
+      "file": "E11- Reinforcement Learning Foundations.md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e11-gridworld-bellman-lab.html",
+      "flags": []
+    },
+    {
+      "file": "E12- Deep Reinforcement Learning.md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e12-dqn-target-update-lab.html",
+      "flags": []
+    },
+    {
+      "file": "E13- Meta-Learning.md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e13-meta-learning-inner-loop.html",
+      "flags": []
+    },
+    {
+      "file": "E14- Self-Supervised Learning.md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e14-contrastive-representation-lab.html",
+      "flags": []
+    },
+    {
+      "file": "E15- Neural ODEs.md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e15-neural-ode-flow.html",
+      "flags": []
+    },
+    {
+      "file": "E16- Energy-Based Models.md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e16-energy-langevin-lab.html",
+      "flags": []
+    },
+    {
+      "file": "E17- State Space Models (SSMs).md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e17-ssm-scan.html",
+      "flags": []
+    },
+    {
+      "file": "E18- Physics-Informed Neural Networks (PINNs).md",
+      "block": "E",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "e18-pinn-residual-lab.html",
+      "flags": []
+    },
+    {
+      "file": "F01- Graph Theory and Spectral Algebra Fundamentals.md",
+      "block": "F",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "f01-graph-spectral-algebra-lab.html",
+      "flags": []
+    },
+    {
+      "file": "F02 - Algebraic Graph Theory.md",
+      "block": "F",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "f02-algebraic-graph-matrices.html",
+      "flags": []
+    },
+    {
+      "file": "F03 - Graph Laplacians.md",
+      "block": "F",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "f03-graph-laplacian-energy.html",
+      "flags": []
+    },
+    {
+      "file": "F04 - Spectral Graph Theory.md",
+      "block": "F",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "f04-spectral-embedding.html",
+      "flags": []
+    },
+    {
+      "file": "F05 - Graph Clustering.md",
+      "block": "F",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "f05-graph-clustering-lab.html",
+      "flags": []
+    },
+    {
+      "file": "F06 - Random Graphs.md",
+      "block": "F",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "f06-random-graph-models-lab.html",
+      "flags": []
+    },
+    {
+      "file": "F07 - Graph Signal Processing (GSP).md",
+      "block": "F",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "f07-graph-signal-filtering.html",
+      "flags": []
+    },
+    {
+      "file": "F08 - Network Science.md",
+      "block": "F",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "f08-network-centrality-communities.html",
+      "flags": []
+    },
+    {
+      "file": "F09 - Hypergraphs.md",
+      "block": "F",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "f09-hypergraph-incidence-lab.html",
+      "flags": []
+    },
+    {
+      "file": "F10 - Topological Data Analysis (TDA).md",
+      "block": "F",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "f10-persistent-homology-filtration.html",
+      "flags": []
+    },
+    {
+      "file": "F11 - Discrete Calculus on Graphs.md",
+      "block": "F",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "f11-discrete-calculus-lab.html",
+      "flags": []
+    },
+    {
+      "file": "F12 - Graph Limits (Graphons).md",
+      "block": "F",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "f12-graphon-sampling-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G01- Introduction to Graph Neural Networks.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g01-message-passing-playground.html",
+      "flags": []
+    },
+    {
+      "file": "G02 - Graph Convolutional Networks.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g02-gcn-message-passing.html",
+      "flags": []
+    },
+    {
+      "file": "G03 - Graph Attention Networks.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g03-graph-attention-coefficients-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G04 - GraphSAGE and Inductive Learning.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g04-graphsage-sampling-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G05 - The Weisfeiler-Leman Test.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g05-wl-color-refinement-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G06 - Higher-Order GNNs.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g06-higher-order-gnn-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G07 - GNNs for Link Prediction and Graph Classification.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g07-link-graph-readout-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G08 - Scalable GNNs.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g08-scalable-gnn-sampling-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G09 - Temporal GNNs.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g09-temporal-gnn-memory-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G10 - Equivariance and Invariance in GNNs.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g10-equivariance-transform-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G11 - Geometric Deep Learning.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g11-geometric-domain-symmetry-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G12 - GNNs for Molecules.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g12-molecular-message-passing-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G13 - GNNs for Knowledge Graphs.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g13-knowledge-graph-relations-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G14 - Robustness and Adversarial Attacks on GNNs.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g14-gnn-adversarial-perturbation-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G15 - Over-Smoothing and Bottlenecks in GNNs.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g15-over-smoothing-depth-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G30- Heterophilic Graph Neural Networks.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g30-heterophilic-gnn-lab.html",
+      "flags": []
+    },
+    {
+      "file": "G32- AI Foundations.md",
+      "block": "G",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "g32-ai-foundations-lab.html",
+      "flags": []
+    },
+    {
+      "file": "H01- Introduction to Sheaf Theory.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h01-introduction-sheaf-theory-lab.html",
+      "flags": []
+    },
+    {
+      "file": "H02 - Sheaves on Topological Spaces.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h02-sheaf-gluing-lab.html",
+      "flags": []
+    },
+    {
+      "file": "H03 - Cellular Sheaves and Cohomology.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h03-cellular-sheaf-cohomology.html",
+      "flags": []
+    },
+    {
+      "file": "H04 - Cellular Sheaves on Graphs.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h04-cellular-sheaf-on-graph-lab.html",
+      "flags": []
+    },
+    {
+      "file": "H05 - The Sheaf Laplacian.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h05-sheaf-laplacian-builder.html",
+      "flags": []
+    },
+    {
+      "file": "H06 - Sheaf Diffusion.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h06-sheaf-diffusion.html",
+      "flags": []
+    },
+    {
+      "file": "H07 - Sheaf Neural Networks.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h07-sheaf-neural-networks-lab.html",
+      "flags": []
+    },
+    {
+      "file": "H08 - Neural Sheaf Diffusion.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h08-neural-sheaf-diffusion-lab.html",
+      "flags": []
+    },
+    {
+      "file": "H09 - Sheaf GNNs with Connection Laplacians.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h09-connection-laplacian-transport-lab.html",
+      "flags": []
+    },
+    {
+      "file": "H10 - Sheaves and Heterophily.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h10-heterophily-restriction-lab.html",
+      "flags": []
+    },
+    {
+      "file": "H11 - Sheaf Theory and Gauge Theory.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h11-sheaf-gauge-transformation-lab.html",
+      "flags": []
+    },
+    {
+      "file": "H12 - Applications of Sheaf GNNs.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h12-sheaf-applications-domain-lab.html",
+      "flags": []
+    },
+    {
+      "file": "H13 - Directed Sheaves and Sheaves on Hypergraphs.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h13-directed-hypergraph-sheaf-lab.html",
+      "flags": []
+    },
+    {
+      "file": "H14 - Sheaves and Persistent Topology.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h14-persistent-sheaf-topology-lab.html",
+      "flags": []
+    },
+    {
+      "file": "H15 - Research Frontier in Sheaf GNNs.md",
+      "block": "H",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "h15-sheaf-research-frontier-lab.html",
+      "flags": []
+    },
+    {
+      "file": "I01- Quantum Mechanics Foundations.md",
+      "block": "I",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "i01-quantum-state-measurement.html",
+      "flags": []
+    },
+    {
+      "file": "I02 - Qubits, Quantum Gates and Circuits.md",
+      "block": "I",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "i02-qubit-bloch-sphere.html",
+      "flags": []
+    },
+    {
+      "file": "I03 - Fundamental Quantum Algorithms.md",
+      "block": "I",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "i03-quantum-algorithm-interference-lab.html",
+      "flags": []
+    },
+    {
+      "file": "I04 - Quantum Machine Learning.md",
+      "block": "I",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "i04-variational-quantum-circuit-lab.html",
+      "flags": []
+    },
+    {
+      "file": "I05 - Quantum Graph Neural Networks.md",
+      "block": "I",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "i05-quantum-graph-circuit-lab.html",
+      "flags": []
+    },
+    {
+      "file": "I06 - Quantum Advantage and Computational Limits.md",
+      "block": "I",
+      "isLearningModule": true,
+      "hasLab": true,
+      "lab": "i06-quantum-advantage-boundary-lab.html",
+      "flags": []
+    },
+    {
+      "file": "paper_download_log.md",
+      "block": "Other",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "Path - Deepmind Basics.md",
+      "block": "Path",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "Path - Industry.md",
+      "block": "Path",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "Path - Mathematical Foundations.md",
+      "block": "Path",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    },
+    {
+      "file": "Path - Research.md",
+      "block": "Path",
+      "isLearningModule": false,
+      "hasLab": false,
+      "lab": null,
+      "flags": []
+    }
+  ],
+  "qualityFlags": [],
+  "prioritizedBacklog": []
+}

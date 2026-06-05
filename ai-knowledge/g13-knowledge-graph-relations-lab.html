@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G13 Knowledge Graph Relation Channels</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g13-kg-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="knowledge-graph" data-lab-id="g13" data-keywords="relation triple typed path decoder negative basis">
+    <section class="visual-stack" aria-label="Interactive 3D knowledge graph relation visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G13 knowledge graph relation triple typed reasoning 3D visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G13</strong></div>
+          <div class="formula-chip"><span id="formulaText">(h, r, t)</span>Relation type and direction decide which facts can support a missing triple.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected fact</span><strong>Knowledge graph relation system is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.55fr)) repeat(5,minmax(0,.5fr)) repeat(5,minmax(0,.42fr));">
+        <select id="scenarioSelect" data-control="mode" aria-label="Knowledge graph scenario">
+          <option value="biography">Bio facts</option>
+          <option value="research">Research KG</option>
+          <option value="biomed">BioMed KG</option>
+        </select>
+        <select id="candidateRelation" data-control="candidateRelation" aria-label="Candidate relation">
+          <option value="born_country">born_country</option>
+          <option value="works_topic">works_topic</option>
+          <option value="candidate_treats">candidate_treats</option>
+        </select>
+        <select id="decoderSelect" data-control="decoderSelect" aria-label="Triple decoder">
+          <option value="transe">TransE</option>
+          <option value="distmult">DistMult</option>
+          <option value="complex">ComplEx</option>
+          <option value="rotate">RotatE</option>
+        </select>
+        <div class="command-control">
+          <label for="reasoningHops">Hops <output data-output="reasoningHops">2</output></label>
+          <input id="reasoningHops" data-param="reasoningHops" type="range" min="1" max="5" step="1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="relationGain">Rel gain <output data-output="relationGain">1.05</output></label>
+          <input id="relationGain" data-param="relationGain" type="range" min="0.1" max="2.2" step="0.01" value="1.05">
+        </div>
+        <div class="command-control">
+          <label for="negativeHardness">Neg hard <output data-output="negativeHardness">0.36</output></label>
+          <input id="negativeHardness" data-param="negativeHardness" type="range" min="0" max="1" step="0.01" value="0.36">
+        </div>
+        <div class="command-control">
+          <label for="basisCount">Basis <output data-output="basisCount">4</output></label>
+          <input id="basisCount" data-param="basisCount" type="range" min="1" max="8" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="entityCarry">Self <output data-output="entityCarry">0.48</output></label>
+          <input id="entityCarry" data-param="entityCarry" type="range" min="0" max="1" step="0.01" value="0.48">
+        </div>
+        <button id="routeMessages" class="primary" data-action="pulse" type="button">R-GCN</button>
+        <button id="composePath" data-action="step" type="button">Rule path</button>
+        <button id="scoreTriplet" data-action="step" type="button">Score fact</button>
+        <button id="corruptNegative" data-action="step" type="button">Hard neg</button>
+        <button id="resetG13" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G13 Knowledge Graph Relation Channels</h1>
+        <p class="subtitle">Rotate the typed fact graph, route R-GCN relation channels, compose paths, corrupt negatives, and score candidate triples.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Triple score"><span>Triple</span><strong id="scoreLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Path evidence"><span>Path</span><strong id="pathLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Basis compression"><span>Basis</span><strong id="basisLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Rank proxy"><span>Rank</span><strong id="rankLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading relational reasoning diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: relation channels change message routing, decoder changes the score geometry, hard negatives expose incomplete facts, and basis count trades parameters for sharing.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g13-kg-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=g13-kg-v3"></script>
+  <script>
+    window.__g13LabSnapshot = window.__g13LabSnapshot || function () { return null; };
+    createG13KnowledgeGraphRelationsLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

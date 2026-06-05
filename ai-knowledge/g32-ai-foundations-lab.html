@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G32 AI Foundations System Loop</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g32-foundations-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="ai-foundations" data-lab-id="g32" data-keywords="objective bias evaluation representation optimization generalization agent deployment">
+    <section class="visual-stack" aria-label="Interactive 3D AI foundations system pipeline">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G32 AI foundations task representation bias objective evaluation 3D system"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G32</strong></div>
+          <div class="formula-chip"><span id="formulaText">task -> representation -> bias -> objective -> evaluation</span>The model is only one part of the AI system contract.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected system</span><strong>AI foundations pipeline is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.52fr)) repeat(5,minmax(0,.48fr)) repeat(5,minmax(0,.4fr));">
+        <select id="taskFamily" data-control="mode" aria-label="Task family">
+          <option value="classification">Classify</option>
+          <option value="generative">Generate</option>
+          <option value="agentic">Agent</option>
+        </select>
+        <select id="representationMode" data-control="representationMode" aria-label="Representation">
+          <option value="tabular">Tabular</option>
+          <option value="tokens">Tokens</option>
+          <option value="graph">Graph</option>
+          <option value="state">State</option>
+        </select>
+        <select id="objectiveType" data-control="objectiveType" aria-label="Objective">
+          <option value="cross_entropy">Cross-entropy</option>
+          <option value="likelihood">Likelihood</option>
+          <option value="reward">Reward</option>
+          <option value="proxy">Proxy</option>
+        </select>
+        <div class="command-control">
+          <label for="dataSize">Data <output data-output="dataSize">9</output></label>
+          <input id="dataSize" data-param="dataSize" type="range" min="2" max="16" step="1" value="9">
+        </div>
+        <div class="command-control">
+          <label for="modelCapacity">Cap <output data-output="modelCapacity">1.10</output></label>
+          <input id="modelCapacity" data-param="modelCapacity" type="range" min="0.2" max="2.6" step="0.05" value="1.1">
+        </div>
+        <div class="command-control">
+          <label for="dataNoise">Noise <output data-output="dataNoise">0.25</output></label>
+          <input id="dataNoise" data-param="dataNoise" type="range" min="0" max="1.4" step="0.01" value="0.25">
+        </div>
+        <div class="command-control">
+          <label for="biasMatch">Bias <output data-output="biasMatch">0.58</output></label>
+          <input id="biasMatch" data-param="biasMatch" type="range" min="0" max="1" step="0.01" value="0.58">
+        </div>
+        <div class="command-control">
+          <label for="shiftLevel">Shift <output data-output="shiftLevel">0.22</output></label>
+          <input id="shiftLevel" data-param="shiftLevel" type="range" min="0" max="1" step="0.01" value="0.22">
+        </div>
+        <button id="buildBaseline" class="primary" data-action="pulse" type="button">Baseline</button>
+        <button id="trainModel" data-action="step" type="button">Train</button>
+        <button id="stressTest" data-action="step" type="button">Stress</button>
+        <button id="runAgentLoop" data-action="step" type="button">Agent</button>
+        <button id="resetG32" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G32 AI Foundations System Loop</h1>
+        <p class="subtitle">Rotate the AI system pipeline, then change task, representation, objective, capacity, data, noise, bias match, and shift to see generalization and deployment risk.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Generalization gap"><span>Gap</span><strong id="gapLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Train risk"><span>Train</span><strong id="trainLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Test risk"><span>Test</span><strong id="testLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Deployment risk"><span>Risk</span><strong id="riskLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading AI system diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: capacity can overfit scarce noisy data, matched bias lowers the gap, shift raises deployment risk, and agent mode adds tools, reward, feedback, and verification.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g32-foundations-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=g32-foundations-v3"></script>
+  <script>
+    window.__g32LabSnapshot = window.__g32LabSnapshot || function () { return null; };
+    createG32AIFoundationsLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

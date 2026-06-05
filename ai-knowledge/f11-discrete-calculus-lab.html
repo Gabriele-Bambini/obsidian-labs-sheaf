@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>F11 Discrete Calculus</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=f11-discrete-calculus-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="discrete-calculus" data-lab-id="f11" data-keywords="graph discrete calculus gradient divergence curl Hodge Laplacian cochains">
+    <section class="visual-stack" aria-label="Interactive 3D discrete calculus visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="F11 discrete calculus 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>F11</strong></div>
+          <div class="formula-chip"><span id="formulaText">d1 d0 = 0</span>Node potentials become edge gradients; edge flows become divergence at nodes and curl on faces.</div>
+        </div>
+        <div class="concept-rail" aria-hidden="true">
+          <span data-visual-key="cochain-0">0-cochain towers</span>
+          <span data-visual-key="cochain-1">1-cochain arrows</span>
+          <span data-visual-key="cochain-2">2-cochain face</span>
+          <span data-visual-key="incidence-b0-b1">B0/B1 boards</span>
+          <span data-visual-key="hodge-split">Hodge split rack</span>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected cochain</span><strong>Discrete operators are loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.58fr)) repeat(5,minmax(0,.58fr)) repeat(4,minmax(0,.48fr));">
+        <select id="topology" data-control="topology" aria-label="Cell complex topology">
+          <option value="filledTriangle">Filled triangle</option>
+          <option value="squareHole">Square hole</option>
+          <option value="weightedBridge">Weighted bridge</option>
+        </select>
+        <select id="field" data-control="field" aria-label="Potential field">
+          <option value="ramp">Ramp potential</option>
+          <option value="sourceSink">Source/sink</option>
+          <option value="vortex">Vortex source</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="Operator view">
+          <option value="operators">Operators</option>
+          <option value="incidence">Incidence</option>
+          <option value="hodge">Hodge split</option>
+          <option value="energy">Energy</option>
+        </select>
+        <div class="command-control">
+          <label for="potentialTilt">Tilt <output data-output="potentialTilt">0.72</output></label>
+          <input id="potentialTilt" data-param="potentialTilt" type="range" min="-1.2" max="1.2" step="0.01" value="0.72">
+        </div>
+        <div class="command-control">
+          <label for="cycleStrength">Cycle <output data-output="cycleStrength">0.62</output></label>
+          <input id="cycleStrength" data-param="cycleStrength" type="range" min="0" max="1.4" step="0.01" value="0.62">
+        </div>
+        <div class="command-control">
+          <label for="sourceStrength">Source <output data-output="sourceStrength">0.46</output></label>
+          <input id="sourceStrength" data-param="sourceStrength" type="range" min="0" max="1.2" step="0.01" value="0.46">
+        </div>
+        <div class="command-control">
+          <label for="faceWeight">Face w <output data-output="faceWeight">0.82</output></label>
+          <input id="faceWeight" data-param="faceWeight" type="range" min="0.1" max="1.6" step="0.01" value="0.82">
+        </div>
+        <div class="command-control">
+          <label for="edgeWeight">Edge w <output data-output="edgeWeight">0.90</output></label>
+          <input id="edgeWeight" data-param="edgeWeight" type="range" min="0.25" max="1.8" step="0.01" value="0.90">
+        </div>
+        <button id="toggleCurl" class="primary" data-action="pulse" type="button">Inject curl</button>
+        <button id="mixFlow" data-action="step" type="button">Mix flow</button>
+        <button id="projectHarmonic" data-action="step" type="button">Project Hodge</button>
+        <button id="resetF11" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block F 3D lab</p>
+        <h1>F11 Discrete Calculus</h1>
+        <p class="subtitle">Rotate a cell complex where raised disks are 0-cochains, arrows are 1-cochains, node rings are divergence, filled faces carry curl, and a missing face leaves harmonic residue.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Gradient"><span>Gradient</span><strong id="gradLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Divergence"><span>Divergence</span><strong id="divLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Curl"><span>Curl</span><strong id="curlLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Residue"><span>Residue</span><strong id="residueLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading discrete gradient, divergence, curl, and Hodge diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: topology changes the available faces, Curl injects circulation, Mix combines exact and cyclic flow, and Hodge isolates whether the residue is curl on a face or a loop around a hole.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=f11-discrete-calculus-v1"></script>
+  <script src="shared/ml-lab-core.js?math3d=f11-discrete-calculus-v1"></script>
+  <script>
+    window.__f11LabSnapshot = window.__f11LabSnapshot || function () { return null; };
+    createF11DiscreteCalculusLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

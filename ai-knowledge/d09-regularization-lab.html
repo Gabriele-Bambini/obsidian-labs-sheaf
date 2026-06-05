@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D09 Regularization</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=d08-d09-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="learning" data-lab-id="d09" data-keywords="regularization ridge lasso elastic net shrinkage validation bias variance early stopping">
+    <section class="visual-stack" aria-label="Interactive 3D regularization visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="D09 Regularization 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>D09</strong></div>
+          <div class="formula-chip"><span>Shrinkage sketch</span>Penalty strength reshapes the fitted curve, coefficient tower, validation U-curve, and early-stopping path.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected diagnostic</span><strong>Regularization geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.76fr) minmax(0,.72fr) repeat(6,minmax(0,.92fr)) repeat(4,minmax(0,.55fr));">
+        <select id="regularizer" data-control="mode" aria-label="Regularizer">
+          <option value="ridge">Ridge L2</option>
+          <option value="lasso">Lasso L1</option>
+          <option value="elastic">Elastic net</option>
+        </select>
+        <select id="scenario" aria-label="Data scenario">
+          <option value="smooth">Smooth</option>
+          <option value="wiggle">Wiggle</option>
+          <option value="correlated">Correlated</option>
+        </select>
+        <div class="command-control">
+          <label for="lambda">Lambda <output data-output="lambda">0.42</output></label>
+          <input id="lambda" data-param="lambda" type="range" min="0" max="1.8" step="0.01" value="0.42">
+        </div>
+        <div class="command-control">
+          <label for="degree">Degree <output data-output="degree">9</output></label>
+          <input id="degree" data-param="degree" type="number" min="1" max="13" step="1" value="9">
+        </div>
+        <div class="command-control">
+          <label for="noise">Noise <output data-output="noise">0.18</output></label>
+          <input id="noise" data-param="noise" type="range" min="0" max="0.5" step="0.01" value="0.18">
+        </div>
+        <div class="command-control">
+          <label for="sampleSize">Samples <output data-output="sampleSize">80</output></label>
+          <input id="sampleSize" data-param="sampleSize" type="range" min="30" max="160" step="5" value="80">
+        </div>
+        <div class="command-control">
+          <label for="l1Mix">L1 mix <output data-output="l1Mix">0.50</output></label>
+          <input id="l1Mix" data-param="l1Mix" type="range" min="0" max="1" step="0.01" value="0.5">
+        </div>
+        <div class="command-control">
+          <label for="patience">Patience <output data-output="patience">6</output></label>
+          <input id="patience" data-param="patience" type="range" min="1" max="12" step="1" value="6">
+        </div>
+        <button id="raise" class="primary" data-action="pulse" type="button">Raise lambda</button>
+        <button id="best" data-action="step" type="button">Best lambda</button>
+        <button id="stepReg" data-action="step" type="button">Epoch +1</button>
+        <button id="resetReg" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block D 3D lab</p>
+        <h1>D09 Regularization</h1>
+        <p class="subtitle">Tune ridge, lasso, elastic net, and early stopping as visible pressure on curves, coefficients, and validation error.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Train"><span>Train</span><strong id="trainLabel">0.000</strong></div>
+        <div class="metric" data-role="metric" data-metric="Test"><span>Test</span><strong id="testLabel">0.000</strong></div>
+        <div class="metric" data-role="metric" data-metric="Norm"><span>Norm</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Active"><span>Active</span><strong id="activeLabel">0/0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading regularization geometry.</p>
+        <p id="state" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Controls are live: lambda shrinks coefficients, degree adds flexibility, lasso zeros bars, elastic net stabilizes correlated features, and Best jumps to the validation minimum.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=d08-d09-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=d08-d09-canonical-clarity-v2"></script>
+  <script>
+    window.__d09LabSnapshot = window.__d09LabSnapshot || function () { return null; };
+    createD09RegularizationLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

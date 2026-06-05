@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E09 Diffusion Denoising</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=e08-e09-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e09" data-keywords="diffusion denoising score model noise schedule DDPM DDIM guidance">
+    <section class="visual-stack" aria-label="Interactive 3D diffusion denoising visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E09 diffusion denoising 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E09</strong></div>
+          <div class="formula-chip"><span>DDPM sketch</span>x_t mixes signal and epsilon noise; a U-Net predicts epsilon_theta, estimates x0, then the sampler walks the reverse score field.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected sample</span><strong>Diffusion trajectory is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.72fr) minmax(0,.66fr) repeat(6,minmax(0,.75fr)) repeat(4,minmax(0,.58fr));">
+        <select id="schedule" data-control="schedule" aria-label="Noise schedule">
+          <option value="linear">Linear beta</option>
+          <option value="cosine">Cosine beta</option>
+          <option value="sigmoid">Sigmoid beta</option>
+        </select>
+        <select id="sampler" aria-label="Sampler">
+          <option value="ddpm">DDPM</option>
+          <option value="ddim">DDIM</option>
+          <option value="solver">Solver</option>
+        </select>
+        <div class="command-control">
+          <label for="timestep">t <output data-output="timestep">64</output></label>
+          <input id="timestep" data-param="timestep" type="range" min="0" max="100" step="1" value="64">
+        </div>
+        <div class="command-control">
+          <label for="noiseLevel">Noise <output data-output="noiseLevel">0.62</output></label>
+          <input id="noiseLevel" data-param="noiseLevel" type="range" min="0.05" max="1" step="0.01" value="0.62">
+        </div>
+        <div class="command-control">
+          <label for="guidanceScale">Guide <output data-output="guidanceScale">1.20</output></label>
+          <input id="guidanceScale" data-param="guidanceScale" type="range" min="0" max="4" step="0.05" value="1.2">
+        </div>
+        <div class="command-control">
+          <label for="stepSize">Step <output data-output="stepSize">0.44</output></label>
+          <input id="stepSize" data-param="stepSize" type="range" min="0.1" max="1" step="0.01" value="0.44">
+        </div>
+        <div class="command-control">
+          <label for="stepCount">Steps <output data-output="stepCount">32</output></label>
+          <input id="stepCount" data-param="stepCount" type="range" min="5" max="80" step="1" value="32">
+        </div>
+        <div class="command-control">
+          <label for="conditionStrength">Cond <output data-output="conditionStrength">0.55</output></label>
+          <input id="conditionStrength" data-param="conditionStrength" type="range" min="0" max="1" step="0.01" value="0.55">
+        </div>
+        <button id="noiseForward" class="primary" data-action="step" type="button">Forward noise</button>
+        <button id="denoiseStep" data-action="step" type="button">Predict epsilon</button>
+        <button id="runReverse" data-action="pulse" type="button">Run sampler</button>
+        <button id="resetDiffusion" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E09 Diffusion Denoising</h1>
+        <p class="subtitle">Rotate the clean manifold, DDPM coefficient board, forward corruption ladder, epsilon residual, U-Net denoiser, score field, sampler paths, and guidance magnet.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Noise"><span>Noise</span><strong id="noiseLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Score"><span>Score</span><strong id="scoreLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="SNR"><span>SNR</span><strong id="snrLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Steps"><span>Steps</span><strong id="stepLabel">0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading diffusion denoising geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: schedule changes beta and coefficients, t/noise spread x_t, guidance moves conditioning, and sampler switches DDPM/DDIM/solver paths.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=e08-e09-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=e08-e09-canonical-clarity-v2"></script>
+  <script>
+    window.__e09LabSnapshot = window.__e09LabSnapshot || function () { return null; };
+    // __e09LabReady = true is set by createE09DiffusionDenoisingLab after the first render setup.
+    createE09DiffusionDenoisingLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

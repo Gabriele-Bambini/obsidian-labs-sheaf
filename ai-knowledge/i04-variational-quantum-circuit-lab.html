@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>I04 Variational Quantum Circuit</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?quantum=i04-concrete-v1">
+</head>
+<body>
+  <main class="lab-shell lab-3d-shell gnn-lab math-3d-lab" data-lab-kind="quantum" data-lab-id="i04" data-keywords="quantum machine learning variational classifier kernel barren plateau parameter shift">
+    <section class="visual-stack" aria-label="Interactive 3D variational quantum machine learning visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to rotate the 3D QML workbench. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="I04 variational quantum classifier, kernel matrix, and training landscape"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>I04</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">Encode x, run W(theta), measure shots, estimate loss, update parameters classically.</strong></div>
+        </div>
+        <div class="hud quantum-hud"><h1>Dataset plane, 3-qubit circuit, Bloch vectors, shot histogram, loss curve, parameter-shift probes, kernel matrix, and barren plateau surface.</h1></div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong id="selectedLabel">QML hybrid training loop</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select id="dataset" aria-label="Dataset">
+          <option value="xor" selected>XOR</option>
+          <option value="linear">Linear</option>
+          <option value="moons">Moons</option>
+          <option value="circles">Circles</option>
+        </select>
+        <select id="ansatz" aria-label="Ansatz">
+          <option value="entangling" selected>Entangling</option>
+          <option value="local">Local</option>
+          <option value="hardware">Hardware eff.</option>
+        </select>
+        <div class="command-control">
+          <label for="layers">Layers <output data-output="layers">1</output></label>
+          <input id="layers" type="range" min="1" max="6" step="1" value="1">
+        </div>
+        <div class="command-control">
+          <label for="shots">Shots <output data-output="shots">256</output></label>
+          <input id="shots" type="range" min="32" max="4096" step="32" value="256">
+        </div>
+        <div class="command-control">
+          <label for="noise">Noise <output data-output="noise">0.04</output></label>
+          <input id="noise" type="range" min="0" max="0.3" step="0.01" value="0.04">
+        </div>
+        <div class="command-control">
+          <label for="learningRate">LR <output data-output="learningRate">0.18</output></label>
+          <input id="learningRate" type="range" min="0.03" max="0.5" step="0.01" value="0.18">
+        </div>
+        <button id="trainStep" class="primary" type="button">Train step</button>
+        <button id="runBatch" type="button">Train 20</button>
+        <button id="addLayer" type="button">Add layer</button>
+        <button id="toggleNoise" type="button">Toggle noise</button>
+        <button id="showKernel" type="button">Kernel view</button>
+        <button id="resetI04" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block I 3D lab</p>
+        <h1>I04 Quantum Machine Learning</h1>
+        <p class="subtitle">A concrete variational classifier: classical data becomes gates, a parameterized ansatz is measured with finite shots, and a classical optimizer updates theta and phi.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Loss"><span>Loss</span><strong id="lossLabel">0.000</strong></div>
+        <div class="metric" data-role="metric" data-metric="Accuracy"><span>Accuracy</span><strong id="accLabel">0.0%</strong></div>
+        <div class="metric" data-role="metric" data-metric="Circuit"><span>Circuit</span><strong id="circuitLabel">3q / 1L</strong></div>
+        <div class="metric" data-role="metric" data-metric="Gradient"><span>Gradient</span><strong id="gradLabel">0.000</strong></div>
+        <div class="metric" data-role="metric" data-metric="Shot stderr"><span>Shot stderr</span><strong id="shotLabel">0.063</strong></div>
+        <div class="metric" data-role="metric" data-metric="Kernel"><span>Kernel</span><strong id="kernelLabel">Kernel dim</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">The quantum circuit supplies measurements, gradients, or a kernel matrix; the optimizer and SVM comparison remain classical.</p>
+        <p id="state" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Increase layers and noise to see the landscape flatten into a barren plateau; lower shots to see measurement uncertainty grow.</p>
+    </aside>
+  </main>
+  <!-- compatibility marker: class="lab-shell lab-3d-shell" -->
+  <!-- visual labels: theta; phi; clean gradients; noisy gradients -->
+  <!-- {"visual":{"kind":"vqc-qml-workbench","graphStyle":"concrete"},"graph":{"nodes":["dataset plane","encoding gates","parameterized ansatz","measurement shots","loss curve","classical optimizer","parameter-shift probes","quantum kernel matrix","SVM margin baseline","barren plateau landscape"],"edges":["data to circuit","shots to loss","gradient to update","kernel to classical SVM"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/quantum-labs.js?quantum=i04-canonical-clarity-v1"></script>
+  <script>
+    window.__i04LabReady = false;
+    window.__i04LabSnapshot = window.__i04LabSnapshot || function () { return null; };
+    createI04VariationalQmlLab();
+  </script>
+</body>
+</html>

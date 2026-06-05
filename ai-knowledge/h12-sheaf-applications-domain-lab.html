@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H12 Applications Of Sheaf GNNs</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=h05-intuitive-v11-h12-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="sheaf" data-lab-id="h12" data-keywords="applications fraud weather traffic molecule medicine recommendation knowledge graph sheaf relation-space transport">
+    <section class="visual-stack">
+      <div class="stage">
+        <div class="lab-viewport">
+          <canvas id="canvas" aria-label="H12 concrete application sheaf relation-space workbench"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>H12</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">R_{v,e} x_v -> relation space -> task loss</strong></div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>domain relation-space adapter</strong></div>
+      </div>
+      <div class="command-bar controls">
+        <select id="domain" aria-label="Application domain">
+          <option value="fraud" selected>Fraud / abuse</option>
+          <option value="weather">Weather / traffic</option>
+          <option value="molecule">Molecule bonds</option>
+          <option value="recommender">User-item events</option>
+          <option value="medicine">Medicine graph</option>
+          <option value="kg">Knowledge graph</option>
+        </select>
+        <select id="mapFamily" aria-label="Restriction map family">
+          <option value="diagonal" selected>Diagonal adapter</option>
+          <option value="edge-type">Edge-type adapter</option>
+          <option value="low-rank">Low-rank adapter</option>
+          <option value="orthogonal">Geometry adapter</option>
+        </select>
+        <select id="view" aria-label="Application view">
+          <option value="domain" selected>Domain station</option>
+          <option value="baseline">Baseline failure</option>
+          <option value="evaluation">Evaluation split</option>
+          <option value="all">All stations</option>
+        </select>
+        <div class="command-control">
+          <label for="mapStrength">Adapter strength <output data-output="mapStrength">0.64</output></label>
+          <input id="mapStrength" type="range" min="0.1" max="1" step="0.02" value="0.64">
+        </div>
+        <div class="command-control">
+          <label for="relationNoise">Relation noise <output data-output="relationNoise">0.22</output></label>
+          <input id="relationNoise" type="range" min="0" max="0.8" step="0.02" value="0.22">
+        </div>
+        <div class="command-control">
+          <label for="edgeMetadata">Edge metadata <output data-output="edgeMetadata">0.58</output></label>
+          <input id="edgeMetadata" type="range" min="0" max="1" step="0.02" value="0.58">
+        </div>
+        <div class="command-control">
+          <label for="baselineDepth">Baseline depth <output data-output="baselineDepth">4</output></label>
+          <input id="baselineDepth" type="range" min="1" max="10" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="domainShift">Domain shift <output data-output="domainShift">0.18</output></label>
+          <input id="domainShift" type="range" min="0" max="0.8" step="0.02" value="0.18">
+        </div>
+        <button id="switchDomain" class="primary" data-action="pulse" type="button">Next station</button>
+        <button id="applySheaf" data-action="step" type="button">Apply transport</button>
+        <button id="runDiffusion" data-action="step" type="button">Test split</button>
+        <button id="showFailure" data-action="pulse" type="button">Show baseline</button>
+        <button id="resetH12" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block H 3D lab</p>
+        <h1>H12 Applications Of Sheaf GNNs</h1>
+        <p class="subtitle">Concrete stations for fraud, weather / traffic, molecules, recommendation, medicine, and knowledge graphs; each relation adapter shows what agreement means before message passing.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Domain fit"><span>Domain fit</span><strong id="domainLabel">fraud / abuse</strong></div>
+        <div class="metric" data-role="metric" data-metric="Disagreement explained"><span>Adapter map</span><strong id="mapLabel">transport</strong></div>
+        <div class="metric" data-role="metric" data-metric="Application coverage"><span>Split robustness</span><strong id="splitLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Baseline failure gap"><span>Baseline gap</span><strong id="gapLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading application workbench.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Plain smoothing mixes unlike endpoint objects. The sheaf lane first maps account-device, wind-frame, bond, user-item, biomedical, or typed-KG endpoints into a relation space.</p>
+    </aside>
+  </main>
+  <!-- {"visual":{"kind":"application-map","graphStyle":"reference"},"profile":{"preferredMetric":"Domain fit"},"graph":{"nodes":["domain tile","central compatibility adapter","domain-aware task signal","fraud relation adapter","weather frame adapter","molecular bond adapter","plain baseline failure"],"edges":["relation-specific transport","domain split","baseline collapse","edge metadata"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=h05-intuitive-v11-h12-clarity-v2"></script>
+  <script src="shared/sheaf-dynamics-labs.js?math3d=h05-intuitive-v11-h12-clarity-v2"></script>
+  <script>
+    window.__h12LabReady = false;
+    window.__h12LabSnapshot = window.__h12LabSnapshot || function () { return null; };
+    createH12ApplicationsConcreteLab();
+  </script>
+</body>
+</html>

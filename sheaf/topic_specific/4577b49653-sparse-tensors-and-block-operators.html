@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true" data-topic-specific="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sparse tensors and block operators - topic-specific visual</title>
+  <link rel="stylesheet" href="../shared/topic-visual-core.css">
+</head>
+<body>
+  <main class="topic-lab">
+    <section class="stage" aria-label="Topic-specific interactive visualization">
+      <canvas id="viz"></canvas>
+      <div class="topbar">
+        <div class="chip"><span>Topic visual</span><strong data-family>Sparse block operator</strong></div>
+        <div class="chip formula"><span>Formal hook</span><strong data-formula></strong></div>
+      </div>
+      <div class="legend"></div>
+    </section>
+    <aside class="controls">
+      <header>
+        <p class="eyebrow">Generated from this note</p>
+        <h1 data-title>Sparse tensors and block operators</h1>
+        <p class="subtitle" data-question></p>
+      </header>
+      <div class="mode-grid">
+        <select data-mode aria-label="View mode">
+          <option value="object">Object view</option>
+          <option value="process">Process view</option>
+          <option value="formal">Formal view</option>
+          <option value="failure">Failure mode</option>
+        </select>
+        <button type="button" data-action="simulate">Simulate</button>
+        <button type="button" data-action="stress">Stress failure</button>
+        <button type="button" data-action="reset">Reset</button>
+      </div>
+      <div class="control-grid"></div>
+      <div class="metric-grid"></div>
+      <div class="explain">
+        <h2>How to read it</h2>
+        <p data-state></p>
+      </div>
+      <p class="footer">Portable local HTML: no CDN. The iframe and full-screen link use relative vault paths, so the visual can travel with an Obsidian sync folder.</p>
+    </aside>
+  </main>
+  <script id="topic-config" type="application/json">{"title": "Sparse tensors and block operators", "path": "I07 - Sparse tensors and block operators.md", "family": "implementation", "subtype": "sparse-block-operator", "subtypeName": "Sparse block operator", "familyName": "Implementation pipeline", "formula": "block sparse Laplacian acts without materializing dense matrices", "question": "Which blocks are nonzero, and where does memory explode if the operator is dense?", "terms": ["sparse", "tensors", "block", "operators", "lens", "changes", "object", "evidence"], "parameters": [{"name": "block size", "value": 54, "min": 0, "max": 100}, {"name": "sparsity", "value": 78, "min": 0, "max": 100}, {"name": "stalk dimension", "value": 46, "min": 0, "max": 100}, {"name": "memory pressure", "value": 42, "min": 0, "max": 100}], "metrics": ["throughput", "capacity", "sparsity", "stability"], "initialExplanation": "This visual was generated from this exact note: 'Sparse tensors and block operators'. It uses the Sparse block operator representation and highlights sparse, tensors, block, operators."}</script>
+  <script src="../shared/topic-visual-core.js"></script>
+  <script>
+    try { createTopicVisual(); }
+    catch (error) {
+      document.body.innerHTML = '<pre style="color:white;background:#05090d;padding:16px;white-space:pre-wrap">Topic visual failed: ' + error.message + '</pre>';
+      console.error(error);
+    }
+  </script>
+</body>
+</html>

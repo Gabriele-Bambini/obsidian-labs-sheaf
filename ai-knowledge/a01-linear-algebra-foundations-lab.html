@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A01 Linear Algebra Fundamentals</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a01-a02-canonical-clarity-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a01" data-keywords="linear algebra vectors 3d space axes components coordinates projection dot product basis">
+    <section class="visual-stack" aria-label="Interactive 3D mathematical visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom. Click objects to inspect.">
+          <canvas id="canvas" aria-label="A01 Linear Algebra Fundamentals 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>A01</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>Vector v lives in a 3D basis. Component legs build v, the span plane catches proj(v), the residual is orthogonal, while small matrix/rank/nullspace/dot/det instruments connect the same picture to the rest of A01.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Click a node to inspect local structure.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select data-control="mode" aria-label="Concept mode">
+            <option value="vector">Vector coordinates</option>
+            <option value="components">Components</option>
+            <option value="projection">Projection</option>
+        </select>
+        <div class="command-control">
+          <label for="a01-x">x component <output data-output="x">1.1</output></label>
+          <input id="a01-x" data-param="x" type="range" min="-2" max="2" step="0.05" value="1.1">
+        </div>
+        <div class="command-control">
+          <label for="a01-y">y component <output data-output="y">0.85</output></label>
+          <input id="a01-y" data-param="y" type="range" min="-2" max="2" step="0.05" value="0.85">
+        </div>
+        <div class="command-control">
+          <label for="a01-z">z component <output data-output="z">0.55</output></label>
+          <input id="a01-z" data-param="z" type="range" min="-2" max="2" step="0.05" value="0.55">
+        </div>
+        <div class="command-control">
+          <label for="a01-basis">Basis scale <output data-output="basis">1</output></label>
+          <input id="a01-basis" data-param="basis" type="range" min="0.5" max="2.5" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="a01-mix">Second vector mix <output data-output="mix">0.35</output></label>
+          <input id="a01-mix" data-param="mix" type="range" min="-1" max="1" step="0.05" value="0.35">
+        </div>
+        <button class="primary" data-action="pulse" type="button">Pulse</button>
+        <button data-action="step" type="button">Step</button>
+        <button data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block A 3D lab</p>
+        <h1>A01 Linear Algebra Fundamentals</h1>
+        <p class="subtitle">Orbit / rotate / zoom the system, select objects, then change parameters to experiment with linear algebra vectors 3d space axes components coordinates projection dot product basis.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Vector length">
+          <span>Vector length</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Plane projection">
+          <span>Plane projection</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Dot with u">
+          <span>Dot with u</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Basis volume">
+          <span>Basis volume</span>
+          <strong>0.00</strong>
+        </div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading the 3D mathematical system.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Command bar controls are live: every slider changes geometry, active channels, metrics, or selected-object state. Blue/cyan shows signal, amber shows frontier, red shows perturbation.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=a01-a02-canonical-clarity-v1"></script>
+  <script>
+    const labState = createGnnLab({"id":"a01","kind":"algebra","title":"A01 Linear Algebra Fundamentals","modes":[{"value":"vector","label":"Vector coordinates"},{"value":"components","label":"Components"},{"value":"projection","label":"Projection"}],"parameters":[{"key":"x","label":"x component","min":-2,"max":2,"step":0.05,"value":1.1},{"key":"y","label":"y component","min":-2,"max":2,"step":0.05,"value":0.85},{"key":"z","label":"z component","min":-2,"max":2,"step":0.05,"value":0.55},{"key":"basis","label":"Basis scale","min":0.5,"max":2.5,"step":0.05,"value":1},{"key":"mix","label":"Second vector mix","min":-1,"max":1,"step":0.05,"value":0.35}],"metrics":["Vector length","Plane projection","Dot with u","Basis volume"],"visual":{"kind":"vector-space-3d","graphStyle":"hidden"},"profile":{"preferredMetric":"Vector length","formula":"v = x e1 + y e2 + z e3","insight":"This lab keeps linear algebra at the object level: one vector in 3D space, its coordinate components, its projection onto the base plane, and its comparison with a second vector."},"graph":{"nodes":[{"label":"origin","position":[-0.35,-1.75,0],"group":0},{"label":"x axis","position":[2.2,-1.75,0],"group":1},{"label":"y axis","position":[-0.35,0.55,0],"group":2},{"label":"z axis","position":[-0.35,-1.75,2.2],"group":3},{"label":"vector v","position":[1,-0.65,0.7],"group":4},{"label":"component legs","position":[0.65,-1.05,0.35],"group":5},{"label":"plane projection","position":[1,-1.75,0.7],"group":6},{"label":"second vector u","position":[-1,-1.2,1.15],"group":7}],"edges":[[0,1,"basis x direction",1],[0,2,"basis y direction",1],[0,3,"basis z direction",1],[0,4,"v coordinates",1.4],[0,5,"component decomposition",1],[4,6,"projection shadow",1.1],[0,7,"second vector comparison",0.9],[4,7,"dot product angle",0.8]]}});
+    window.__a01LabSnapshot = () => window.__gLabSnapshot();
+    Object.defineProperty(window, "__a01LabReady", { get: () => window.__gLabReady === true });
+  </script>
+</body>
+</html>

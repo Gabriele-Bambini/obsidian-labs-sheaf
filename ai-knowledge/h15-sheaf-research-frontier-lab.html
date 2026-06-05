@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H15 Research Frontier In Sheaf GNNs</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=h05-intuitive-v11-h15-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="sheaf" data-lab-id="h15" data-keywords="research frontier dynamic sheaves topology learning gauge constraints hypergraph multimodal scalability quantum ablation benchmark">
+    <section class="visual-stack">
+      <div class="stage">
+        <div class="lab-viewport">
+          <canvas id="canvas" aria-label="H15 concrete sheaf GNN research experiment bench"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>H15</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">learn F, test geometry, ablate baseline</strong></div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>dynamic experiment station</strong></div>
+      </div>
+      <div class="command-bar controls">
+        <select id="frontier" aria-label="Frontier mode">
+          <option value="dynamic" selected>Dynamic sheaves</option>
+          <option value="structure">Learn topology</option>
+          <option value="constraints">Constraint families</option>
+          <option value="hypergraph">Hypergraph / multimodal</option>
+          <option value="scale">Scalability</option>
+          <option value="quantum">Physical / quantum</option>
+          <option value="evaluation">Evaluation wall</option>
+        </select>
+        <select id="mapFamily" aria-label="Map family">
+          <option value="signed">Signed</option>
+          <option value="diagonal" selected>Diagonal</option>
+          <option value="low-rank">Low-rank</option>
+          <option value="orthogonal">Orthogonal</option>
+          <option value="dense">Dense</option>
+          <option value="unitary">Unitary</option>
+        </select>
+        <select id="benchmark" aria-label="Benchmark type">
+          <option value="signed" selected>Signed synthetic</option>
+          <option value="temporal">Temporal split</option>
+          <option value="hypergraph">Hypergraph task</option>
+          <option value="quantum">Quantum baseline</option>
+        </select>
+        <div class="command-control">
+          <label for="timeDrift">Temporal drift <output data-output="timeDrift">0.26</output></label>
+          <input id="timeDrift" type="range" min="0" max="1" step="0.02" value="0.26">
+        </div>
+        <div class="command-control">
+          <label for="topologyFreedom">Topology freedom <output data-output="topologyFreedom">0.42</output></label>
+          <input id="topologyFreedom" type="range" min="0" max="1" step="0.02" value="0.42">
+        </div>
+        <div class="command-control">
+          <label for="constraintStrength">Constraint strength <output data-output="constraintStrength">0.58</output></label>
+          <input id="constraintStrength" type="range" min="0" max="1" step="0.02" value="0.58">
+        </div>
+        <div class="command-control">
+          <label for="scale">Edge count |E| <output data-output="scale">42</output></label>
+          <input id="scale" type="range" min="10" max="100" step="1" value="42">
+        </div>
+        <div class="command-control">
+          <label for="supervision">Supervision <output data-output="supervision">0.62</output></label>
+          <input id="supervision" type="range" min="0" max="1" step="0.02" value="0.62">
+        </div>
+        <div class="command-control">
+          <label for="noise">Topology noise <output data-output="noise">0.18</output></label>
+          <input id="noise" type="range" min="0" max="1" step="0.02" value="0.18">
+        </div>
+        <button id="advanceFrontier" class="primary" data-action="step" type="button">Advance station</button>
+        <button id="applyConstraint" data-action="step" type="button">Apply constraint</button>
+        <button id="stressScale" data-action="pulse" type="button">Stress scale</button>
+        <button id="runAblation" data-action="pulse" type="button">Run ablation</button>
+        <button id="resetH15" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block H 3D lab</p>
+        <h1>H15 Research Frontier In Sheaf GNNs</h1>
+        <p class="subtitle">A research experiment bench: event stream, topology forge, restriction-map rack, sheaf diffusion chamber, scale stress rig, quantum/gauge station, and evaluation wall.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Open-problem pressure"><span>Frontier</span><strong id="frontierLabel">dynamic</strong></div>
+        <div class="metric" data-role="metric" data-metric="Theory anchor"><span>Stability</span><strong id="stabilityLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Direction coverage"><span>Expressivity</span><strong id="expressLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Systems risk"><span>Map cost</span><strong id="costLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading research experiment bench.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Every research claim passes through the same bench: choose maps, stress topology/time/scale, then compare against matched baselines and ablations.</p>
+    </aside>
+  </main>
+  <!-- {"visual":{"kind":"research-roadmap","graphStyle":"reference"},"profile":{"preferredMetric":"Open-problem pressure"},"graph":{"nodes":["research direction","coupling constraint","usable SNN core","benchmark validation lane","theory proof lane","dynamic sheaf bench","topology forge","restriction map rack","scale stress rig"],"edges":["constraint pressure","baseline ablation","systems feasibility","theory validation"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=h05-intuitive-v11-h15-clarity-v2"></script>
+  <script src="shared/sheaf-dynamics-labs.js?math3d=h05-intuitive-v11-h15-clarity-v2"></script>
+  <script>
+    window.__h15LabReady = false;
+    window.__h15LabSnapshot = window.__h15LabSnapshot || function () { return null; };
+    createH15ResearchFrontierConcreteLab();
+  </script>
+</body>
+</html>

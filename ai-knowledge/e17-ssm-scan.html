@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E17 SSM Scan</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=e17-ssm-canonical-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e17" data-keywords="state space model SSM S4 Mamba HiPPO selective scan convolution recurrent memory">
+    <section class="visual-stack" aria-label="Interactive 3D State Space Model selective scan visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E17 SSM Scan 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E17</strong></div>
+          <div class="formula-chip"><span>SSM sketch</span>Input writes into a compact state, A evolves memory, C reads output, and fixed kernels or selective scans make long sequences efficient.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected sequence</span><strong>SSM scan geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.72fr) minmax(0,.72fr) repeat(6,minmax(0,.74fr)) repeat(4,minmax(0,.56fr));">
+        <select id="sequencePreset" data-control="sequencePreset" aria-label="Sequence preset">
+          <option value="topic">Topic memory</option>
+          <option value="sensor">Bursty sensor</option>
+          <option value="reset">Reset stream</option>
+        </select>
+        <select id="executionView" data-control="executionView" aria-label="Execution view">
+          <option value="recurrent">Recurrent</option>
+          <option value="convolution">Convolution</option>
+          <option value="scan">Selective scan</option>
+        </select>
+        <div class="command-control">
+          <label for="retention">Retain <output data-output="retention">0.62</output></label>
+          <input id="retention" data-param="retention" type="range" min="0.05" max="0.98" step="0.01" value="0.62">
+        </div>
+        <div class="command-control">
+          <label for="inputGate">Write <output data-output="inputGate">0.55</output></label>
+          <input id="inputGate" data-param="inputGate" type="range" min="0" max="1" step="0.01" value="0.55">
+        </div>
+        <div class="command-control">
+          <label for="deltaScale">Delta <output data-output="deltaScale">0.38</output></label>
+          <input id="deltaScale" data-param="deltaScale" type="range" min="0.05" max="1" step="0.01" value="0.38">
+        </div>
+        <div class="command-control">
+          <label for="stateSize">State <output data-output="stateSize">5</output></label>
+          <input id="stateSize" data-param="stateSize" type="range" min="2" max="10" step="1" value="5">
+        </div>
+        <div class="command-control">
+          <label for="selectivity">Select <output data-output="selectivity">0.44</output></label>
+          <input id="selectivity" data-param="selectivity" type="range" min="0" max="1" step="0.01" value="0.44">
+        </div>
+        <div class="command-control">
+          <label for="kernelLength">Kernel <output data-output="kernelLength">8</output></label>
+          <input id="kernelLength" data-param="kernelLength" type="range" min="3" max="16" step="1" value="8">
+        </div>
+        <button id="scanStep" class="primary" data-action="step" type="button">Scan state</button>
+        <button id="composeBlocks" data-action="pulse" type="button">Compose scan</button>
+        <button id="compareAttention" data-action="pulse" type="button">Compare cost</button>
+        <button id="resetSsm" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E17 SSM Scan</h1>
+        <p class="subtitle">Rotate recurrent state lanes, convolution kernels, HiPPO memory basis, complex oscillatory modes, Mamba gates, selective Delta resets, associative scan tree, and attention-cost comparison.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Memory retention"><span>Memory</span><strong id="memoryRetentionLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Scan error"><span>Scan</span><strong id="scanErrorLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Kernel reach"><span>Kernel</span><strong id="kernelReachLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Stream cost"><span>Cost</span><strong id="streamCostLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading SSM scan geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: retention lengthens memory, write gate changes input injection, Delta resets or preserves state, selectivity makes Mamba token-dependent, and scan shows recurrence as parallel composition.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=e17-ssm-canonical-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=e17-ssm-canonical-v3"></script>
+  <script>
+    window.__e17LabSnapshot = window.__e17LabSnapshot || function () { return null; };
+    // __e17LabReady = true is set by createE17SsmScanLab after the first render setup.
+    createE17SsmScanLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

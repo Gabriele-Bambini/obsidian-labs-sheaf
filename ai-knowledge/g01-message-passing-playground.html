@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G01 Message Passing Playground</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g01-message-passing-v4">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="message-passing" data-lab-id="g01" data-keywords="message aggregation neighborhood permutation invariant multiset">
+    <section class="visual-stack" aria-label="Interactive 3D message passing visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G01 message passing 3D interactive graph"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G01</strong></div>
+          <div class="formula-chip"><span id="formulaText">h'_v = gamma(h_v, aggregate messages)</span>Messages travel along edges; aggregation compresses an unordered neighborhood into one update.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected neighborhood</span><strong>Message passing is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.58fr)) repeat(5,minmax(0,.58fr)) repeat(4,minmax(0,.48fr));">
+        <select id="aggregator" data-control="aggregator" aria-label="Aggregation operator">
+          <option value="sum">Sum aggregator</option>
+          <option value="mean">Mean aggregator</option>
+          <option value="max">Max gate</option>
+        </select>
+        <select id="graphShape" data-control="graphShape" aria-label="Graph shape">
+          <option value="hub">Hub neighborhood</option>
+          <option value="chain">Long chain</option>
+          <option value="twoClass">Two communities</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="Message passing view">
+          <option value="messages">Messages</option>
+          <option value="multiset">Multiset</option>
+          <option value="frontier">k-hop frontier</option>
+          <option value="readout">Readout</option>
+        </select>
+        <div class="command-control">
+          <label for="layers">Layers <output data-output="layers">3</output></label>
+          <input id="layers" data-param="layers" type="range" min="1" max="8" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="mixing">Mixing <output data-output="mixing">0.74</output></label>
+          <input id="mixing" data-param="mixing" type="range" min="0.15" max="1.4" step="0.01" value="0.74">
+        </div>
+        <div class="command-control">
+          <label for="featureNoise">Noise <output data-output="featureNoise">0.22</output></label>
+          <input id="featureNoise" data-param="featureNoise" type="range" min="0" max="0.9" step="0.01" value="0.22">
+        </div>
+        <div class="command-control">
+          <label for="neighborhoodRadius">Radius <output data-output="neighborhoodRadius">2</output></label>
+          <input id="neighborhoodRadius" data-param="neighborhoodRadius" type="range" min="1" max="4" step="1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="residual">Residual <output data-output="residual">0.34</output></label>
+          <input id="residual" data-param="residual" type="range" min="0" max="0.9" step="0.01" value="0.34">
+        </div>
+        <button id="sendMessages" class="primary" data-action="pulse" type="button">Send messages</button>
+        <button id="stepFrontier" data-action="step" type="button">Expand hops</button>
+        <button id="permuteOrder" data-action="step" type="button">Shuffle order</button>
+        <button id="resetG01" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G01 Message Passing Playground</h1>
+        <p class="subtitle">Rotate the selected node, its incoming edge messages, unordered neighbor multiset, aggregation bars, k-hop frontier, and permutation-invariance diagnostic.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Message norm"><span>Message norm</span><strong id="messageNormLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Degree bias"><span>Degree bias</span><strong id="degreeBiasLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Equivariance gap"><span>Equiv gap</span><strong id="equivarianceLabel">0.000</strong></div>
+        <div class="metric" data-role="metric" data-metric="Max dropped"><span>Max dropped</span><strong id="maxDroppedLabel">0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading message aggregation diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: Sum exposes multiplicity and degree bias, Mean normalizes by neighborhood size, Max keeps only the strongest coordinate, and Permute changes neighbor order without changing the update.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g01-message-passing-v4"></script>
+  <script src="shared/ml-lab-core.js?math3d=g01-message-passing-v4"></script>
+  <script>
+    window.__g01LabSnapshot = window.__g01LabSnapshot || function () { return null; };
+    createG01MessagePassingLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H07 Sheaf Neural Networks</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=h05-intuitive-v11-h07-concrete-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="sheaf" data-lab-id="h07" data-keywords="sheaf neural networks learned restriction maps message passing heterophily compatibility SNN layers">
+    <section class="visual-stack">
+      <div class="stage">
+        <div class="lab-viewport">
+          <canvas id="canvas" aria-label="H07 concrete sheaf neural network architecture visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>H07</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">m = B_v^T B_u h_u</strong></div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>SNN layer architecture</strong></div>
+      </div>
+      <div class="command-bar controls">
+        <select id="mode" aria-label="SNN view">
+          <option value="architecture">Architecture</option>
+          <option value="restrictions">Learn restrictions</option>
+          <option value="message">Message pass</option>
+          <option value="oversmoothing">Over-smoothing</option>
+        </select>
+        <select id="mapFamily" aria-label="Restriction map family">
+          <option value="scalar">Scalar maps</option>
+          <option value="diagonal" selected>Diagonal maps</option>
+          <option value="orthogonal">Orthogonal maps</option>
+          <option value="projection">Projection maps</option>
+          <option value="dense">Dense maps</option>
+        </select>
+        <select id="comparison" aria-label="Layer comparison">
+          <option value="sheaf">Sheaf transport</option>
+          <option value="graph">Raw graph smoothing</option>
+        </select>
+        <div class="command-control">
+          <label for="layerDepth">SNN layers <output data-output="layerDepth">3</output></label>
+          <input id="layerDepth" type="range" min="1" max="8" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="relationSharpness">Compatibility sharpness <output data-output="relationSharpness">1.00</output></label>
+          <input id="relationSharpness" type="range" min="0.25" max="1.8" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="relationNoise">Relation noise <output data-output="relationNoise">0.28</output></label>
+          <input id="relationNoise" type="range" min="0" max="0.8" step="0.02" value="0.28">
+        </div>
+        <div class="command-control">
+          <label for="neighborBudget">Active neighbors <output data-output="neighborBudget">4</output></label>
+          <input id="neighborBudget" type="range" min="1" max="6" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="selfWeight">Self representation <output data-output="selfWeight">0.52</output></label>
+          <input id="selfWeight" type="range" min="0" max="1" step="0.02" value="0.52">
+        </div>
+        <button id="learnMaps" class="primary" data-action="step" type="button">Learn restrictions</button>
+        <button id="passMessage" data-action="pulse" type="button">Pass message</button>
+        <button id="stepLayer" data-action="step" type="button">Step layer</button>
+        <button id="resetH07" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block H 3D lab</p>
+        <h1>H07 Sheaf Neural Networks</h1>
+        <p class="subtitle">A real SNN layer: node feature towers, shared restriction predictor, edge-stalk comparison chambers, transported messages, aggregation, update, and loss diagnostics.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Compatibility gain"><span>Compatibility gain</span><strong id="gainLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Message quality"><span>Message quality</span><strong id="energyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Neighbor coverage"><span>Map agreement</span><strong id="mapLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Map regularity"><span>Over-smoothing</span><strong id="smoothLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading SNN architecture diagnostics.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">The center chamber compares restricted endpoint features. Message arrows are transported by B_v^T B_u before aggregation updates the target representation.</p>
+    </aside>
+  </main>
+  <!-- {"visual":{"kind":"snn-compatibility","graphStyle":"hybrid"},"profile":{"preferredMetric":"Compatibility gain"},"graph":{"nodes":["neighbor representation space","edge-stalk comparison chamber","trusted sheaf message","restriction predictor","aggregation readout"],"edges":["learned restriction map","B_v transpose B_u transport","layer update"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=h05-intuitive-v11-h07-concrete-v2"></script>
+  <script src="shared/sheaf-dynamics-labs.js?math3d=h05-intuitive-v11-h07-concrete-v2"></script>
+  <script>
+    window.__h07LabReady = false;
+    window.__h07LabSnapshot = window.__h07LabSnapshot || function () { return null; };
+    createH07SheafNeuralNetworkConcreteLab();
+  </script>
+</body>
+</html>

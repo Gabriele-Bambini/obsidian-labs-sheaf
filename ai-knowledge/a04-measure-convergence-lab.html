@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A04 Measure Convergence</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a03-a04-canonical-clarity-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a04" data-keywords="measure convergence Lebesgue integral limits">
+    <section class="visual-stack" aria-label="Interactive 3D mathematical visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom. Click objects to inspect.">
+          <canvas id="canvas" aria-label="A04 Measure Convergence 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>A04</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>Domain, Measurable sets, Function sequence, Support, Lebesgue slices, DCT test: compare pointwise/a.e. limits with integral mass.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Click a node to inspect local structure.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select data-control="mode" aria-label="Concept mode">
+            <option value="pointwise">Pointwise limit</option>
+            <option value="spike">A.E. spike</option>
+            <option value="simple">Lebesgue slices</option>
+        </select>
+        <div class="command-control">
+          <label for="a04-n">sequence n <output data-output="n">8</output></label>
+          <input id="a04-n" data-param="n" type="range" min="1" max="40" step="1" value="8">
+        </div>
+        <div class="command-control">
+          <label for="a04-epsilon">epsilon <output data-output="epsilon">0.12</output></label>
+          <input id="a04-epsilon" data-param="epsilon" type="range" min="0.02" max="0.5" step="0.01" value="0.12">
+        </div>
+        <div class="command-control">
+          <label for="a04-support">support <output data-output="support">0.35</output></label>
+          <input id="a04-support" data-param="support" type="range" min="0.1" max="0.8" step="0.02" value="0.35">
+        </div>
+        <div class="command-control">
+          <label for="a04-partitions">levels <output data-output="partitions">6</output></label>
+          <input id="a04-partitions" data-param="partitions" type="range" min="3" max="14" step="1" value="6">
+        </div>
+        <div class="command-control">
+          <label for="a04-envelope">bound <output data-output="envelope">1.35</output></label>
+          <input id="a04-envelope" data-param="envelope" type="range" min="0.4" max="3" step="0.05" value="1.35">
+        </div>
+        <button class="primary" data-action="pulse" type="button">Pulse</button>
+        <button data-action="step" type="button">Step</button>
+        <button data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block A 3D lab</p>
+        <h1>A04 Measure Convergence</h1>
+        <p class="subtitle">Orbit / rotate / zoom the system, select objects, then change parameters to experiment with measure convergence Lebesgue integral limits.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Sup error">
+          <span>Sup error</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="L1 integral">
+          <span>L1 integral</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Support measure">
+          <span>Support measure</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Dominated ratio">
+          <span>Dominated ratio</span>
+          <strong>0.00</strong>
+        </div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading the 3D mathematical system.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Command bar controls are live: every slider changes geometry, active channels, metrics, or selected-object state. Blue/cyan shows signal, amber shows frontier, red shows perturbation.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=a03-a04-canonical-clarity-v1"></script>
+  <script>
+    const labState = createGnnLab({"id":"a04","kind":"algebra","title":"A04 Measure Convergence","modes":[{"value":"pointwise","label":"Pointwise limit"},{"value":"spike","label":"A.E. spike"},{"value":"simple","label":"Lebesgue slices"}],"parameters":[{"key":"n","label":"sequence n","min":1,"max":40,"step":1,"value":8},{"key":"epsilon","label":"epsilon","min":0.02,"max":0.5,"step":0.01,"value":0.12},{"key":"support","label":"support","min":0.1,"max":0.8,"step":0.02,"value":0.35},{"key":"partitions","label":"levels","min":3,"max":14,"step":1,"value":6},{"key":"envelope","label":"bound","min":0.4,"max":3,"step":0.05,"value":1.35}],"metrics":["Sup error","L1 integral","Support measure","Dominated ratio"],"visual":{"kind":"measure-convergence-3d","graphStyle":"hidden"},"profile":{"preferredMetric":"L1 integral","formula":"f_n -> f pointwise/a.e. does not imply int f_n dmu -> int f dmu","insight":"A04 shows convergence as measurable geometry: bars are f_n, the green footprint is support, and horizontal slices build the integral."},"graph":{"nodes":[{"label":"domain [0,1]","position":[-2.6,-1.8,0],"group":0},{"label":"function sequence","position":[-0.8,-0.55,0.15],"group":1},{"label":"support measure","position":[0.7,-1.72,0.25],"group":2},{"label":"Lebesgue slices","position":[2.1,-0.5,0.45],"group":3},{"label":"limit test","position":[2.8,-1.5,-0.5],"group":4}],"edges":[[0,1,"measurable function",1],[1,2,"support footprint",1],[1,3,"range slicing",1],[2,4,"a.e. exception",1],[3,4,"integral limit test",1]]}});
+    window.__a04LabSnapshot = () => window.__gLabSnapshot();
+    Object.defineProperty(window, "__a04LabReady", { get: () => window.__gLabReady === true });
+  </script>
+</body>
+</html>

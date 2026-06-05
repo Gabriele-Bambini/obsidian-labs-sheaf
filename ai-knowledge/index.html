@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Knowledge Interactive Labs</title>
+  <link rel="stylesheet" href="./shared/interactive.css">
+  <style>
+    .catalog {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 32px 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .card {
+      display: block;
+      min-height: 160px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--ink);
+      text-decoration: none;
+      box-shadow: var(--shadow);
+    }
+    .card span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .coverage-link {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 8px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <main class="catalog">
+    <h1>AI Knowledge Interactive Labs</h1>
+    <p>Local process visualizations embedded from the Obsidian notes.</p>
+    <p><a class="coverage-link" href="./COVERAGE_MAP.md">Open the interactive coverage map</a></p>
+    <section class="grid" aria-label="Interactive lab catalog">
+      <a class="card" href="./a01-linear-algebra-foundations-lab.html">
+        <strong>Linear Algebra Foundations</strong>
+        <span>Orbit a 3D transformed basis cell with live span, projection, nullspace, determinant, rank, and conditioning diagnostics.</span>
+      </a>
+      <a class="card" href="./a02-linear-map-grid.html">
+        <strong>Linear Maps, Kernel And Image</strong>
+        <span>Orbit domain and codomain planes while kernel, image, quotient collapse, dual level sets, and rank-nullity update live.</span>
+      </a>
+      <a class="card" href="./a03-eigen-quadratic-form.html">
+        <strong>3D Multivariable Calculus</strong>
+        <span>Orbit Hessian surfaces, level curves, gradients, Taylor patches, eigen-directions, and constrained motion.</span>
+      </a>
+      <a class="card" href="./a04-measure-convergence-lab.html">
+        <strong>3D Measure And Convergence</strong>
+        <span>Orbit function sequences over x and n while support measure, L1 error, sup error, integrals, and simple approximations update.</span>
+      </a>
+      <a class="card" href="./a05-functional-analysis-operator-lab.html">
+        <strong>Functional Analysis Operators</strong>
+        <span>Compare Hilbert projection, Banach contraction, compact smoothing, dual functionals, and derivative amplification.</span>
+      </a>
+      <a class="card" href="./a06-topology-neighborhood-lab.html">
+        <strong>Topology Neighborhoods</strong>
+        <span>Change spaces, subsets, and probe neighborhoods to compare openness, compactness, and connectedness.</span>
+      </a>
+      <a class="card" href="./a07-measure-integration.html">
+        <strong>Differential Geometry Volume Intuition</strong>
+        <span>Use region accumulation as a bridge to coordinate patches, local area, and manifold volume elements.</span>
+      </a>
+      <a class="card" href="./a08-algebra-structure-lab.html">
+        <strong>Abstract Algebra Structures</strong>
+        <span>Switch between groups, rings, and fields while checking closure, inverses, and distributivity.</span>
+      </a>
+      <a class="card" href="./a09-category-theory-diagram-lab.html">
+        <strong>Category Theory Diagrams</strong>
+        <span>Animate objects, arrows, composition, functor translation, posets, and naturality squares.</span>
+      </a>
+      <a class="card" href="./a10-category-limits-adjunctions-lab.html">
+        <strong>Limits And Adjunctions</strong>
+        <span>Compare universal cones with free-forgetful adjunction diagrams.</span>
+      </a>
+      <a class="card" href="./a11-information-theory-lab.html">
+        <strong>Information Theory Quantities</strong>
+        <span>Compare entropy, cross-entropy, KL divergence, and mutual information under changing probabilities.</span>
+      </a>
+      <a class="card" href="./a12-algebraic-topology-lab.html">
+        <strong>3D Algebraic Topology</strong>
+        <span>Orbit a simplicial complex while filtration, triangle fill, and sample density change Betti numbers.</span>
+      </a>
+      <a class="card" href="./a13-differential-equations-flow-lab.html">
+        <strong>3D Differential Equations Flow</strong>
+        <span>Orbit vector fields, compare Euler with RK4, and watch initial-value solutions climb through time.</span>
+      </a>
+      <a class="card" href="./a14-complex-contour-residue-lab.html">
+        <strong>Complex Contours And Residues</strong>
+        <span>Move poles through a contour and see how winding number controls residue integrals.</span>
+      </a>
+      <a class="card" href="./a15-numerical-methods-stability-lab.html">
+        <strong>3D Numerical Stability</strong>
+        <span>Compare conditioning, residual paths, root-finding behavior, finite-difference error, and trusted digits.</span>
+      </a>
+      <a class="card" href="./b01-probability-foundations-lab.html">
+        <strong>3D Probability Foundations</strong>
+        <span>Orbit probability mass over outcomes, condition on evidence, inspect Bayes updates, and sample Monte Carlo averages.</span>
+      </a>
+      <a class="card" href="./b02-multivariate-probability-lab.html">
+        <strong>3D Multivariate Probability</strong>
+        <span>Orbit a bivariate Gaussian, change covariance, project marginals, and slice conditional distributions.</span>
+      </a>
+      <a class="card" href="./b03-estimator-likelihood-lab.html">
+        <strong>Estimator Likelihood</strong>
+        <span>Sample Bernoulli data, fit MLE and MAP estimates, and inspect the likelihood curve.</span>
+      </a>
+      <a class="card" href="./b04-hypothesis-testing-lab.html">
+        <strong>3D Hypothesis Testing</strong>
+        <span>Orbit null and alternative sampling distributions while alpha, p-values, Type II error, and power change.</span>
+      </a>
+      <a class="card" href="./b05-bayesian-updating.html">
+        <strong>Bayesian Updating</strong>
+        <span>Update a Beta prior with Bernoulli evidence and watch likelihood become posterior belief.</span>
+      </a>
+      <a class="card" href="./b06-markov-chain-lab.html">
+        <strong>Markov Chain Dynamics</strong>
+        <span>Step a transition matrix, compare sample paths with distributions, and find stationarity.</span>
+      </a>
+      <a class="card" href="./b07-advanced-stochastic-calculus-lab.html">
+        <strong>3D Stochastic Calculus</strong>
+        <span>Orbit Brownian and Ito paths while drift, diffusion, time step, quadratic variation, and mean reversion change.</span>
+      </a>
+      <a class="card" href="./b08-information-geometry-lab.html">
+        <strong>3D Information Geometry</strong>
+        <span>Orbit a Fisher metric surface, KL curvature bowl, metric ellipse, and natural-gradient step on a Gaussian manifold.</span>
+      </a>
+      <a class="card" href="./b09-nonparametric-statistics-lab.html">
+        <strong>3D Non-parametric Statistics</strong>
+        <span>Orbit KDE curves, true density, bootstrap replicas, and kNN local-radius geometry as bandwidth and sample size change.</span>
+      </a>
+      <a class="card" href="./b10-causal-inference-lab.html">
+        <strong>3D Causal Inference</strong>
+        <span>Orbit a DAG, cut incoming arrows with do-interventions, and compare association, adjustment, true effects, and collider bias.</span>
+      </a>
+      <a class="card" href="./c01-convex-analysis-lab.html">
+        <strong>3D Convex Analysis</strong>
+        <span>Orbit epigraphs, Jensen chords, supporting hyperplanes, subgradients, and Fenchel conjugate certificates.</span>
+      </a>
+      <a class="card" href="./c02-optimization-landscape.html">
+        <strong>Optimization Landscape</strong>
+        <span>Compare gradient descent, momentum, and Newton-style curvature correction on loss surfaces.</span>
+      </a>
+      <a class="card" href="./c03-constrained-optimization.html">
+        <strong>Constrained Optimization</strong>
+        <span>See feasible regions, active boundaries, Lagrange normals, barriers, and penalties.</span>
+      </a>
+      <a class="card" href="./c04-stochastic-optimization-lab.html">
+        <strong>3D Stochastic Optimization</strong>
+        <span>Orbit noisy minibatch-gradient trajectories while batch size, learning rate, momentum, Adam scaling, and variance change.</span>
+      </a>
+      <a class="card" href="./c05-euler-lagrange-action-lab.html">
+        <strong>Calculus of Variations</strong>
+        <span>Manipulate curves, perturbations, action values, Euler-Lagrange residuals, and a 3D functional landscape.</span>
+      </a>
+      <a class="card" href="./c06-optimal-control-lab.html">
+        <strong>3D Optimal Control</strong>
+        <span>Orbit state-time trajectories while LQR, saturated feedback, bang-bang control, value geometry, and control costs change.</span>
+      </a>
+      <a class="card" href="./c07-duality-theory-lab.html">
+        <strong>3D Duality Theory</strong>
+        <span>Orbit primal objectives, active constraints, Lagrangian saddle geometry, dual lower bounds, KKT multipliers, and gaps.</span>
+      </a>
+      <a class="card" href="./c08-proximal-methods-lab.html">
+        <strong>3D Proximal Methods</strong>
+        <span>Orbit composite objectives, soft-thresholding, Moreau envelopes, proximal-gradient steps, and fixed-point residuals.</span>
+      </a>
+      <a class="card" href="./c09-nonconvex-optimization-lab.html">
+        <strong>3D Non-convex Optimization</strong>
+        <span>Orbit rugged landscapes, basins of attraction, saddle curvature, momentum paths, and noisy SGD escape.</span>
+      </a>
+      <a class="card" href="./c10-optimal-transport-lab.html">
+        <strong>3D Optimal Transport</strong>
+        <span>Orbit source and target mass, Kantorovich flow lanes, Sinkhorn blur, dual potentials, and displacement interpolation.</span>
+      </a>
+      <a class="card" href="./d01-linear-models-lab.html">
+        <strong>3D Linear Models</strong>
+        <span>Fit regression planes, descend convex loss bowls, compare ridge shrinkage, and inspect logistic decision boundaries.</span>
+      </a>
+      <a class="card" href="./d02-svm-margin-kernel-lab.html">
+        <strong>3D Support Vector Machines</strong>
+        <span>Orbit maximum margins, hinge-loss violations, support vectors, soft-margin penalties, and kernel decision surfaces.</span>
+      </a>
+      <a class="card" href="./d03-tree-models-lab.html">
+        <strong>3D Tree-Based Models</strong>
+        <span>Grow CART splits, scan impurity gain, prune weak branches, and compare one tree with a forest vote.</span>
+      </a>
+      <a class="card" href="./d04-dimensionality-reduction-lab.html">
+        <strong>3D Dimensionality Reduction</strong>
+        <span>Orbit PCA planes, reconstruction residuals, random projections, and manifold neighborhood preservation.</span>
+      </a>
+      <a class="card" href="./d05-clustering-algorithms-lab.html">
+        <strong>3D Clustering Algorithms</strong>
+        <span>Compare K-means centroids, DBSCAN density reachability, GMM responsibilities, and spectral graph cuts.</span>
+      </a>
+      <a class="card" href="./d06-ensemble-methods-lab.html">
+        <strong>3D Ensemble Methods</strong>
+        <span>Orbit base learners, bagging variance reduction, random-forest decorrelation, boosting residuals, and stacking weights.</span>
+      </a>
+      <a class="card" href="./d07-metric-learning-lab.html">
+        <strong>Metric Learning Embeddings</strong>
+        <span>Train triplet and contrastive embeddings by pulling positives together and pushing hard negatives past a margin.</span>
+      </a>
+      <a class="card" href="./d08-learning-theory-lab.html">
+        <strong>3D Learning Theory</strong>
+        <span>Orbit empirical and population risk, capacity bounds, VC shattering, Rademacher signs, and stability margins.</span>
+      </a>
+      <a class="card" href="./d09-regularization-lab.html">
+        <strong>Regularization Bias-Variance Lab</strong>
+        <span>Adjust shrinkage, sparsity, early stopping, and noise to compare train error, test error, and coefficient stability.</span>
+      </a>
+      <a class="card" href="./d10-model-selection-evaluation-lab.html">
+        <strong>3D Model Selection And Evaluation</strong>
+        <span>Orbit train/validation/test splits, hyperparameter search optimism, CV folds, nested CV, calibration, thresholds, and leakage.</span>
+      </a>
+      <a class="card" href="./e03-convolution-kernel-lab.html">
+        <strong>Convolution Kernel</strong>
+        <span>Slide kernels over a grid and compare stride, padding, feature maps, and pooling.</span>
+      </a>
+      <a class="card" href="./e04-rnn-hidden-state-lab.html">
+        <strong>RNN Hidden State</strong>
+        <span>Unroll recurrent memory and compare vanilla recurrence with gated gradient flow.</span>
+      </a>
+      <a class="card" href="./e06-llm-token-prediction.html">
+        <strong>LLM Token Prediction</strong>
+        <span>Adjust temperature and top-k filtering while an autoregressive model chooses the next token.</span>
+      </a>
+      <a class="card" href="./e10-normalizing-flow-density.html">
+        <strong>Normalizing Flow Density</strong>
+        <span>Warp a base Gaussian through an invertible map and inspect the log-Jacobian correction.</span>
+      </a>
+      <a class="card" href="./e11-gridworld-bellman-lab.html">
+        <strong>Gridworld Bellman Backups</strong>
+        <span>Run value iteration and watch rewards propagate into a greedy policy.</span>
+      </a>
+      <a class="card" href="./f01-graph-spectral-algebra-lab.html">
+        <strong>3D Graph Spectral Algebra</strong>
+        <span>Orbit graph operators, incidence differences, Laplacian energy, eigenmodes, heat flow, and cut bottlenecks.</span>
+      </a>
+      <a class="card" href="./f02-algebraic-graph-matrices.html">
+        <strong>Algebraic Graph Matrix Encoder</strong>
+        <span>Toggle graph edges and compare adjacency, degree, incidence, and two-step walk matrices.</span>
+      </a>
+      <a class="card" href="./f03-graph-laplacian-energy.html">
+        <strong>Graph Laplacian Energy</strong>
+        <span>Place signals on a graph and watch Laplacian smoothing reduce edge disagreement.</span>
+      </a>
+      <a class="card" href="./f04-spectral-embedding.html">
+        <strong>Spectral Embedding</strong>
+        <span>Use Fiedler vectors to reveal bottlenecks, cuts, and low-energy graph coordinates.</span>
+      </a>
+      <a class="card" href="./f05-graph-clustering-lab.html">
+        <strong>3D Graph Clustering Diagnostics</strong>
+        <span>Orbit community partitions, spectral relaxation, balanced objectives, modularity, and stability under graph noise.</span>
+      </a>
+      <a class="card" href="./e01-mlp-decision-regions.html">
+        <strong>MLP Decision Regions</strong>
+        <span>Compare single neurons and hidden layers on linear, XOR, and center-ring classification tasks.</span>
+      </a>
+      <a class="card" href="./e02-backprop-computational-graph.html">
+        <strong>Backpropagation Computational Graph</strong>
+        <span>Step through forward values and reverse-mode gradients.</span>
+      </a>
+      <a class="card" href="./e05-attention-flow.html">
+        <strong>Attention Scores And Value Mixing</strong>
+        <span>Adjust query-key alignment and softmax temperature to see attention weights mix values.</span>
+      </a>
+      <a class="card" href="./e07-vae-latent-space-lab.html">
+        <strong>VAE Latent Space</strong>
+        <span>Sample with reparameterization and watch KL pressure shape the latent distribution.</span>
+      </a>
+      <a class="card" href="./e08-gan-minimax-game.html">
+        <strong>GAN Minimax Game</strong>
+        <span>Alternate discriminator and generator steps in a one-dimensional adversarial game.</span>
+      </a>
+      <a class="card" href="./e09-diffusion-denoising.html">
+        <strong>Diffusion Forward And Reverse Process</strong>
+        <span>Move between forward noising and score-like reverse denoising on a structured point cloud.</span>
+      </a>
+      <a class="card" href="./e12-dqn-target-update-lab.html">
+        <strong>DQN Target Updates</strong>
+        <span>Update online Q-values against a slower target network and inspect TD error.</span>
+      </a>
+      <a class="card" href="./e13-meta-learning-inner-loop.html">
+        <strong>Meta-Learning Inner Loop</strong>
+        <span>Adapt a shared initialization to tasks and update it through the outer loop.</span>
+      </a>
+      <a class="card" href="./e14-contrastive-representation-lab.html">
+        <strong>Contrastive Representation Space</strong>
+        <span>Pull positive augmented views together and push negative examples apart.</span>
+      </a>
+      <a class="card" href="./e15-neural-ode-flow.html">
+        <strong>Neural ODE Flow</strong>
+        <span>Integrate hidden states through a learned vector field and inspect solver-step error.</span>
+      </a>
+      <a class="card" href="./e16-energy-langevin-lab.html">
+        <strong>Energy Landscape Sampling</strong>
+        <span>Use Langevin dynamics to move samples through low-energy valleys under temperature noise.</span>
+      </a>
+      <a class="card" href="./e17-ssm-scan.html">
+        <strong>SSM Recurrent Updates And Parallel Scan</strong>
+        <span>Compare token-by-token hidden-state updates with associative scan composition.</span>
+      </a>
+      <a class="card" href="./e18-pinn-residual-lab.html">
+        <strong>PINN Residuals</strong>
+        <span>Balance sparse data fitting with differential-equation residuals at collocation points.</span>
+      </a>
+      <a class="card" href="./g01-message-passing-playground.html">
+        <strong>Message Passing Playground</strong>
+        <span>Compare sum, mean, max, and learned aggregation on the same graph.</span>
+      </a>
+      <a class="card" href="./g02-gcn-message-passing.html">
+        <strong>GCN Message Passing</strong>
+        <span>Watch normalized neighbor aggregation update graph states.</span>
+      </a>
+      <a class="card" href="./g04-graphsage-sampling-lab.html">
+        <strong>GraphSAGE Sampling</strong>
+        <span>Animate inductive target-node embeddings, neighbor fanout, aggregator choice, coverage, and sample variance.</span>
+      </a>
+      <a class="card" href="./g05-wl-color-refinement-lab.html">
+        <strong>Weisfeiler-Leman Color Refinement</strong>
+        <span>Iterate node-color hashing and compare 1-WL limits on regular graph pairs.</span>
+      </a>
+      <a class="card" href="./g07-link-graph-readout-lab.html">
+        <strong>Link Prediction And Graph Readout</strong>
+        <span>Score candidate edges and compare sum and mean pooling for graph classification.</span>
+      </a>
+      <a class="card" href="./h05-sheaf-laplacian-builder.html">
+        <strong>Sheaf Laplacian Builder</strong>
+        <span>Build block restriction matrices and diffuse against translated edge disagreement.</span>
+      </a>
+      <a class="card" href="./f07-graph-signal-filtering.html">
+        <strong>Graph Signal Filtering</strong>
+        <span>Switch between low-pass smoothing and high-pass edge emphasis on graph node values.</span>
+      </a>
+      <a class="card" href="./f08-network-centrality-communities.html">
+        <strong>Network Centrality And Communities</strong>
+        <span>Compare degree, closeness, betweenness, and eigenvector importance on a bridged network.</span>
+      </a>
+      <a class="card" href="./f09-hypergraph-incidence-lab.html">
+        <strong>Hypergraph Incidence</strong>
+        <span>Move node values through group hyperedges and compare incidence view with clique expansion.</span>
+      </a>
+      <a class="card" href="./f10-persistent-homology-filtration.html">
+        <strong>Persistent Homology Filtration</strong>
+        <span>Grow a radius around points and watch components, loops, and barcodes change.</span>
+      </a>
+      <a class="card" href="./f11-discrete-calculus-lab.html">
+        <strong>Discrete Calculus On Graphs</strong>
+        <span>Compute gradient, divergence, and curl from incidence matrices on a small complex.</span>
+      </a>
+      <a class="card" href="./f12-graphon-sampling-lab.html">
+        <strong>Graphon Sampling</strong>
+        <span>Sample latent node positions and compare a continuous graphon with a finite adjacency draw.</span>
+      </a>
+      <a class="card" href="./g09-temporal-gnn-memory-lab.html">
+        <strong>Temporal GNN Memory</strong>
+        <span>Process timestamped events and watch node memories update only when interactions occur.</span>
+      </a>
+      <a class="card" href="./g11-geometric-domain-symmetry-lab.html">
+        <strong>Geometric Domain Symmetry</strong>
+        <span>Switch between grids, sets, graphs, and manifolds to match symmetry with neural operators.</span>
+      </a>
+      <a class="card" href="./g12-molecular-message-passing-lab.html">
+        <strong>Molecular Message Passing</strong>
+        <span>Send bond-conditioned messages between atoms and compare topology with geometry-aware readout.</span>
+      </a>
+      <a class="card" href="./g13-knowledge-graph-relations-lab.html">
+        <strong>Knowledge Graph Relations</strong>
+        <span>Route typed edges through relation-specific channels and score candidate facts.</span>
+      </a>
+      <a class="card" href="./g14-gnn-adversarial-perturbation-lab.html">
+        <strong>GNN Adversarial Perturbations</strong>
+        <span>Flip graph edges and compare blind aggregation with simple feature-based sanitization.</span>
+      </a>
+      <a class="card" href="./g15-over-smoothing-depth-lab.html">
+        <strong>Over-Smoothing And Bottlenecks</strong>
+        <span>Add message-passing layers and watch node features diffuse through a bottlenecked graph.</span>
+      </a>
+      <a class="card" href="./g30-heterophilic-gnn-lab.html">
+        <strong>Heterophilic Graph Neural Networks</strong>
+        <span>Compare plain smoothing, even-hop aggregation, signed compatibility, and residual feature preservation.</span>
+      </a>
+      <a class="card" href="./g32-ai-foundations-lab.html">
+        <strong>AI Foundations Pipeline</strong>
+        <span>Move through data, representation, bias, objectives, optimization, evaluation, and deployment risk.</span>
+      </a>
+      <a class="card" href="./h01-introduction-sheaf-theory-lab.html">
+        <strong>3D Sheaf Local-To-Global Primer</strong>
+        <span>Orbit open covers, restrictions, gluing defects, cellular stalk residuals, and sheaf-Laplacian energy.</span>
+      </a>
+      <a class="card" href="./h02-sheaf-gluing-lab.html">
+        <strong>3D Sheaf Gluing</strong>
+        <span>Orbit open covers, overlap gates, restriction arrows, gluing defects, germs, and global-section ribbons.</span>
+      </a>
+      <a class="card" href="./h03-cellular-sheaf-cohomology.html">
+        <strong>Cellular Sheaf Cohomology</strong>
+        <span>Project local assignments onto edges and measure global consistency defects.</span>
+      </a>
+      <a class="card" href="./h04-cellular-sheaf-on-graph-lab.html">
+        <strong>Cellular Sheaf On A Graph</strong>
+        <span>Project node stalk values into edge stalks and compare constant with heterophilic restrictions.</span>
+      </a>
+      <a class="card" href="./h06-sheaf-diffusion.html">
+        <strong>Sheaf Diffusion</strong>
+        <span>Visualize stalk values, edge maps, disagreement, and smoothing.</span>
+      </a>
+      <a class="card" href="./h07-sheaf-neural-networks-lab.html">
+        <strong>3D Sheaf Neural Networks</strong>
+        <span>Orbit learned restrictions, transported messages, sheaf diffusion, projection maps, and over-smoothing diagnostics.</span>
+      </a>
+      <a class="card" href="./h08-neural-sheaf-diffusion-lab.html">
+        <strong>Neural Sheaf Diffusion</strong>
+        <span>Run sheaf heat-flow steps while learned restriction maps reshape the harmonic space.</span>
+      </a>
+      <a class="card" href="./h09-connection-laplacian-transport-lab.html">
+        <strong>3D Connection Laplacian Transport</strong>
+        <span>Orbit local frames, transport vectors through orthogonal edge maps, and inspect loop holonomy.</span>
+      </a>
+      <a class="card" href="./h11-sheaf-gauge-transformation-lab.html">
+        <strong>3D Sheaf Gauge Transformation</strong>
+        <span>Orbit local frames, apply covariant gauges, and expose broken-map energy artifacts.</span>
+      </a>
+      <a class="card" href="./h14-persistent-sheaf-topology-lab.html">
+        <strong>Persistent Sheaf Topology</strong>
+        <span>Orbit a filtration with stalk heights, triangle faces, barcode bars, and sheaf obstruction diagnostics.</span>
+      </a>
+      <a class="card" href="./h13-directed-hypergraph-sheaf-lab.html">
+        <strong>3D Directed And Hypergraph Sheaves</strong>
+        <span>Orbit source-target role maps, hyperedge group stalks, residual fields, and gather-correct-broadcast dynamics.</span>
+      </a>
+      <a class="card" href="./i05-quantum-graph-circuit-lab.html">
+        <strong>Quantum Graph Neural Networks</strong>
+        <span>Encode nodes as qubits and graph edges as trainable entangling circuit layers.</span>
+      </a>
+      <a class="card" href="./g06-higher-order-gnn-lab.html">
+        <strong>Higher-Order GNN Expressivity</strong>
+        <span>Compare 1-WL message passing with pair and subgraph features that expose motifs.</span>
+      </a>
+      <a class="card" href="./g08-scalable-gnn-sampling-lab.html">
+        <strong>Scalable GNN Sampling</strong>
+        <span>Compare neighbor sampling, cluster batches, and random-walk subgraph training.</span>
+      </a>
+      <a class="card" href="./h15-sheaf-research-frontier-lab.html">
+        <strong>Sheaf GNN Research Frontier</strong>
+        <span>Orbit frontier scenarios and compare map families, scale stress, ablations, and research tradeoffs.</span>
+      </a>
+      <a class="card" href="./f06-random-graph-models-lab.html">
+        <strong>Random Graph Models</strong>
+        <span>Sample Erdos-Renyi, Barabasi-Albert, and stochastic block graph generators.</span>
+      </a>
+      <a class="card" href="./g03-graph-attention-coefficients-lab.html">
+        <strong>Graph Attention Coefficients</strong>
+        <span>Compute masked softmax weights and watch neighbor importance reshape edge messages.</span>
+      </a>
+      <a class="card" href="./g10-equivariance-transform-lab.html">
+        <strong>Equivariance And Invariance</strong>
+        <span>Rotate and translate a geometric graph while comparing scalar and vector outputs.</span>
+      </a>
+      <a class="card" href="./h10-heterophily-restriction-lab.html">
+        <strong>3D Sheaves And Heterophily</strong>
+        <span>Orbit heterophilic graph roles, learn restriction maps, and compare raw versus sheaf smoothing.</span>
+      </a>
+      <a class="card" href="./h12-sheaf-applications-domain-lab.html">
+        <strong>3D Sheaf GNN Applications</strong>
+        <span>Orbit fraud, weather, molecule, recommender, and traffic graphs with editable transport maps and split diagnostics.</span>
+      </a>
+      <a class="card" href="./i03-quantum-algorithm-interference-lab.html">
+        <strong>Quantum Algorithm Interference</strong>
+        <span>Step oracle phases, diffusion, and Fourier-style amplitude concentration.</span>
+      </a>
+      <a class="card" href="./i04-variational-quantum-circuit-lab.html">
+        <strong>Variational Quantum Circuit</strong>
+        <span>Train gate angles, add entanglers, and watch loss and gradient behavior.</span>
+      </a>
+      <a class="card" href="./i01-quantum-state-measurement.html">
+        <strong>Quantum State Measurement</strong>
+        <span>Change amplitudes, switch measurement basis, and see probabilities from the Born rule.</span>
+      </a>
+      <a class="card" href="./i02-qubit-bloch-sphere.html">
+        <strong>Qubit Bloch Sphere</strong>
+        <span>Apply basic quantum gates to a qubit state on the sphere.</span>
+      </a>
+      <a class="card" href="./i06-quantum-advantage-boundary-lab.html">
+        <strong>Quantum Advantage Boundary</strong>
+        <span>Compare problem scaling, quantum speedups, NISQ noise, and correction overhead.</span>
+      </a>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>B04 Hypothesis Testing</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=b04-b05-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="probability" data-lab-id="b04" data-keywords="hypothesis testing null alternative p-value rejection region type I type II power effect size">
+    <section class="visual-stack" aria-label="Interactive 3D mathematical visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom. Click objects to inspect.">
+          <canvas id="canvas" aria-label="B04 Hypothesis Testing 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>B04</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>Null and alternative bell curves, observed statistic, alpha wall, p-value tail, Type I/II errors, power, CI, permutation, and multiple-testing controls share one decision geometry.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Click a node to inspect local structure.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select data-control="mode" aria-label="Concept mode">
+            <option value="null">Null model</option>
+            <option value="pvalue">p-value</option>
+            <option value="power">Power</option>
+            <option value="multiple">Multiple tests</option>
+        </select>
+        <div class="command-control">
+          <label for="b04-focus">Concept focus <output data-output="focus">0.45</output></label>
+          <input id="b04-focus" data-param="focus" type="range" min="0" max="1" step="0.01" value="0.45">
+        </div>
+        <div class="command-control">
+          <label for="b04-spread">Spread / uncertainty <output data-output="spread">0.55</output></label>
+          <input id="b04-spread" data-param="spread" type="range" min="0.05" max="1" step="0.01" value="0.55">
+        </div>
+        <div class="command-control">
+          <label for="b04-noise">Noise / perturbation <output data-output="noise">0.24</output></label>
+          <input id="b04-noise" data-param="noise" type="range" min="0" max="1" step="0.01" value="0.24">
+        </div>
+        <div class="command-control">
+          <label for="b04-samples">Sample count <output data-output="samples">7</output></label>
+          <input id="b04-samples" data-param="samples" type="range" min="2" max="14" step="1" value="7">
+        </div>
+        <div class="command-control">
+          <label for="b04-strength">Evidence strength <output data-output="strength">0.5</output></label>
+          <input id="b04-strength" data-param="strength" type="range" min="0" max="1" step="0.01" value="0.5">
+        </div>
+        <button class="primary" data-action="pulse" type="button">Pulse</button>
+        <button data-action="step" type="button">Step</button>
+        <button data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block B 3D lab</p>
+        <h1>B04 Hypothesis Testing</h1>
+        <p class="subtitle">Orbit / rotate / zoom the system, select objects, then change parameters to experiment with hypothesis testing null alternative p-value rejection region type I type II power effect size.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="p-value">
+          <span>p-value</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Power">
+          <span>Power</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Type I risk">
+          <span>Type I risk</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Effect size">
+          <span>Effect size</span>
+          <strong>0.00</strong>
+        </div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading the 3D mathematical system.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Command bar controls are live: every slider changes geometry, active channels, metrics, or selected-object state. Blue/cyan shows signal, amber shows frontier, red shows perturbation.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=b04-b05-canonical-clarity-v2"></script>
+  <script>
+    const labState = createGnnLab({"id":"b04","kind":"probability","title":"B04 Hypothesis Testing","modes":[{"value":"null","label":"Null model"},{"value":"pvalue","label":"p-value"},{"value":"power","label":"Power"},{"value":"multiple","label":"Multiple tests"}],"parameters":[{"key":"focus","label":"Concept focus","min":0,"max":1,"step":0.01,"value":0.45},{"key":"spread","label":"Spread / uncertainty","min":0.05,"max":1,"step":0.01,"value":0.55},{"key":"noise","label":"Noise / perturbation","min":0,"max":1,"step":0.01,"value":0.24},{"key":"samples","label":"Sample count","min":2,"max":14,"step":1,"value":7},{"key":"strength","label":"Evidence strength","min":0,"max":1,"step":0.01,"value":0.5}],"metrics":["p-value","Power","Type I risk","Effect size"],"visual":{"kind":"hypothesis-testing-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"p-value","formula":"p = P(T >= t_obs | H0)","insight":"B04 keeps testing as a decision geometry: the observed statistic is compared to the null tail while power comes from the alternative shift."}});
+    window.__b04LabSnapshot = () => window.__gLabSnapshot();
+    Object.defineProperty(window, "__b04LabReady", { get: () => window.__gLabReady === true });
+  </script>
+</body>
+</html>

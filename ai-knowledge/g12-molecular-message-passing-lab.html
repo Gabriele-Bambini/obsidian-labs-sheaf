@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G12 Molecular Message Passing</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g12-molecule-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="molecular" data-lab-id="g12" data-keywords="molecule bond atom mpnn conformer distance readout">
+    <section class="visual-stack" aria-label="Interactive 3D molecular message passing visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G12 molecule atom bond message passing 3D visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G12</strong></div>
+          <div class="formula-chip"><span id="formulaText">m_ij = M(h_i, h_j, e_ij, r_ij)</span>Typed bonds carry chemistry; 3D distances add conformer-dependent geometry.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected molecule</span><strong>Molecular message system is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.6fr)) repeat(5,minmax(0,.56fr)) repeat(5,minmax(0,.38fr));">
+        <select id="moleculeSelect" data-control="moleculeSelect" aria-label="Molecule">
+          <option value="ethanol">EtOH</option>
+          <option value="amide">Amide</option>
+          <option value="aromatic">Ring</option>
+        </select>
+        <select id="messageRule" data-control="messageRule" aria-label="Message rule">
+          <option value="bond">Bond</option>
+          <option value="radial">Radial</option>
+          <option value="hybrid">Hybrid</option>
+          <option value="equivariant">Vector</option>
+        </select>
+        <select id="readoutMode" data-control="readoutMode" aria-label="Readout mode">
+          <option value="sum">Sum</option>
+          <option value="mean">Mean</option>
+          <option value="attention">Attn</option>
+          <option value="charges">Charges</option>
+        </select>
+        <div class="command-control">
+          <label for="mpnnLayers">Layers <output data-output="mpnnLayers">3</output></label>
+          <input id="mpnnLayers" data-param="mpnnLayers" type="range" min="1" max="8" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="bondWeight">Bond <output data-output="bondWeight">1.05</output></label>
+          <input id="bondWeight" data-param="bondWeight" type="range" min="0.1" max="2.2" step="0.01" value="1.05">
+        </div>
+        <div class="command-control">
+          <label for="geometryWeight">Geometry <output data-output="geometryWeight">0.62</output></label>
+          <input id="geometryWeight" data-param="geometryWeight" type="range" min="0" max="1.6" step="0.01" value="0.62">
+        </div>
+        <div class="command-control">
+          <label for="distanceCutoff">Cutoff <output data-output="distanceCutoff">2.40</output></label>
+          <input id="distanceCutoff" data-param="distanceCutoff" type="range" min="0.8" max="4.8" step="0.05" value="2.40">
+        </div>
+        <div class="command-control">
+          <label for="conformerBend">Bend <output data-output="conformerBend">0.24</output></label>
+          <input id="conformerBend" data-param="conformerBend" type="range" min="0" max="1" step="0.01" value="0.24">
+        </div>
+        <button id="passMessages" class="primary" data-action="pulse" type="button">MPNN pass</button>
+        <button id="bendConformer" data-action="step" type="button">Bend 3D</button>
+        <button id="toggleGeometry" data-action="step" type="button" aria-label="Geometry cutoff">Cutoff</button>
+        <button id="poolReadout" data-action="step" type="button">Readout</button>
+        <button id="resetG12" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G12 Molecular Message Passing</h1>
+        <p class="subtitle">Rotate the molecule, pass typed bond messages, add non-bonded 3D neighbors by cutoff, then pool atom contributions into a property.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Energy proxy"><span>Energy</span><strong id="energyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Dipole proxy"><span>Dipole</span><strong id="dipoleLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Geometry share"><span>Geometry</span><strong id="geometryLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Active bonds"><span>Bonds</span><strong id="bondLabel">0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading molecular diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: bond type changes message strength, cutoff adds spatial neighbors, conformer bend changes distances, and sum/mean/attention readouts change the predicted property.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g12-molecule-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=g12-molecule-v3"></script>
+  <script>
+    window.__g12LabSnapshot = window.__g12LabSnapshot || function () { return null; };
+    createG12MolecularMessageLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

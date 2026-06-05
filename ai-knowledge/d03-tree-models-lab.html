@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D03 Tree Models</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=d02-d03-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="learning" data-lab-id="d03" data-keywords="decision tree CART Gini impurity pruning forest vote regression tree">
+    <section class="visual-stack" aria-label="Interactive 3D CART decision-tree visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="D03 Tree Models 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>D03</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>CART grows axis-aligned splits, scores candidate thresholds by impurity decrease, then controls variance through pruning or forest votes.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Tree geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.82fr) minmax(0,.78fr) minmax(0,.78fr) repeat(5,minmax(0,1fr)) repeat(3,minmax(0,.62fr));">
+        <select id="viewMode" data-control="mode" aria-label="Tree view">
+          <option value="tree">Tree splits</option>
+          <option value="impurity">Impurity</option>
+          <option value="pruning">Pruning</option>
+          <option value="forest">Forest</option>
+        </select>
+        <select id="task" aria-label="Task">
+          <option value="classification">Classify</option>
+          <option value="regression">Regress</option>
+        </select>
+        <select id="dataset" aria-label="Dataset">
+          <option value="classification">Classes</option>
+          <option value="regression">Regression</option>
+        </select>
+        <div class="command-control">
+          <label for="maxDepth">Max depth <output data-output="maxDepth">3</output></label>
+          <input id="maxDepth" data-param="maxDepth" type="range" min="1" max="5" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="minLeaf">Min leaf <output data-output="minLeaf">3</output></label>
+          <input id="minLeaf" data-param="minLeaf" type="range" min="1" max="12" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="pruneAlpha">Prune alpha <output data-output="pruneAlpha">0.20</output></label>
+          <input id="pruneAlpha" data-param="pruneAlpha" type="range" min="0" max="2" step="0.02" value="0.20">
+        </div>
+        <div class="command-control">
+          <label for="treeNoise">Label noise <output data-output="treeNoise">0.14</output></label>
+          <input id="treeNoise" data-param="treeNoise" type="range" min="0" max="1" step="0.02" value="0.14">
+        </div>
+        <div class="command-control">
+          <label for="bootstrap">Bootstrap <output data-output="bootstrap">0.40</output></label>
+          <input id="bootstrap" data-param="bootstrap" type="range" min="0" max="1" step="0.02" value="0.40">
+        </div>
+        <button id="fitTree" class="primary" data-action="pulse" type="button">Fit tree</button>
+        <button id="growTree" data-action="step" type="button">Grow split</button>
+        <button id="resetTree" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block D 3D lab</p>
+        <h1>D03 Tree Models</h1>
+        <p class="subtitle">Rotate CART split walls, impurity bars, pruning collapse, and forest disagreement.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Leaves"><span>Leaves</span><strong>0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Best gain"><span>Best gain</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Accuracy"><span>Score</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Variance"><span>Variance</span><strong>0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading the CART partition system.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Controls are causal: depth adds split walls, min leaf changes leaf size, alpha collapses branches, task switches classification to squared-error regression, and forest mode exposes split instability.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=d02-d03-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=d02-d03-canonical-clarity-v2"></script>
+  <script>
+    window.__d03LabSnapshot = window.__d03LabSnapshot || function () { return null; };
+    createD03TreeLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

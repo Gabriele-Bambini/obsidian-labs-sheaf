@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>I06 Quantum Advantage Boundary</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?quantum=i06-concrete-v1">
+</head>
+<body>
+  <main class="lab-shell lab-3d-shell gnn-lab math-3d-lab" data-lab-kind="quantum" data-lab-id="i06" data-keywords="quantum advantage BQP BPP NP NISQ error correction baseline scaling">
+    <section class="visual-stack" aria-label="Interactive 3D quantum advantage boundary visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to rotate the 3D advantage atlas. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="I06 scaling curves, BQP map, NISQ wall, QEC overhead, and advantage boundary"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>I06</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">Advantage means end-to-end quantum cost below the best classical baseline after overhead.</strong></div>
+        </div>
+        <div class="hud quantum-hud"><h1>Scaling curves, BPP/BQP/NP inset, NISQ noise wall, QEC overhead stack, input/output bottlenecks, and moving classical baseline.</h1></div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong id="selectedLabel">Advantage boundary atlas</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select id="problem" aria-label="Problem family">
+          <option value="factoring" selected>Factoring</option>
+          <option value="search">Search</option>
+          <option value="simulation">Simulation</option>
+          <option value="qml">QML</option>
+          <option value="np">NP-complete</option>
+        </select>
+        <div class="command-control">
+          <label for="size">Size n <output data-output="size">32</output></label>
+          <input id="size" type="range" min="8" max="128" step="4" value="32">
+        </div>
+        <div class="command-control">
+          <label for="noise">Noise <output data-output="noise">0.04</output></label>
+          <input id="noise" type="range" min="0" max="0.35" step="0.01" value="0.04">
+        </div>
+        <div class="command-control">
+          <label for="qecOverhead">QEC x <output data-output="qecOverhead">40</output></label>
+          <input id="qecOverhead" type="range" min="1" max="250" step="1" value="40">
+        </div>
+        <div class="command-control">
+          <label for="baseline">Baseline <output data-output="baseline">1.00</output></label>
+          <input id="baseline" type="range" min="0.25" max="4" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="loadingCost">Loading <output data-output="loadingCost">0.30</output></label>
+          <input id="loadingCost" type="range" min="0" max="1" step="0.02" value="0.3">
+        </div>
+        <div class="command-control">
+          <label for="shots">Shots <output data-output="shots">512</output></label>
+          <input id="shots" type="range" min="64" max="8192" step="64" value="512">
+        </div>
+        <button id="switchProblem" class="primary" type="button">Switch problem</button>
+        <button id="addCorrection" type="button">Add QEC</button>
+        <button id="project" type="button">Project size</button>
+        <button id="resetI06" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block I 3D lab</p>
+        <h1>I06 Quantum Advantage Boundary</h1>
+        <p class="subtitle">A resource atlas for separating theoretical speedup from useful advantage: input cost, output cost, noise, correction overhead, and classical baselines all move the boundary.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Problem family"><span>Problem</span><strong id="problemLabel">factoring</strong></div>
+        <div class="metric" data-role="metric" data-metric="Advantage"><span>Advantage</span><strong id="advantageLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Boundary"><span>Boundary</span><strong id="boundaryLabel">classical wins</strong></div>
+        <div class="metric" data-role="metric" data-metric="Overhead"><span>QEC overhead</span><strong id="overheadLabel">1.0x</strong></div>
+        <div class="metric" data-role="metric" data-metric="Classical"><span>log classical</span><strong id="classicalLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Quantum"><span>log quantum</span><strong id="quantumLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">The green sheet is only useful advantage when the amber end-to-end quantum curve is below the red classical curve.</p>
+        <p id="state" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Move baseline, loading cost, shots, noise, and QEC overhead: the theorem curve is not the delivered runtime curve.</p>
+    </aside>
+  </main>
+  <!-- compatibility marker: class="lab-shell lab-3d-shell" -->
+  <!-- ready marker: __i06LabReady = true -->
+  <!-- visual labels: theoretical speedup; useful advantage boundary; BPP / BQP / NP map; query count vs wall-clock; NISQ noise wall; error correction overhead stack; data loading bottleneck; measurement shot bottleneck; classical baseline moving target; output bandwidth limit; cameraTheta; project() -->
+  <!-- {"visual":{"kind":"quantum-advantage-boundary","graphStyle":"concrete"},"graph":{"nodes":["classical scaling curve","ideal quantum curve","end-to-end quantum curve","BPP/BQP/NP map","NISQ noise wall","QEC stack","loading bottleneck","shot bottleneck"],"edges":["theoretical speedup to useful boundary","noise to overhead","baseline to boundary"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/quantum-labs.js?quantum=i06-canonical-clarity-v1"></script>
+  <script>
+    window.__i06LabReady = false;
+    window.__i06LabSnapshot = window.__i06LabSnapshot || function () { return null; };
+    createI06QuantumAdvantageBoundaryLab();
+  </script>
+</body>
+</html>

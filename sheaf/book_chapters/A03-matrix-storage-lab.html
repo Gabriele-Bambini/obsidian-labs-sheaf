@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A03 - Matrix Storage Lab</title>
+<style>
+  :root{--bg:#061018;--panel:#0d1b24;--panel2:#09151d;--line:#29495a;--text:#f6fbff;--muted:#afc3cc;--cyan:#64f1e1;--gold:#ffd166;--rose:#ff6699;--blue:#80b8ff;--green:#9af58f}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;max-width:100%;overflow-x:hidden;background:var(--bg);color:var(--text);font-family:Segoe UI,Inter,Arial,sans-serif}
+  body{background:radial-gradient(circle at 28% 18%,rgba(100,241,225,.13),transparent 30%),radial-gradient(circle at 75% 60%,rgba(128,184,255,.10),transparent 28%),linear-gradient(135deg,#050b10,#0b1720 62%,#05090d)}
+  .app{width:100%;max-width:100vw;min-height:100vh;display:grid;grid-template-columns:minmax(800px,1fr) 390px;gap:14px;padding:14px;align-items:start}
+  .stage,.side{border:1px solid var(--line);background:rgba(7,16,22,.91);border-radius:14px;box-shadow:0 16px 60px rgba(0,0,0,.38);overflow:hidden}
+  .stage{min-height:780px;padding:18px;background:linear-gradient(rgba(255,255,255,.026) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.026) 1px,transparent 1px),rgba(5,12,18,.95);background-size:44px 44px}
+  .topbar{display:grid;grid-template-columns:280px 1fr;gap:12px;margin-bottom:14px}
+  .chip{border:1px solid #315366;background:rgba(10,25,34,.96);padding:12px 14px;border-radius:10px;overflow-wrap:anywhere}
+  .chip b{display:block;color:var(--cyan);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+  .chip span{display:block;font-weight:900;font-size:18px}
+  .formula code{font:800 15px/1.35 Consolas,Menlo,monospace;color:#f6fbff;white-space:normal;overflow-wrap:anywhere}
+  .workspace{display:grid;grid-template-columns:1.05fr 1.15fr;gap:12px}
+  .panel{border:1px solid #2a4c5d;background:rgba(9,21,29,.94);border-radius:12px;padding:12px;min-width:0}
+  .panel h2{margin:0 0 8px;color:var(--cyan);font-size:17px;line-height:1.15}
+  .panel p{margin:0 0 8px;color:#c7dbe3;font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+  .graphBox{height:356px;position:relative}
+  svg{display:block;width:100%;height:100%}
+  .edge{fill:none;stroke-width:7;stroke-linecap:round;opacity:.58}
+  .edge.active{opacity:1;filter:url(#edgeGlow)}
+  .node text{font:850 12px Segoe UI,Arial,sans-serif;fill:#f6fbff;text-anchor:middle}
+  .role{font:700 10px Segoe UI,Arial,sans-serif!important;fill:#aac0ca!important}
+  .node circle{stroke:#fff;stroke-width:2.2;filter:url(#glow)}
+  .matrixWrap{display:grid;grid-template-columns:1fr;gap:10px}
+  .matrixWrap>div{min-width:0;overflow:hidden}
+  .matrix{display:grid;gap:4px;align-items:center;justify-content:start;max-width:100%;overflow:auto;padding-bottom:4px}
+  .matrix .corner,.matrix .head,.matrix .rowhead,.matrix .cell{width:46px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:850}
+  .matrix .corner{background:transparent}
+  .matrix .head,.matrix .rowhead{color:#b8ccd5;background:#0a1620;border:1px solid #203946}
+  .matrix .cell{font-family:Consolas,Menlo,monospace;background:#0b1921;border:1px solid #1f3947;color:#9fb4bd}
+  .matrix .cell.nonzero{background:#153443;color:#e9fbff;border-color:#2d6d7b}
+  .matrix .cell.active{background:var(--cyan);color:#061017;border-color:#e4fffb;box-shadow:0 0 18px rgba(100,241,225,.48)}
+  .matrix .cell.neg{background:#3b1528;color:#ffdce8}.matrix .cell.pos{background:#15443e;color:#dbfff8}
+  .storage{display:grid;grid-template-columns:1fr;gap:8px}
+  .storage pre,.readout{margin:0;border:1px solid #244554;background:#08151d;border-radius:9px;padding:10px;color:#e8fbff;font:750 12px/1.45 Consolas,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+  .side{padding:14px;display:flex;flex-direction:column;gap:12px}
+  .eyebrow{color:var(--cyan);font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+  h1{font-size:28px;line-height:1.05;margin:4px 0 6px;overflow-wrap:anywhere}
+  .side p{color:#c8d8df;margin:0;font-size:14px;line-height:1.45;overflow-wrap:anywhere}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  button,select{width:100%;min-width:0;border:1px solid #2b4858;background:#14212b;color:#fff;border-radius:7px;padding:10px 9px;font-weight:850;font-size:13px;line-height:1.15}
+  button:active{transform:translateY(1px)}
+  .slider,.check{border:1px solid #203c4b;background:#101d26;padding:10px;border-radius:8px}
+  .slider label,.check label{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:#b7cbd4;font-weight:850;margin-bottom:6px}
+  input[type=range]{width:100%;accent-color:var(--cyan)} input[type=checkbox]{width:20px;height:20px;accent-color:var(--cyan);flex:0 0 auto}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .metric{border:1px solid #2a4553;background:#0d1a22;padding:10px;border-radius:8px}
+  .metric b{display:block;color:#a9c0ca;font-size:11px;text-transform:uppercase;margin-bottom:6px}
+  .metric span{font-weight:950;font-size:21px}
+  .explain{border:1px solid #2a4553;background:#0d1a22;padding:12px;font-size:14px;line-height:1.45;color:#d7e8ef;border-radius:8px}
+  @media(max-width:980px){
+    .app{display:flex;flex-direction:column;padding:8px;overflow:hidden}
+    .stage,.side{width:calc(100vw - 16px);max-width:calc(100vw - 16px);min-width:0}
+    .stage{min-height:0;padding:12px}.topbar{grid-template-columns:1fr}.workspace{grid-template-columns:1fr}.matrixWrap{grid-template-columns:1fr}
+    .graphBox{height:330px}.controls,.metrics{grid-template-columns:1fr}.chip span{font-size:17px}.formula code{font-size:14px}
+  }
+  @media(max-width:480px){.app{transform:scale(.88);transform-origin:top left;width:calc(100vw / .88);max-width:none}}
+</style>
+</head>
+<body>
+<main class="app">
+  <section class="stage">
+    <div class="topbar">
+      <div class="chip"><b>A03 lab</b><span>edge → matrix → sparse tensor</span></div>
+      <div class="chip formula"><b>current convention</b><code id="formula">A[target, source] = weight, so row target aggregates incoming sources.</code></div>
+    </div>
+    <div class="workspace">
+      <div class="panel">
+        <h2>1. Biological graph</h2>
+        <p>The selected biological relation is highlighted everywhere else: matrix cell, incidence column, and sparse storage row.</p>
+        <div class="graphBox">
+          <svg id="graphSvg" viewBox="0 0 520 360" aria-label="Graph view">
+            <defs>
+              <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <filter id="edgeGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="arrowC" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M1,1 L9,5.5 L1,10 Z" fill="#64f1e1"/></marker>
+              <marker id="arrowR" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M1,1 L9,5.5 L1,10 Z" fill="#ff6699"/></marker>
+              <marker id="arrowB" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M1,1 L9,5.5 L1,10 Z" fill="#80b8ff"/></marker>
+              <marker id="arrowG" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M1,1 L9,5.5 L1,10 Z" fill="#ffd166"/></marker>
+            </defs>
+            <g id="edgesLayer"></g>
+            <g id="nodesLayer"></g>
+            <circle id="pulseDot" cx="-20" cy="-20" r="7" fill="#fff" opacity="0"/>
+          </svg>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>2. Matrix views</h2>
+        <p>Adjacency answers "which source can message this target?" Incidence answers "which node is source or target of this edge?"</p>
+        <div class="matrixWrap">
+          <div><p><b>Adjacency A</b></p><div id="adjacency" class="matrix"></div></div>
+          <div><p><b>Incidence B</b></p><div id="incidence" class="matrix"></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>3. Sparse implementation</h2>
+        <p>For real biological graphs, the dense table is mostly zeros. GNN code stores the observed relations.</p>
+        <div class="storage">
+          <pre id="coo"></pre>
+          <pre id="csr"></pre>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>4. What changes when you move a control?</h2>
+        <div class="readout" id="readout"></div>
+      </div>
+    </div>
+  </section>
+  <aside class="side">
+    <div><div class="eyebrow">Generated specifically for A03</div><h1>Where is a biological edge stored?</h1><p>Change direction, threshold, storage format, and scale. The same biology has different computational forms.</p></div>
+    <div class="controls">
+      <select id="preset"><option value="grn">GRN: TF targets</option><option value="ppi">PPI module</option><option value="cell">Cell-cell graph</option><option value="toy">Plain toy graph</option></select>
+      <select id="format"><option value="coo">Focus COO edge_index</option><option value="csr">Focus CSR rows</option><option value="incidence">Focus incidence B</option><option value="dense">Focus dense A</option></select>
+      <select id="orientation"><option value="incoming">A[target, source]</option><option value="outgoing">A[source, target]</option></select>
+      <select id="edgeSel"></select>
+      <button id="step">Step edge</button><button id="pulse">Pulse message</button>
+      <button id="reset">Reset</button>
+    </div>
+    <div class="check"><label>directed biological edges <input id="directed" type="checkbox" checked></label></div>
+    <div class="check"><label>add self-loops <input id="loops" type="checkbox"></label></div>
+    <div class="slider"><label>evidence threshold <span id="thrVal"></span></label><input id="thr" type="range" min="0" max="1" step=".01" value=".30"></div>
+    <div class="slider"><label>atlas scale n <span id="scaleVal"></span></label><input id="scale" type="range" min="4" max="100000" step="1" value="2000"></div>
+    <div class="metrics">
+      <div class="metric"><b>visible edges</b><span id="mVal">0</span></div><div class="metric"><b>density</b><span id="rhoVal">0</span></div>
+      <div class="metric"><b>dense memory</b><span id="denseVal">0</span></div><div class="metric"><b>sparse memory</b><span id="sparseVal">0</span></div>
+    </div>
+    <div class="explain" id="explain"></div>
+  </aside>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const colors=['#64f1e1','#ff6699','#80b8ff','#ffd166','#9af58f','#b18cff'];
+const presets={
+  grn:{nodes:['TF1','GeneA','GeneB','State'],roles:['regulator','target','target','context'],edges:[[0,1,.92,'motif+ATAC'],[0,2,.56,'coexpr'],[2,3,.78,'marker'],[1,3,.24,'weak']]},
+  ppi:{nodes:['ProtA','ProtB','ProtC','Pathway'],roles:['protein','protein','protein','context'],edges:[[0,1,.88,'binding'],[1,2,.71,'complex'],[2,3,.64,'pathway'],[0,3,.36,'annotation']]},
+  cell:{nodes:['CellA','CellB','CellC','Niche'],roles:['ligand','receiver','receiver','context'],edges:[[0,1,.83,'ligand'],[0,2,.47,'distance'],[3,1,.76,'niche'],[2,3,.31,'boundary']]},
+  toy:{nodes:['A','B','C','D'],roles:['node','node','node','node'],edges:[[0,1,.90,'e1'],[0,2,.70,'e2'],[2,3,.80,'e3'],[1,3,.35,'e4']]}
+};
+const pos=[{x:110,y:178},{x:292,y:94},{x:306,y:252},{x:142,y:315}];
+let selectedEdge=0,pulsing=false,pulseT=0;
+function visibleData(){
+  const p=presets[$('preset').value];
+  let edges=p.edges.filter(e=>e[2]>=Number($('thr').value)).map(e=>[...e]);
+  if(!$('directed').checked){edges=[...edges,...edges.map(e=>[e[1],e[0],e[2],e[3]+' rev'])]}
+  if($('loops').checked){for(let i=0;i<p.nodes.length;i++)edges.push([i,i,1,'self'])}
+  selectedEdge=Math.min(selectedEdge,Math.max(0,edges.length-1));
+  return {...p,edges};
+}
+function matrix(d){
+  const n=d.nodes.length,A=Array.from({length:n},()=>Array(n).fill(0));
+  for(const e of d.edges){const s=e[0],t=e[1],w=e[2]; if($('orientation').value==='incoming')A[t][s]=w; else A[s][t]=w}
+  return A;
+}
+function csr(A){const rowptr=[0],col=[],val=[]; for(let i=0;i<A.length;i++){for(let j=0;j<A.length;j++){if(A[i][j]>0){col.push(j);val.push(A[i][j])}} rowptr.push(col.length)} return {rowptr,col,val}}
+function refreshEdgeSelect(d){
+  $('edgeSel').innerHTML=d.edges.map((e,i)=>`<option value="${i}">${d.nodes[e[0]]} -> ${d.nodes[e[1]]}</option>`).join('');
+  $('edgeSel').value=selectedEdge;
+}
+function drawGraph(d){
+  const eLayer=$('edgesLayer'),nLayer=$('nodesLayer'),sel=d.edges[selectedEdge];
+  eLayer.innerHTML=d.edges.map((e,i)=>{
+    const a=pos[e[0]],b=pos[e[1]],dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;
+    const sx=a.x+ux*38,sy=a.y+uy*38,tx=b.x-ux*38,ty=b.y-uy*38,midX=(sx+tx)/2-uy*18,midY=(sy+ty)/2+ux*18;
+    const cls=i===selectedEdge?'edge active':'edge';
+    const marker=$('directed').checked?`marker-end="url(#arrow${['C','R','B','G'][i%4]})"`:'';
+    return `<path id="edgePath${i}" class="${cls}" d="M${sx},${sy} Q${midX},${midY} ${tx},${ty}" stroke="${colors[i%colors.length]}" ${marker}/><text x="${midX}" y="${midY-8}" fill="#dff8ff" font-size="11" font-weight="800" text-anchor="middle">${e[3]}</text>`;
+  }).join('');
+  nLayer.innerHTML=d.nodes.map((n,i)=>`<g class="node"><circle cx="${pos[i].x}" cy="${pos[i].y}" r="34" fill="${colors[i%colors.length]}"/><text x="${pos[i].x}" y="${pos[i].y-45}">${n}</text><text class="role" x="${pos[i].x}" y="${pos[i].y+52}">${d.roles[i]}</text></g>`).join('');
+  if(pulsing&&sel){pulseT+=.018; const p=Math.min(1,pulseT); const a=pos[sel[0]],b=pos[sel[1]],x=a.x+(b.x-a.x)*p,y=a.y+(b.y-a.y)*p; $('pulseDot').setAttribute('cx',x);$('pulseDot').setAttribute('cy',y);$('pulseDot').setAttribute('opacity','1'); if(p>=1){pulsing=false;pulseT=0;$('pulseDot').setAttribute('opacity','0')}}
+}
+function renderAdjacency(d,A){
+  const sel=d.edges[selectedEdge],n=d.nodes.length,activeRow=$('orientation').value==='incoming'?(sel?sel[1]:-1):(sel?sel[0]:-1),activeCol=$('orientation').value==='incoming'?(sel?sel[0]:-1):(sel?sel[1]:-1);
+  const grid=$('adjacency'); grid.style.gridTemplateColumns=`repeat(${n+1},52px)`;
+  let html='<div class="corner"></div>'+d.nodes.map(x=>`<div class="head">${x}</div>`).join('');
+  for(let i=0;i<n;i++){html+=`<div class="rowhead">${d.nodes[i]}</div>`; for(let j=0;j<n;j++){const v=A[i][j]; let cls='cell'; if(v>0)cls+=' nonzero'; if(i===activeRow&&j===activeCol)cls+=' active'; html+=`<div class="${cls}">${v? v.toFixed(2):'0'}</div>`}}
+  grid.innerHTML=html;
+}
+function renderIncidence(d){
+  const n=d.nodes.length,m=Math.min(d.edges.length,5),grid=$('incidence'); grid.style.gridTemplateColumns=`repeat(${m+1},52px)`;
+  let html='<div class="corner"></div>'+Array.from({length:m},(_,i)=>`<div class="head">e${i+1}</div>`).join('');
+  for(let r=0;r<n;r++){html+=`<div class="rowhead">${d.nodes[r]}</div>`; for(let k=0;k<m;k++){const e=d.edges[k],v=r===e[0]?-1:r===e[1]?1:0; let cls='cell'; if(v<0)cls+=' neg'; if(v>0)cls+=' pos'; if(k===selectedEdge)cls+=' active'; html+=`<div class="${cls}">${v===0?'0':v>0?'+1':'-1'}</div>`}}
+  grid.innerHTML=html;
+}
+function renderStorage(d,A){
+  const c=csr(A);
+  $('coo').textContent='COO / PyG edge_index\\nsource = ['+d.edges.map(e=>d.nodes[e[0]]).join(', ')+']\\ntarget = ['+d.edges.map(e=>d.nodes[e[1]]).join(', ')+']\\nedge_attr.conf = ['+d.edges.map(e=>e[2].toFixed(2)).join(', ')+']';
+  $('csr').textContent='CSR rows for A\\nrowptr = ['+c.rowptr.join(', ')+']\\ncol = ['+c.col.map(i=>d.nodes[i]).join(', ')+']\\nval = ['+c.val.map(v=>v.toFixed(2)).join(', ')+']';
+}
+function fmtBytes(b){if(b<1e3)return b.toFixed(0)+' B';if(b<1e6)return (b/1e3).toFixed(1)+' KB';if(b<1e9)return (b/1e6).toFixed(1)+' MB';return (b/1e9).toFixed(1)+' GB'}
+function metrics(d,A){
+  const n=Number($('scale').value),m=d.edges.length,rho=m/Math.max(1,n*(n-1));
+  $('mVal').textContent=m; $('rhoVal').textContent=rho.toExponential(1);
+  $('denseVal').textContent=fmtBytes(n*n*4); $('sparseVal').textContent=fmtBytes((n+1)*8+m*(8+4));
+  $('thrVal').textContent=Number($('thr').value).toFixed(2); $('scaleVal').textContent=n.toLocaleString();
+  const convention=$('orientation').value==='incoming'?'A[target, source] = weight, so row target aggregates incoming sources.':'A[source, target] = weight, so row source lists outgoing targets.';
+  $('formula').textContent=convention;
+  const sel=d.edges[selectedEdge],edgeText=sel?`${d.nodes[sel[0]]} -> ${d.nodes[sel[1]]} (${sel[3]}, confidence ${sel[2].toFixed(2)})`:'none';
+  $('readout').textContent=`selected edge: ${edgeText}\\nformat focus: ${$('format').value}\\norientation: ${$('orientation').value}\\nself loops: ${$('loops').checked?'yes':'no'}\\ndirected: ${$('directed').checked?'yes':'no'}`;
+  $('explain').textContent='Dense A is easy to reason about, but costs O(n^2). COO stores each observed edge as source and target arrays, matching PyG edge_index. CSR stores row boundaries, so incoming aggregation can read one target row without scanning the full matrix. For GRNs, the convention decides whether TF1 -> GeneA is stored at A[GeneA, TF1] or A[TF1, GeneA].';
+}
+function render(){const d=visibleData(),A=matrix(d);refreshEdgeSelect(d);drawGraph(d);renderAdjacency(d,A);renderIncidence(d);renderStorage(d,A);metrics(d,A);window.__A03BookLabReady=true;window.__A03BookLabSnapshot={preset:$('preset').value,format:$('format').value,edges:d.edges.length,orientation:$('orientation').value}; if(pulsing)requestAnimationFrame(render)}
+['preset','format','orientation','directed','loops','thr','scale'].forEach(id=>$(id).addEventListener('input',render));
+$('edgeSel').addEventListener('input',e=>{selectedEdge=Number(e.target.value);render()});
+$('step').addEventListener('click',()=>{const d=visibleData();selectedEdge=(selectedEdge+1)%Math.max(1,d.edges.length);render()});
+$('pulse').addEventListener('click',()=>{pulsing=true;pulseT=0;requestAnimationFrame(render)});
+$('reset').addEventListener('click',()=>{$('preset').value='grn';$('format').value='coo';$('orientation').value='incoming';$('directed').checked=true;$('loops').checked=false;$('thr').value=.30;$('scale').value=2000;selectedEdge=0;render()});
+render();
+</script>
+</body>
+</html>

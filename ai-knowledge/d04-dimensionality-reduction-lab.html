@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D04 Dimensionality Reduction</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=d04-d05-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="learning" data-lab-id="d04" data-keywords="PCA SVD random projection manifold learning reconstruction residual dimensionality reduction">
+    <section class="visual-stack" aria-label="Interactive 3D dimensionality-reduction visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="D04 Dimensionality Reduction 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>D04</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>Reduction is controlled information loss: PCA keeps variance, residuals show rank-k loss, random maps preserve distances, manifolds preserve neighborhoods.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Dimensionality-reduction geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.82fr) minmax(0,.78fr) repeat(5,minmax(0,1fr)) repeat(3,minmax(0,.62fr));">
+        <select id="viewMode" data-control="mode" aria-label="Reduction view">
+          <option value="pca">PCA plane</option>
+          <option value="residuals">Residuals</option>
+          <option value="random">Random proj</option>
+          <option value="manifold">Manifold</option>
+        </select>
+        <select id="dataset" aria-label="Dataset">
+          <option value="slab">Slab</option>
+          <option value="swiss">Swiss roll</option>
+        </select>
+        <div class="command-control">
+          <label for="targetDim">Target k <output data-output="targetDim">2</output></label>
+          <input id="targetDim" data-param="targetDim" type="range" min="1" max="3" step="1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="neighborScale">Neighbors <output data-output="neighborScale">10</output></label>
+          <input id="neighborScale" data-param="neighborScale" type="range" min="4" max="24" step="1" value="10">
+        </div>
+        <div class="command-control">
+          <label for="drNoise">Noise <output data-output="drNoise">0.12</output></label>
+          <input id="drNoise" data-param="drNoise" type="range" min="0" max="1" step="0.02" value="0.12">
+        </div>
+        <div class="command-control">
+          <label for="randomSeed">Seed view <output data-output="randomSeed">3</output></label>
+          <input id="randomSeed" data-param="randomSeed" type="range" min="1" max="9" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="spread">Spread <output data-output="spread">0.50</output></label>
+          <input id="spread" data-param="spread" type="range" min="0" max="1" step="0.02" value="0.50">
+        </div>
+        <button id="fitReducer" class="primary" data-action="pulse" type="button">Auto view</button>
+        <button id="stepReducer" data-action="step" type="button">Raise k</button>
+        <button id="resetReducer" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block D 3D lab</p>
+        <h1>D04 Dimensionality Reduction</h1>
+        <p class="subtitle">Rotate PCA axes, reconstruction residuals, random projection shadows, and manifold neighborhood graphs.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Variance"><span>Variance</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Recon RMSE"><span>Recon RMSE</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Distortion"><span>Distortion</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Trust"><span>Trust</span><strong>0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading the reduction geometry.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Controls are live: target k changes rank and residual rods, neighbors changes manifold graph density, dataset switches linear slab to Swiss roll, and random mode reveals distance distortion.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=d04-d05-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=d04-d05-canonical-clarity-v2"></script>
+  <script>
+    window.__d04LabSnapshot = window.__d04LabSnapshot || function () { return null; };
+    createD04DimensionalityLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

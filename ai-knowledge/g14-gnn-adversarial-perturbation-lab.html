@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G14 GNN Robustness Attack Surface</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g14-robust-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="robustness" data-lab-id="g14" data-keywords="attack robust perturbation evasion poisoning defense margin">
+    <section class="visual-stack" aria-label="Interactive 3D GNN robustness attack surface">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G14 adversarial perturbation robustness 3D attack surface"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G14</strong></div>
+          <div class="formula-chip"><span id="formulaText">margin = true logit - attack logit</span>Changing graph structure changes which messages reach the target.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected threat</span><strong>Robustness attack surface is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(2,minmax(0,.6fr)) repeat(5,minmax(0,.55fr)) repeat(5,minmax(0,.42fr));">
+        <select id="attackType" data-control="mode" aria-label="Attack type">
+          <option value="evasion">Evasion</option>
+          <option value="poisoning">Poison</option>
+          <option value="injection">Inject</option>
+        </select>
+        <select id="defenseMode" data-control="defenseMode" aria-label="Defense mode">
+          <option value="none">No defense</option>
+          <option value="similarity">Similarity</option>
+          <option value="trimmed">Trimmed</option>
+          <option value="attention">Attention</option>
+        </select>
+        <div class="command-control">
+          <label for="propagationDepth">Depth <output data-output="propagationDepth">2</output></label>
+          <input id="propagationDepth" data-param="propagationDepth" type="range" min="1" max="5" step="1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="attackBudget">Budget <output data-output="attackBudget">3</output></label>
+          <input id="attackBudget" data-param="attackBudget" type="range" min="0" max="8" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="defenseStrength">Defense <output data-output="defenseStrength">0.46</output></label>
+          <input id="defenseStrength" data-param="defenseStrength" type="range" min="0" max="1.5" step="0.01" value="0.46">
+        </div>
+        <div class="command-control">
+          <label for="featureShift">Feature <output data-output="featureShift">0.25</output></label>
+          <input id="featureShift" data-param="featureShift" type="range" min="0" max="1" step="0.01" value="0.25">
+        </div>
+        <div class="command-control">
+          <label for="plausibility">Plaus <output data-output="plausibility">0.64</output></label>
+          <input id="plausibility" data-param="plausibility" type="range" min="0" max="1" step="0.01" value="0.64">
+        </div>
+        <button id="flipEdge" class="primary" data-action="pulse" type="button">Flip edge</button>
+        <button id="applyDefense" data-action="step" type="button">Filter</button>
+        <button id="poisonTraining" data-action="step" type="button">Poison</button>
+        <button id="runThreatModel" data-action="step" type="button">Threat</button>
+        <button id="resetG14" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G14 GNN Robustness Attack Surface</h1>
+        <p class="subtitle">Rotate the target neighborhood, flip adversarial edges, poison labels, and apply defenses that recover margin at a cost.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Target confidence"><span>Confidence</span><strong id="confidenceLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Robust margin"><span>Margin</span><strong id="marginLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Changed edges"><span>Edges</span><strong id="edgesLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Defense cost"><span>Cost</span><strong id="costLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading robustness diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: budget changes edge flips, feature shift changes attack surface, defense filters messages, and poisoning damages training before learning.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g14-robust-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=g14-robust-v3"></script>
+  <script>
+    window.__g14LabSnapshot = window.__g14LabSnapshot || function () { return null; };
+    createG14AdversarialRobustnessLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>F06 Random Graph Models</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=f06-random-graphs-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="graph" data-lab-id="f06" data-keywords="random graph Erdos Renyi Barabasi Albert stochastic block model null model">
+    <section class="visual-stack" aria-label="Interactive 3D random graph model visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="F06 random graph models 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>F06</strong></div>
+          <div class="formula-chip"><span>Distribution over graphs</span>One graph is only a sample: compare ER independent coins, BA cumulative advantage, SBM planted communities, ensemble variation, and matched-density nulls.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected model</span><strong><span id="modelLabel">ER</span> sample is loading.</strong></div>
+        <div class="concept-rail" data-visual-key="f06 physical random-graph legend" style="grid-template-columns:repeat(5,minmax(0,1fr));">
+          <span>ER sprinkler: p flips edge coins</span>
+          <span>Giant gate: p ~= 1/n</span>
+          <span>Small-world ruler: beta shortcuts</span>
+          <span>Attachment magnet: hubs attract</span>
+          <span>Block matrix: planted groups</span>
+        </div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(2,minmax(0,.62fr)) repeat(5,minmax(0,.68fr)) repeat(3,minmax(0,.52fr));">
+        <select id="model" data-control="model" aria-label="Random graph model">
+          <option value="er">Erdos-Renyi</option>
+          <option value="ws">Watts-Strogatz</option>
+          <option value="ba">Barabasi-Albert</option>
+          <option value="sbm">SBM</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="Random graph view">
+          <option value="sample">Sample</option>
+          <option value="matrix">Matrix</option>
+          <option value="ensemble">Ensemble</option>
+          <option value="null">Null test</option>
+        </select>
+        <div class="command-control">
+          <label for="density">Density <output data-output="density">0.14</output></label>
+          <input id="density" data-param="density" type="range" min="0.04" max="0.32" step="0.01" value="0.14">
+        </div>
+        <div class="command-control">
+          <label for="attachmentM">Attach <output data-output="attachmentM">2</output></label>
+          <input id="attachmentM" data-param="attachmentM" type="range" min="1" max="5" step="1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="contrast">Contrast <output data-output="contrast">0.55</output></label>
+          <input id="contrast" data-param="contrast" type="range" min="0.05" max="0.95" step="0.01" value="0.55">
+        </div>
+        <div class="command-control">
+          <label for="seedJitter">Seed <output data-output="seedJitter">3</output></label>
+          <input id="seedJitter" data-param="seedJitter" type="range" min="0" max="12" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="rewireNoise">Rewire <output data-output="rewireNoise">0.08</output></label>
+          <input id="rewireNoise" data-param="rewireNoise" type="range" min="0" max="0.5" step="0.01" value="0.08">
+        </div>
+        <button id="switchModel" class="primary" data-action="pulse" type="button">Switch model</button>
+        <button id="runFive" data-action="step" type="button">5 samples</button>
+        <button id="stressNull" data-action="reset" type="button">Null test</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block F 3D lab</p>
+        <h1>F06 Random Graph Models</h1>
+        <p class="subtitle">Rotate the sampled graph cloud, probability matrix, giant-component shell, hub tower, SBM block matrix, ensemble strip, triangle surplus gauge, and matched-density null-model comparator.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Edges"><span>Edges</span><strong id="edgeLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Giant"><span>Giant</span><strong id="giantLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Hubs"><span>Hubs</span><strong id="hubLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Closure"><span>Closure</span><strong id="closureLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading random graph model diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="stateText">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: model changes the sampling law, density controls ER thresholds, contrast plants SBM communities, and null test compares observed structure to matched density.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=f06-random-graphs-v1"></script>
+  <script src="shared/ml-lab-core.js?math3d=f06-random-graphs-v1"></script>
+  <script>
+    window.__f06LabSnapshot = window.__f06LabSnapshot || function () { return null; };
+    createF06RandomGraphModelsLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

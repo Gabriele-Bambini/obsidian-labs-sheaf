@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>C01 Convex Analysis</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=b10-c01-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="optimization" data-lab-id="c01" data-keywords="convex analysis convex set epigraph Jensen subgradient supporting hyperplane Fenchel conjugate">
+    <section class="visual-stack" aria-label="Interactive 3D mathematical visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom. Click objects to inspect.">
+          <canvas id="canvas" aria-label="C01 Convex Analysis 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>C01</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>Convex sets keep segments inside; epigraphs, Jensen gaps, support/subgradient planes, PSD curvature, and Fenchel slopes certify global optimality.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Click a node to inspect local structure.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select data-control="mode" aria-label="Concept mode">
+            <option value="set">Convex set</option>
+            <option value="epigraph">Epigraph</option>
+            <option value="jensen">Jensen</option>
+            <option value="fenchel">Fenchel conjugate</option>
+        </select>
+        <div class="command-control">
+          <label for="c01-curvature">Curvature / convexity <output data-output="curvature">0.9</output></label>
+          <input id="c01-curvature" data-param="curvature" type="range" min="-1.5" max="2.5" step="0.01" value="0.9">
+        </div>
+        <div class="command-control">
+          <label for="c01-step">Step size / time <output data-output="step">0.28</output></label>
+          <input id="c01-step" data-param="step" type="range" min="0.02" max="1" step="0.01" value="0.28">
+        </div>
+        <div class="command-control">
+          <label for="c01-noise">Noise / perturbation <output data-output="noise">0.16</output></label>
+          <input id="c01-noise" data-param="noise" type="range" min="0" max="1" step="0.01" value="0.16">
+        </div>
+        <div class="command-control">
+          <label for="c01-budget">Iterations / particles <output data-output="budget">6</output></label>
+          <input id="c01-budget" data-param="budget" type="range" min="1" max="14" step="1" value="6">
+        </div>
+        <div class="command-control">
+          <label for="c01-regularization">Regularization / dual weight <output data-output="regularization">0.45</output></label>
+          <input id="c01-regularization" data-param="regularization" type="range" min="0" max="1" step="0.01" value="0.45">
+        </div>
+        <button class="primary" data-action="pulse" type="button">Pulse</button>
+        <button data-action="step" type="button">Step</button>
+        <button data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block C 3D lab</p>
+        <h1>C01 Convex Analysis</h1>
+        <p class="subtitle">Orbit / rotate / zoom the system, select objects, then change parameters to experiment with convex analysis convex set epigraph Jensen subgradient supporting hyperplane Fenchel conjugate.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Jensen gap">
+          <span>Jensen gap</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Support violation">
+          <span>Support violation</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Subgradient norm">
+          <span>Subgradient norm</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Fenchel gap">
+          <span>Fenchel gap</span>
+          <strong>0.00</strong>
+        </div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading the 3D mathematical system.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Command bar controls are live: every slider changes geometry, active channels, metrics, or selected-object state. Blue/cyan shows signal, amber shows frontier, red shows perturbation.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=b10-c01-canonical-clarity-v2"></script>
+  <script>
+    const labState = createGnnLab({"id":"c01","kind":"optimization","title":"C01 Convex Analysis","modes":[{"value":"set","label":"Convex set"},{"value":"epigraph","label":"Epigraph"},{"value":"jensen","label":"Jensen"},{"value":"fenchel","label":"Fenchel conjugate"}],"parameters":[{"key":"curvature","label":"Curvature / convexity","min":-1.5,"max":2.5,"step":0.01,"value":0.9},{"key":"step","label":"Step size / time","min":0.02,"max":1,"step":0.01,"value":0.28},{"key":"noise","label":"Noise / perturbation","min":0,"max":1,"step":0.01,"value":0.16},{"key":"budget","label":"Iterations / particles","min":1,"max":14,"step":1,"value":6},{"key":"regularization","label":"Regularization / dual weight","min":0,"max":1,"step":0.01,"value":0.45}],"metrics":["Jensen gap","Support violation","Subgradient norm","Fenchel gap"],"visual":{"kind":"convex-analysis-lab","graphStyle":"hidden","quality":"c01-c02-premium-v1"},"profile":{"preferredMetric":"Jensen gap","formula":"f(theta x + (1-theta)y) <= theta f(x) + (1-theta)f(y)","insight":"C01 makes convex analysis concrete: epigraphs, supporting planes, Jensen gaps, and conjugate slopes are visible certificates, not abstract definitions."}});
+    window.__c01LabSnapshot = () => window.__gLabSnapshot();
+    Object.defineProperty(window, "__c01LabReady", { get: () => window.__gLabReady === true });
+  </script>
+</body>
+</html>

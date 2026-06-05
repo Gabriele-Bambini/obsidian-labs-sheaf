@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A10 Advanced Category Theory</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a09-a10-canonical-clarity-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a10" data-keywords="advanced category theory limits colimits cones adjunction monad Kan extension sheaf gluing universal property">
+    <section class="visual-stack" aria-label="Interactive 3D mathematical visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom. Click objects to inspect.">
+          <canvas id="canvas" aria-label="A10 Advanced Category Theory 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>A10</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>Limit cone, Colimit glue, Adjunction bridge, Monad flatten, Kan extension, and Sheaf gluing are shown as concrete universal constructions.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Click a node to inspect local structure.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select data-control="mode" aria-label="Concept mode">
+            <option value="limits">Limits</option>
+            <option value="adjunction">Adjunction</option>
+            <option value="monad">Monad</option>
+            <option value="kan">Kan extension</option>
+            <option value="sheaf">Sheaf glue</option>
+        </select>
+        <div class="command-control">
+          <label for="a10-defect">cone defect <output data-output="defect">0.18</output></label>
+          <input id="a10-defect" data-param="defect" type="range" min="0" max="1" step="0.02" value="0.18">
+        </div>
+        <div class="command-control">
+          <label for="a10-adjunction">adjunction fit <output data-output="adjunction">0.72</output></label>
+          <input id="a10-adjunction" data-param="adjunction" type="range" min="0" max="1" step="0.02" value="0.72">
+        </div>
+        <div class="command-control">
+          <label for="a10-depth">monad depth <output data-output="depth">3</output></label>
+          <input id="a10-depth" data-param="depth" type="range" min="1" max="8" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="a10-extension">extension span <output data-output="extension">0.45</output></label>
+          <input id="a10-extension" data-param="extension" type="range" min="0" max="1" step="0.02" value="0.45">
+        </div>
+        <div class="command-control">
+          <label for="a10-glue">glue strength <output data-output="glue">0.28</output></label>
+          <input id="a10-glue" data-param="glue" type="range" min="0" max="1" step="0.02" value="0.28">
+        </div>
+        <button class="primary" data-action="pulse" type="button">Show universal role</button>
+        <button data-action="step" type="button">Factor/flatten</button>
+        <button data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block A 3D lab</p>
+        <h1>A10 Advanced Category Theory</h1>
+        <p class="subtitle">Orbit / rotate / zoom the system, select objects, then change parameters to experiment with advanced category theory limits colimits cones adjunction monad Kan extension sheaf gluing universal property.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Universal defect">
+          <span>Universal defect</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Adjunction fit">
+          <span>Adjunction fit</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Monad coherence">
+          <span>Monad coherence</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Extension cost">
+          <span>Extension cost</span>
+          <strong>0.00</strong>
+        </div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading the 3D mathematical system.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Command bar controls are live: every slider changes geometry, active channels, metrics, or selected-object state. Blue/cyan shows signal, amber shows frontier, red shows perturbation.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=a09-a10-canonical-clarity-v1"></script>
+  <script>
+    const labState = createGnnLab({"id":"a10","kind":"algebra","title":"A10 Advanced Category Theory","modes":[{"value":"limits","label":"Limits"},{"value":"adjunction","label":"Adjunction"},{"value":"monad","label":"Monad"},{"value":"kan","label":"Kan extension"},{"value":"sheaf","label":"Sheaf glue"}],"parameters":[{"key":"defect","label":"cone defect","min":0,"max":1,"step":0.02,"value":0.18},{"key":"adjunction","label":"adjunction fit","min":0,"max":1,"step":0.02,"value":0.72},{"key":"depth","label":"monad depth","min":1,"max":8,"step":1,"value":3},{"key":"extension","label":"extension span","min":0,"max":1,"step":0.02,"value":0.45},{"key":"glue","label":"glue strength","min":0,"max":1,"step":0.02,"value":0.28}],"metrics":["Universal defect","Adjunction fit","Monad coherence","Extension cost"],"visual":{"kind":"advanced-category-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Universal defect","formula":"limit cone + hom_C(Fa,b) ~= hom_D(a,Ub) + T=UF + Lan_K","insight":"A10 keeps advanced category theory as universal tasks: a cone factors uniquely through a limit, adjunctions transpose arrows, monads flatten nested structure, Kan extensions fill missing data, and sheaf gluing checks coherence."}});
+    window.__a10LabSnapshot = () => window.__gLabSnapshot();
+    Object.defineProperty(window, "__a10LabReady", { get: () => window.__gLabReady === true });
+  </script>
+</body>
+</html>

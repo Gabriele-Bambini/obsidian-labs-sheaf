@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D08 Learning Theory</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=d08-d09-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="learning" data-lab-id="d08" data-keywords="learning theory generalization empirical risk population risk PAC VC Rademacher stability">
+    <section class="visual-stack" aria-label="Interactive 3D learning-theory visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="D08 Learning Theory 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>D08</strong></div>
+          <div class="formula-chip"><span>Generalization sketch</span>Training fit is visible; population risk is inferred through sample size, capacity, random signs, margins, and stability.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected diagnostic</span><strong>Learning-theory geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.92fr) repeat(5,minmax(0,1fr)) repeat(3,minmax(0,.62fr));">
+        <select id="viewMode" data-control="mode" aria-label="Theory view">
+          <option value="risk">Risk gap</option>
+          <option value="vc">VC shattering</option>
+          <option value="rademacher">Rademacher</option>
+          <option value="stability">Stability</option>
+        </select>
+        <div class="command-control">
+          <label for="sampleSize">Sample n <output data-output="sampleSize">80</output></label>
+          <input id="sampleSize" data-param="sampleSize" type="range" min="30" max="220" step="5" value="80">
+        </div>
+        <div class="command-control">
+          <label for="capacity">Capacity <output data-output="capacity">4</output></label>
+          <input id="capacity" data-param="capacity" type="range" min="1" max="10" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="regularization">Regularize <output data-output="regularization">0.35</output></label>
+          <input id="regularization" data-param="regularization" type="range" min="0" max="1" step="0.01" value="0.35">
+        </div>
+        <div class="command-control">
+          <label for="labelNoise">Noise <output data-output="labelNoise">0.12</output></label>
+          <input id="labelNoise" data-param="labelNoise" type="range" min="0" max="0.45" step="0.01" value="0.12">
+        </div>
+        <div class="command-control">
+          <label for="confidence">Confidence <output data-output="confidence">0.95</output></label>
+          <input id="confidence" data-param="confidence" type="range" min="0.75" max="0.99" step="0.01" value="0.95">
+        </div>
+        <button id="pulseTheory" class="primary" data-action="pulse" type="button">Resample</button>
+        <button id="stepTheory" data-action="step" type="button">New signs</button>
+        <button id="resetTheory" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block D 3D lab</p>
+        <h1>D08 Learning Theory</h1>
+        <p class="subtitle">Inspect why training error may or may not predict future error: risk gap, VC capacity, random signs, and stability.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Empirical"><span>Empirical</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Gap"><span>Gap</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Bound"><span>Bound</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Capacity"><span>Capacity</span><strong>0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading generalization geometry.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Controls are live: sample size shrinks the PAC funnel, capacity bends the separator, random signs expose noise fitting, and regularization reduces leave-one-out movement.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=d08-d09-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=d08-d09-canonical-clarity-v2"></script>
+  <script>
+    window.__d08LabSnapshot = window.__d08LabSnapshot || function () { return null; };
+    createD08LearningTheoryLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

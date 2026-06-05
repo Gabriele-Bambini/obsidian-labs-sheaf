@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>F07 Graph Signal Processing</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=f07-graph-signal-processing-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="graph" data-lab-id="f07" data-keywords="graph signal processing graph Fourier transform Laplacian filtering heat kernel wavelet">
+    <section class="visual-stack" aria-label="Interactive 3D graph signal processing visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="F07 graph signal processing 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>F07</strong></div>
+          <div class="formula-chip"><span>x -> U h(Lambda) U^T x</span>The same node signal becomes smooth, rough, anomalous, or denoised depending on graph geometry and filter gain.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected signal</span><strong><span id="modeLabel">Low-pass</span> graph filter is loading.</strong></div>
+        <div class="concept-rail" data-visual-key="f07 physical GSP legend" style="grid-template-columns:repeat(5,minmax(0,1fr));">
+          <span>Signal towers: x_i on nodes</span>
+          <span>GFT rack: U^T x coefficients</span>
+          <span>Gain gate: h(lambda)</span>
+          <span>Heat runway: exp(-tL)</span>
+          <span>Wavelet rings: delta_v scales</span>
+        </div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(4,minmax(0,.50fr)) repeat(5,minmax(0,.58fr)) repeat(4,minmax(0,.44fr));">
+        <select id="graphPreset" data-control="graphPreset" aria-label="Graph geometry">
+          <option value="sensor">Sensor mesh</option>
+          <option value="bridge">Bridge graph</option>
+          <option value="cycle">Cycle graph</option>
+        </select>
+        <select id="signalPreset" data-control="signalPreset" aria-label="Signal shape">
+          <option value="smooth">Smooth field</option>
+          <option value="spike">Local spike</option>
+          <option value="noisy">Noisy smooth</option>
+          <option value="boundary">Sharp boundary</option>
+        </select>
+        <select id="mode" data-control="mode" aria-label="Filter mode">
+          <option value="low">Low-pass</option>
+          <option value="high">High-pass</option>
+          <option value="band">Band-pass</option>
+          <option value="wavelet">Wavelet</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="Graph signal view">
+          <option value="signal">Signal</option>
+          <option value="spectrum">Spectrum</option>
+          <option value="energy">Energy</option>
+          <option value="wavelet">Wavelet</option>
+        </select>
+        <div class="command-control">
+          <label for="cutoff">Cutoff <output data-output="cutoff">0.55</output></label>
+          <input id="cutoff" data-param="cutoff" type="range" min="0.15" max="1.8" step="0.01" value="0.55">
+        </div>
+        <div class="command-control">
+          <label for="noiseLevel">Noise <output data-output="noiseLevel">0.22</output></label>
+          <input id="noiseLevel" data-param="noiseLevel" type="range" min="0" max="0.8" step="0.01" value="0.22">
+        </div>
+        <div class="command-control">
+          <label for="diffusionTime">Heat t <output data-output="diffusionTime">0.70</output></label>
+          <input id="diffusionTime" data-param="diffusionTime" type="range" min="0.05" max="2.4" step="0.01" value="0.70">
+        </div>
+        <div class="command-control">
+          <label for="bandWidth">Band <output data-output="bandWidth">0.38</output></label>
+          <input id="bandWidth" data-param="bandWidth" type="range" min="0.12" max="0.9" step="0.01" value="0.38">
+        </div>
+        <div class="command-control">
+          <label for="waveletScale">Scale <output data-output="waveletScale">0.62</output></label>
+          <input id="waveletScale" data-param="waveletScale" type="range" min="0.2" max="1.4" step="0.01" value="0.62">
+        </div>
+        <button id="filterSignal" class="primary" data-action="pulse" type="button">Apply h(lambda)</button>
+        <button id="randomize" data-action="step" type="button">Add noise</button>
+        <button id="iterate" data-action="step" type="button">K-hop filter</button>
+        <button id="heatFlow" data-action="reset" type="button">Run heat</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block F 3D lab</p>
+        <h1>F07 Graph Signal Processing</h1>
+        <p class="subtitle">Rotate the graph signal as node heights, edge-disagreement rods, graph Fourier coefficient bars, spectral gain gates, heat-kernel smoothing, and localized wavelet rings.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Dirichlet energy"><span>Energy</span><strong id="energyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Roughness"><span>Roughness</span><strong id="roughnessLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Low frequency"><span>Low share</span><strong id="lowShareLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="High frequency"><span>High share</span><strong id="highShareLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading graph signal diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: graph geometry changes frequency, signal preset changes Fourier mass, cutoff changes the gain curve, heat time smooths high modes, and noise reveals roughness.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=f07-graph-signal-processing-v1"></script>
+  <script src="shared/ml-lab-core.js?math3d=f07-graph-signal-processing-v1"></script>
+  <script>
+    window.__f07LabSnapshot = window.__f07LabSnapshot || function () { return null; };
+    createF07GraphSignalProcessingLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

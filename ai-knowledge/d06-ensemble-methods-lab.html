@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D06 Ensemble Methods</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=d06-d07-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="learning" data-lab-id="d06" data-keywords="ensemble bagging random forest boosting stacking variance correlation out-of-fold">
+    <section class="visual-stack" aria-label="Interactive 3D ensemble visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="D06 Ensemble Methods 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>D06</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>Ensembles improve when members disagree usefully: bagging averages variance, forests decorrelate, boosting corrects residuals, stacking validates weights.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Ensemble workbench is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.82fr) repeat(5,minmax(0,1fr)) repeat(3,minmax(0,.62fr));">
+        <select id="mode" data-control="mode" aria-label="Ensemble mode">
+          <option value="bagging">Bagging</option>
+          <option value="forest">Forest</option>
+          <option value="boosting">Boosting</option>
+          <option value="stacking">Stacking</option>
+        </select>
+        <div class="command-control">
+          <label for="modelCount">Models <output data-output="modelCount">8</output></label>
+          <input id="modelCount" data-param="modelCount" type="range" min="4" max="24" step="1" value="8">
+        </div>
+        <div class="command-control">
+          <label for="featureSubsample">Feature subsample <output data-output="featureSubsample">0.68</output></label>
+          <input id="featureSubsample" data-param="featureSubsample" type="range" min="0.15" max="1" step="0.01" value="0.68">
+        </div>
+        <div class="command-control">
+          <label for="learningRate">Learning rate <output data-output="learningRate">0.12</output></label>
+          <input id="learningRate" data-param="learningRate" type="range" min="0.03" max="0.35" step="0.01" value="0.12">
+        </div>
+        <div class="command-control">
+          <label for="diversity">Diversity <output data-output="diversity">0.46</output></label>
+          <input id="diversity" data-param="diversity" type="range" min="0" max="1" step="0.02" value="0.46">
+        </div>
+        <div class="command-control">
+          <label for="baseDepth">Base depth <output data-output="baseDepth">3</output></label>
+          <input id="baseDepth" data-param="baseDepth" type="range" min="1" max="6" step="1" value="3">
+        </div>
+        <button id="fitEnsemble" class="primary" data-action="pulse" type="button">Train 4</button>
+        <button id="stepEnsemble" data-action="step" type="button">Add stage</button>
+        <button id="resetEnsemble" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block D 3D lab</p>
+        <h1>D06 Ensemble Methods</h1>
+        <p class="subtitle">Rotate bootstrap fans, feature-random forests, residual boosting ladders, and out-of-fold stacking mixers.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Variance"><span>Variance</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Correlation"><span>Correlation</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Loss"><span>Loss/OOB</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Margin"><span>Margin</span><strong>0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading ensemble geometry.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Controls are live: model count changes averaging variance, feature subsampling lowers correlation, learning rate changes boosting stages, and diversity spreads stacking weights.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=d06-d07-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=d06-d07-canonical-clarity-v2"></script>
+  <script>
+    window.__d06LabSnapshot = window.__d06LabSnapshot || function () { return null; };
+    createD06EnsembleLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

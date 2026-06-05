@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H01 Introduction To Sheaf Theory</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=h05-intuitive-v11-h01-v2">
+</head>
+<body>
+  <main class="lab-shell lab-3d-shell gnn-lab math-3d-lab" data-lab-kind="sheaf" data-lab-id="h01" data-keywords="sheaf introduction open sets stalks restrictions global sections cellular sheaf laplacian">
+    <section class="visual-stack" aria-label="Interactive 3D introductory sheaf visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="H01 open cover stalk restrictions global section sheaf 3D lab"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>H01</strong></div>
+          <div class="formula-chip"><span id="formulaText">local sections glue only when restrictions agree</span>Open cover data becomes global data only through overlap compatibility.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected sheaf</span><strong>Open cover system is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(2,minmax(0,.58fr)) repeat(5,minmax(0,.52fr)) repeat(4,minmax(0,.42fr));">
+        <select id="mode" data-control="mode" aria-label="Concept mode">
+          <option value="cover">Open cover</option>
+          <option value="cellular">Stalks and restrictions</option>
+          <option value="laplacian">Global section test</option>
+        </select>
+        <select id="restrictionMode" data-control="restrictionMode" aria-label="Restriction mode">
+          <option value="identity">Identity</option>
+          <option value="signed">Signed</option>
+          <option value="scaled">Scaled</option>
+          <option value="projection">Projection</option>
+        </select>
+        <div class="command-control">
+          <label for="sectionU">sU <output data-output="sectionU">0.80</output></label>
+          <input id="sectionU" data-param="sectionU" type="range" min="-1" max="1" step="0.01" value="0.8">
+        </div>
+        <div class="command-control">
+          <label for="sectionV">sV <output data-output="sectionV">-0.35</output></label>
+          <input id="sectionV" data-param="sectionV" type="range" min="-1" max="1" step="0.01" value="-0.35">
+        </div>
+        <div class="command-control">
+          <label for="sectionW">sW <output data-output="sectionW">0.26</output></label>
+          <input id="sectionW" data-param="sectionW" type="range" min="-1" max="1" step="0.01" value="0.26">
+        </div>
+        <div class="command-control">
+          <label for="restrictionStrictness">Strict <output data-output="restrictionStrictness">0.90</output></label>
+          <input id="restrictionStrictness" data-param="restrictionStrictness" type="range" min="0.25" max="2.2" step="0.01" value="0.9">
+        </div>
+        <div class="command-control">
+          <label for="coverRefinement">Cover <output data-output="coverRefinement">3</output></label>
+          <input id="coverRefinement" data-param="coverRefinement" type="range" min="1" max="10" step="1" value="3">
+        </div>
+        <button id="makeCompatible" class="primary" data-action="pulse" type="button">Glue sections</button>
+        <button id="breakGluing" data-action="step" type="button">Break overlap</button>
+        <button id="stepDiffuse" data-action="step" type="button">Diffuse</button>
+        <button id="resetH01" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block H 3D lab</p>
+        <h1>H01 Introduction To Sheaf Theory</h1>
+        <p class="subtitle">Rotate an open cover, move local sections, switch restriction maps, test gluing, then watch sheaf Laplacian diffusion reduce compatibility energy.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Gluing score"><span>Gluing score</span><strong id="glueLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Restriction defect"><span>Defect</span><strong id="defectLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Cover support"><span>Support</span><strong id="supportLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Global section gap"><span>Global gap</span><strong id="gapLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading local-to-global diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: local section sliders move patch values, restriction maps change compatibility, Glue creates a global section, and Flow applies L_F = delta^T delta.</p>
+    </aside>
+  </main>
+  <!-- class="lab-shell lab-3d-shell" class="control-grid controls" preserveDrawingBuffer static compatibility marker -->
+  <!-- {"visual":{"kind":"open-cover","graphStyle":"anchors"},"profile":{"preferredMetric":"Gluing score"},"graph":{"nodes":["open patch coverage","stalk column","global section"],"edges":["restriction","overlap","gluing"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=h05-intuitive-v11-h01-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=h05-intuitive-v11-h01-v3"></script>
+  <script>
+    window.__h01LabReady = false;
+    window.__h01LabSnapshot = window.__h01LabSnapshot || function () { return null; };
+    createH01SheafIntroductionLab();
+  </script>
+</body>
+</html>

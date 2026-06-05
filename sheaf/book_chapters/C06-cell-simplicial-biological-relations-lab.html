@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>C06 - Cell, Simplicial, Hypergraph, and Biological Relation Lab</title>
+  <style>
+    :root{--bg:#071015;--panel:#0d1820;--panel2:#102331;--ink:#e7f4f7;--muted:#9eb6c2;--line:#264353;--a:#58e0d3;--b:#e8b857;--c:#a78bfa;--d:#f47b65;--g:#77df96}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Arial,sans-serif}
+    .shell{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;padding:12px;background:radial-gradient(circle at 20% 10%,#123242 0,#071015 42%,#050b0f 100%)}
+    .stage{min-width:0;border:1px solid var(--line);border-radius:14px;background:#09151c;display:grid;grid-template-rows:auto minmax(420px,1fr) auto;overflow:hidden}
+    .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#102432,#0a151d)}
+    h1{font-size:18px;line-height:1.2;margin:0}.sub{margin:4px 0 0;color:var(--muted);font-size:12px}.formula{font:650 13px ui-monospace,Consolas,monospace;color:#dff8f5;background:#071219;border:1px solid #244858;border-radius:10px;padding:9px;max-width:430px}
+    canvas{width:100%;height:100%;display:block;background:linear-gradient(180deg,#0a1720,#071015)}
+    .controls{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:8px;padding:10px;border-top:1px solid var(--line);background:#0b1720}
+    label{display:grid;gap:4px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+    select,input,button{width:100%;min-height:34px;border-radius:8px;border:1px solid #315268;background:#102637;color:var(--ink);font:600 13px inherit;padding:6px 8px}
+    input{accent-color:var(--a);padding:0} button{cursor:pointer;background:#143246} button:hover{border-color:var(--a)}
+    .side{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#102331,#0a151d);padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+    .eyebrow{margin:0;color:var(--a);font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:800}.side h2{margin:2px 0 0;font-size:18px}.side p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+    .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid #244252;border-radius:10px;padding:9px;background:#0a1821}.metric span{display:block;color:var(--muted);font-size:11px}.metric strong{display:block;font-size:20px;margin-top:3px}
+    .note{border:1px solid #244252;border-radius:12px;background:#07131a;padding:10px}.note h3{font-size:14px;margin:0 0 6px}.legend{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--muted)}.sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+    @media(max-width:860px){.shell{grid-template-columns:1fr;padding:8px}.stage{grid-template-rows:auto 460px auto}.controls{grid-template-columns:1fr 1fr}.formula{max-width:none}.side{padding:12px}.metrics{grid-template-columns:1fr 1fr}}
+    @media(max-width:520px){.stage{grid-template-rows:auto 420px auto}.controls{grid-template-columns:1fr}.metrics{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main class="shell" data-c06-lab-ready="false">
+    <section class="stage">
+      <div class="top">
+        <div><h1>C06 - Domain choice for biological group relations</h1><p class="sub">Drag/scroll the scene. Switch domains and watch which biological claims are forced.</p></div>
+        <div class="formula">Graph: E subset VxV<br>Hypergraph: e subset V<br>Simplicial: sigma in K => all faces in K<br>Cell: boundary specified, not clique-forced</div>
+      </div>
+      <canvas id="scene" width="1100" height="680" aria-label="Interactive comparison of graph, hypergraph, simplicial complex, and cell complex"></canvas>
+      <div class="controls">
+        <label>Domain<select id="domain"><option value="graph">Graph</option><option value="hypergraph">Hypergraph</option><option value="simplicial">Simplicial complex</option><option value="cell">Cell complex</option></select></label>
+        <label>Biology preset<select id="preset"><option value="regulon">TF-enhancer-gene-state module</option><option value="protein">Protein complex</option><option value="communication">Ligand-receptor-cell communication</option><option value="spatial">Spatial tissue niche</option></select></label>
+        <label>Closure strength <output id="closureOut">0.65</output><input id="closure" type="range" min="0" max="100" value="65"></label>
+        <label>Evidence threshold <output id="thresholdOut">0.60</output><input id="threshold" type="range" min="0" max="100" value="60"></label>
+        <label>Group size <output id="sizeOut">4</output><input id="size" type="range" min="3" max="9" value="4"></label>
+        <label>Orientation <output id="orientOut">1</output><input id="orientation" type="range" min="-1" max="1" step="1" value="1"></label>
+        <button id="addSimplex" type="button">Add simplex</button>
+        <button id="addCell" type="button">Add irregular cell</button>
+        <button id="toggleClosure" type="button">Toggle closure audit</button>
+        <button id="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side">
+      <div><p class="eyebrow">Lesson-specific lab</p><h2>What the domain forces</h2><p id="explain">A graph makes pairwise claims. Increase group size to see how clique expansion grows.</p></div>
+      <div class="metrics">
+        <div class="metric"><span>Closure violations</span><strong id="mClosure">0</strong></div>
+        <div class="metric"><span>Pairwise edge load</span><strong id="mEdges">6</strong></div>
+        <div class="metric"><span>Incidence density</span><strong id="mDensity">0.42</strong></div>
+        <div class="metric"><span>Overclaim risk</span><strong id="mRisk">0.36</strong></div>
+      </div>
+      <div class="note"><h3>How to read it</h3><p id="state">Each node is a biological object. Filled regions are higher-order relations. Red dashed edges are weak evidence that closure would force.</p></div>
+      <div class="legend">
+        <div><span class="sw" style="background:var(--a)"></span>supported object</div>
+        <div><span class="sw" style="background:var(--b)"></span>group relation</div>
+        <div><span class="sw" style="background:var(--c)"></span>cell boundary</div>
+        <div><span class="sw" style="background:var(--d)"></span>weak forced face</div>
+      </div>
+    </aside>
+  </main>
+  <script>
+    const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
+    const els={domain:domain,preset:preset,closure:closure,threshold:threshold,size:size,orientation:orientation,closureOut:closureOut,thresholdOut:thresholdOut,sizeOut:sizeOut,orientOut:orientOut,mClosure:mClosure,mEdges:mEdges,mDensity:mDensity,mRisk:mRisk,explain:explain,state:state};
+    let rot=-0.55,tilt=0.72,zoom=1,drag=false,last=[0,0],audit=true,extraSimplex=0,extraCell=0,lastControl='init';
+    const labels={regulon:['TF','Enh','Gene','State','Motif','Pert','Time','Path','Cell'],protein:['P1','P2','P3','P4','P5','P6','P7','P8','P9'],communication:['Sender','Ligand','Rec','Recv','Cyt','Path','State','Niche','Time'],spatial:['CellA','CellB','CellC','CellD','ECM','Vessel','Immune','Tumor','Signal']};
+    const evidence=[.92,.81,.34,.66,.48,.74,.29,.57,.43,.88,.25,.71,.53,.39,.62,.77,.45,.69,.31,.82,.51,.28,.59,.73,.36,.64,.47,.79,.41,.55,.68,.33,.86,.49,.61,.38];
+    function project(p){const c=Math.cos(rot),s=Math.sin(rot),ct=Math.cos(tilt),st=Math.sin(tilt);let x=p.x*c-p.z*s,z=p.x*s+p.z*c,y=p.y*ct-z*st;return {x:canvas.width/2+x*zoom,y:canvas.height/2+y*zoom,z:z*ct+p.y*st};}
+    function points(n){const out=[];for(let i=0;i<n;i++){const a=i/n*Math.PI*2;out.push({x:210*Math.cos(a),y:70*Math.sin(i*1.7),z:170*Math.sin(a),i});}return out;}
+    function edgePairs(n){const pairs=[];for(let i=0;i<n;i++)pairs.push([i,(i+1)%n]);if(els.domain.value==='graph'||els.domain.value==='simplicial'){for(let i=0;i<n;i++)for(let j=i+2;j<n;j++){if(!(i===0&&j===n-1))pairs.push([i,j]);}}return pairs;}
+    function metrics(){const n=+els.size.value,t=+els.threshold.value/100,c=+els.closure.value/100,mode=els.domain.value;const clique=n*(n-1)/2;const weak=evidence.slice(0,Math.min(evidence.length,clique)).filter(v=>v<t).length;let edges=mode==='hypergraph'?n:mode==='cell'?n:Math.round(clique*(mode==='simplicial'?c:1));let violations=mode==='simplicial'?Math.round(weak*c+extraSimplex):mode==='cell'?Math.max(0,Math.round(weak*.25-extraCell)):0;let density=edges/Math.max(1,clique);let risk=mode==='graph'?Math.min(1,.25+density*.35):mode==='hypergraph'?Math.max(.08,.28-c*.12):mode==='simplicial'?Math.min(1,.2+violations/(n+1)+c*.25):Math.min(1,.18+violations*.08+Math.abs(+els.orientation.value)*.05);return{n,clique,edges,violations,density,risk};}
+    function draw(){const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);ctx.save();ctx.fillStyle='#071015';ctx.fillRect(0,0,w,h);const n=+els.size.value,pts=points(n),proj=pts.map(project),mode=els.domain.value,m=metrics(),t=+els.threshold.value/100;ctx.lineWidth=2.5;ctx.strokeStyle='rgba(100,150,170,.22)';for(let r=80;r<320;r+=40){ctx.beginPath();ctx.ellipse(w/2,h/2,r*zoom,r*.42*zoom,0,0,Math.PI*2);ctx.stroke();}
+      if(mode==='hypergraph'){ctx.beginPath();proj.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fillStyle='rgba(232,184,87,.22)';ctx.strokeStyle='rgba(232,184,87,.9)';ctx.setLineDash([10,7]);ctx.lineWidth=4;ctx.fill();ctx.stroke();ctx.setLineDash([]);}
+      if(mode==='simplicial'){for(let i=1;i<n-1;i++){ctx.beginPath();[proj[0],proj[i],proj[i+1]].forEach((p,k)=>k?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fillStyle='rgba(88,224,211,.16)';ctx.strokeStyle='rgba(88,224,211,.55)';ctx.fill();ctx.stroke();}}
+      if(mode==='cell'){ctx.beginPath();proj.forEach((p,i)=>{const off=(i%2?18:-12)*zoom;i?ctx.quadraticCurveTo(p.x+off,p.y-off,p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.closePath();ctx.fillStyle='rgba(167,139,250,.20)';ctx.strokeStyle='rgba(167,139,250,.9)';ctx.lineWidth=4;ctx.fill();ctx.stroke();if(+els.orientation.value!==0){ctx.fillStyle='#a78bfa';const p=proj[1];ctx.beginPath();ctx.moveTo(p.x+18,p.y);ctx.lineTo(p.x+2,p.y-9);ctx.lineTo(p.x+2,p.y+9);ctx.closePath();ctx.fill();}}
+      const pairs=edgePairs(n);pairs.forEach((e,idx)=>{const a=proj[e[0]],b=proj[e[1]],ev=evidence[idx%evidence.length];ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=ev<t&&audit?'#f47b65':'rgba(207,232,240,.72)';ctx.setLineDash(ev<t&&audit?[8,6]:[]);ctx.lineWidth=ev<t&&audit?3:2;ctx.stroke();ctx.setLineDash([]);});
+      proj.forEach((p,i)=>{ctx.beginPath();ctx.arc(p.x,p.y,24*zoom,0,Math.PI*2);ctx.fillStyle='#f7fbff';ctx.strokeStyle=i<4?'#58e0d3':'#77df96';ctx.lineWidth=3;ctx.fill();ctx.stroke();ctx.fillStyle='#122735';ctx.font=`${Math.max(10,12*zoom)}px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(labels[els.preset.value][i],p.x,p.y);});
+      ctx.fillStyle='rgba(7,16,21,.72)';ctx.fillRect(18,18,350,104);ctx.fillStyle='#dff8f5';ctx.font='700 16px Arial';ctx.fillText(mode.toUpperCase(),34,43);ctx.font='13px Arial';ctx.fillStyle='#a8c3cf';ctx.fillText(`group size ${n}; clique edges ${m.clique}; current edge load ${m.edges}`,34,68);ctx.fillText(`weak forced faces are dashed red when audit is on`,34,92);ctx.fillText(`drag to rotate; wheel to zoom`,34,116);ctx.restore();canvas.dataset.rendered='true';updateText();}
+    function updateText(){const m=metrics(),mode=els.domain.value;els.closureOut.textContent=(+els.closure.value/100).toFixed(2);els.thresholdOut.textContent=(+els.threshold.value/100).toFixed(2);els.sizeOut.textContent=els.size.value;els.orientOut.textContent=els.orientation.value;els.mClosure.textContent=m.violations;els.mEdges.textContent=m.edges;els.mDensity.textContent=m.density.toFixed(2);els.mRisk.textContent=m.risk.toFixed(2);const explain={graph:'Graph mode expands relations into pairwise edges. It is simple, but group evidence can become fake pairwise certainty.',hypergraph:'Hypergraph mode keeps the group as one object. It avoids clique expansion but gives weaker boundary structure.',simplicial:'Simplicial mode enforces closure. It is clean when every face is justified and risky when evidence is weak.',cell:'Cell-complex mode keeps an irregular boundary. It can model modules without forcing every possible edge.'};els.explain.textContent=explain[mode];els.state.textContent=`Preset: ${els.preset.options[els.preset.selectedIndex].text}. Last control: ${lastControl}. Audit ${audit?'on':'off'}.`;}
+    function change(name){lastControl=name;draw();}
+    ['domain','preset','closure','threshold','size','orientation'].forEach(id=>els[id].addEventListener('input',()=>change(id)));
+    addSimplex.onclick=()=>{extraSimplex++;els.domain.value='simplicial';change('add simplex')};addCell.onclick=()=>{extraCell++;els.domain.value='cell';change('add irregular cell')};toggleClosure.onclick=()=>{audit=!audit;change('toggle closure audit')};reset.onclick=()=>{rot=-0.55;tilt=0.72;zoom=1;extraSimplex=0;extraCell=0;audit=true;els.domain.value='graph';els.preset.value='regulon';els.closure.value=65;els.threshold.value=60;els.size.value=4;els.orientation.value=1;change('reset')};
+    canvas.addEventListener('pointerdown',e=>{drag=true;last=[e.clientX,e.clientY]});addEventListener('pointerup',()=>drag=false);canvas.addEventListener('pointermove',e=>{if(!drag)return;rot+=(e.clientX-last[0])*.006;tilt=Math.max(.18,Math.min(1.2,tilt+(e.clientY-last[1])*.004));last=[e.clientX,e.clientY];change('orbit')});canvas.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.62,Math.min(1.75,zoom*(e.deltaY>0?.94:1.06)));change('zoom')},{passive:false});
+    window.__C06LabReady=true;window.__C06_LAB_READY__=true;window.__C06LabSnapshot=()=>{const m=metrics();return{kind:'cell-simplicial-complex-lab',labId:'C06',title:'Cell complexes, simplicial complexes, and biological relations',status:'ready',domain:els.domain.value,preset:els.preset.value,groupSize:m.n,edgeLoad:m.edges,closureViolations:m.violations,incidenceDensity:m.density,overclaimRisk:m.risk,has3d:true,visualKind:'manual-3d-projection-canvas',visualQuality:'topic-specific',stateText:els.state.textContent,revision:'2026-06-02-c06-bespoke',lastControl}};document.querySelector('.shell').dataset.c06LabReady='true';draw();
+  </script>
+</body>
+</html>

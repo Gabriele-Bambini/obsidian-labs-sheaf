@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>A14 - Metrics Cockpit Lab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#071015;--panel:#0d1c26;--line:#24485d;--text:#e9f6f8;--muted:#9fb9c6;--cyan:#58e0d3;--blue:#54a8ff;--gold:#e8b857;--pink:#ff6d8b;--green:#6ee7a8;--red:#ff7a7a;--violet:#a78bfa}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.42 Inter,Segoe UI,system-ui,Arial,sans-serif}
+    .shell{height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:12px;padding:12px;background:radial-gradient(circle at 18% 8%,#123044 0,#071015 48%,#050b10 100%)}
+    .stage,.panel{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(13,28,38,.96),rgba(7,16,21,.97));box-shadow:0 18px 50px rgba(0,0,0,.34);min-width:0;min-height:0}
+    .stage{display:grid;grid-template-rows:minmax(0,1fr) auto;overflow:hidden;position:relative}.canvas-wrap{min-height:0;position:relative}canvas{display:block;width:100%;height:100%;min-height:340px;touch-action:none}
+    .overlay{position:absolute;left:14px;right:14px;top:14px;display:flex;gap:10px;justify-content:space-between;pointer-events:none}.badge,.formula{border:1px solid rgba(143,216,242,.25);background:rgba(7,16,21,.76);backdrop-filter:blur(8px);border-radius:12px;padding:9px 11px}.badge span,.formula span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.badge strong{font-size:18px}.formula{max-width:650px;color:#cfe5ec}.formula code{color:var(--cyan);font-weight:800}
+    .controls{display:grid;grid-template-columns:1.25fr .95fr .75fr .75fr .75fr .75fr;gap:10px;padding:10px;border-top:1px solid var(--line);background:#091720}.control{min-width:0;overflow:hidden}.control label{display:flex;justify-content:space-between;margin-bottom:4px;color:var(--muted);font-size:12px}.control output{color:var(--text);font-weight:800}select,input{width:100%;min-width:0;border:1px solid #315b70;border-radius:10px;background:#102838;color:var(--text);font:inherit}select{height:38px;padding:0 10px}input[type=range]{height:38px;accent-color:var(--cyan)}
+    .panel{display:flex;flex-direction:column;gap:12px;padding:14px;overflow:auto}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--cyan)!important}.panel h1{font-size:22px;line-height:1.1;margin:0}.panel p{margin:0;color:var(--muted)}
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:10px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;margin-top:4px;font-size:19px}.good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--gold)}
+    .bars{display:grid;gap:7px}.bar-row{display:grid;grid-template-columns:92px minmax(0,1fr) 42px;gap:8px;align-items:center}.track{height:13px;border:1px solid #203c4d;background:#08131a;border-radius:999px;overflow:hidden}.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),var(--blue));width:0}.bar-row b{font-size:12px}.bar-row em{font-style:normal;text-align:right;color:var(--muted);font-size:12px}
+    .card{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:12px}.card h2{font-size:15px;margin:0 0 6px}.legend{display:flex;flex-wrap:wrap;gap:7px}.legend span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:var(--muted)}.dot{width:9px;height:9px;border-radius:99px;display:inline-block}
+    @media(max-width:860px){html,body{height:100%;overflow:hidden;max-width:100vw}.shell{width:100vw;height:100vh;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,52vh) minmax(0,1fr);gap:8px;padding:8px;overflow:hidden}.stage,.panel{width:100%;max-width:100%;overflow:hidden}.stage{grid-template-rows:minmax(0,1fr) auto}.canvas-wrap{min-height:0}canvas{min-height:220px}.overlay{left:10px;right:10px;top:10px}.formula{display:none}.controls{grid-template-columns:repeat(3,minmax(0,1fr));max-height:166px;overflow:hidden;padding:8px;gap:7px}.control label{display:block;font-size:11px;line-height:1.15}.control output{float:right;font-size:11px}select,input[type=range]{height:30px}.panel{min-height:0;padding:10px;gap:9px;overflow:auto}.panel h1{font-size:17px;line-height:1.14;overflow-wrap:break-word}.metric-grid{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:8px}.metric strong{font-size:17px}.legend{display:none}.card:nth-of-type(2){display:none}}
+    @media(max-width:480px){.shell{grid-template-rows:minmax(0,52vh) minmax(0,1fr)}.controls{grid-template-columns:repeat(2,minmax(0,1fr));max-height:184px}.metric-grid{grid-template-columns:1fr}.panel header p:not(.eyebrow){display:none}.bars .bar-row:nth-child(n+5){display:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="stage" aria-label="Interactive metric selection visualization">
+      <div class="canvas-wrap">
+        <canvas id="scene" aria-label="Metric cockpit canvas"></canvas>
+        <div class="overlay">
+          <div class="badge"><span>Chapter lab</span><strong>A14</strong></div>
+          <div class="formula"><span>Metric geometry</span><code>precision = TP/(TP+FP)</code>, <code>recall = TP/(TP+FN)</code>, and PR baseline equals prevalence.</div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control"><label>Task</label><select id="task">
+          <option value="grn">GRN edge ranking</option>
+          <option value="node">node disease labels</option>
+          <option value="graph">molecule toxicity graph</option>
+          <option value="multi">multilabel gene function</option>
+        </select></div>
+        <div class="control"><label>Metric focus</label><select id="focus">
+          <option value="pr">PR / rare positives</option>
+          <option value="roc">ROC ranking</option>
+          <option value="f1">F1 threshold</option>
+          <option value="topk">Top-K validation</option>
+        </select></div>
+        <div class="control"><label>Threshold <output id="thrOut">0.55</output></label><input id="thr" type="range" min="5" max="95" value="55"></div>
+        <div class="control"><label>Prevalence <output id="prevOut">12</output></label><input id="prev" type="range" min="3" max="50" value="12"></div>
+        <div class="control"><label>Separation <output id="sepOut">64</output></label><input id="sep" type="range" min="10" max="95" value="64"></div>
+        <div class="control"><label>Top K <output id="kOut">10</output></label><input id="k" type="range" min="3" max="25" value="10"></div>
+      </div>
+    </section>
+    <aside class="panel">
+      <header><p class="eyebrow">Metric cockpit</p><h1>Which score matches the biology?</h1><p id="subtitle">Move the threshold and prevalence; curves and decision metrics will disagree for good reasons.</p></header>
+      <div class="metric-grid">
+        <div class="metric"><span>Precision</span><strong id="precision">0%</strong></div>
+        <div class="metric"><span>Recall</span><strong id="recall">0%</strong></div>
+        <div class="metric"><span>F1 score</span><strong id="f1">0%</strong></div>
+        <div class="metric"><span>Hits@K</span><strong id="hits">0%</strong></div>
+      </div>
+      <div class="card"><h2>Score families</h2><div id="bars" class="bars"></div></div>
+      <div class="card"><h2>Interpretation</h2><p id="insight">Change a control to inspect the metric.</p></div>
+      <div class="legend"><span><i class="dot" style="background:var(--green)"></i> TP</span><span><i class="dot" style="background:var(--red)"></i> FP</span><span><i class="dot" style="background:var(--pink)"></i> FN</span><span><i class="dot" style="background:#577584"></i> TN</span></div>
+    </aside>
+  </main>
+  <script>
+    const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
+    const controls={task:document.getElementById('task'),focus:document.getElementById('focus'),thr:document.getElementById('thr'),prev:document.getElementById('prev'),sep:document.getElementById('sep'),k:document.getElementById('k')};
+    const out={thr:document.getElementById('thrOut'),prev:document.getElementById('prevOut'),sep:document.getElementById('sepOut'),k:document.getElementById('kOut'),precision:document.getElementById('precision'),recall:document.getElementById('recall'),f1:document.getElementById('f1'),hits:document.getElementById('hits'),bars:document.getElementById('bars'),insight:document.getElementById('insight'),subtitle:document.getElementById('subtitle')};
+    let snapshot={};
+    function sigmoid(x){return 1/(1+Math.exp(-x))}
+    function data(){const prev=Number(controls.prev.value)/100,sep=Number(controls.sep.value)/100;const n=80,pos=Math.max(2,Math.round(n*prev));const arr=[];for(let i=0;i<n;i++){const y=i<pos?1:0;const base=y?.52+sep*.34:.48-sep*.30;const wiggle=Math.sin(i*1.73)*.10+Math.cos(i*.41)*.06;let score=Math.max(.01,Math.min(.99,base+wiggle));arr.push({id:i,y,score})}return arr.sort((a,b)=>b.score-a.score)}
+    function metrics(arr){const t=Number(controls.thr.value)/100,k=Number(controls.k.value);let tp=0,fp=0,tn=0,fn=0;arr.forEach(d=>{const p=d.score>=t;if(p&&d.y)tp++;else if(p&&!d.y)fp++;else if(!p&&!d.y)tn++;else fn++});const precision=tp/(tp+fp||1),recall=tp/(tp+fn||1),specificity=tn/(tn+fp||1),f1=2*precision*recall/(precision+recall||1),acc=(tp+tn)/arr.length;const top=arr.slice(0,k);const hits=top.filter(d=>d.y).length/Math.min(k,arr.filter(d=>d.y).length||1);const first=arr.findIndex(d=>d.y);const mrr=first>=0?1/(first+1):0;const auroc=aucRoc(arr),aupr=aucPr(arr);return {tp,fp,tn,fn,precision,recall,specificity,f1,acc,hits,mrr,auroc,aupr,k,t}}
+    function aucRoc(arr){const pos=arr.filter(d=>d.y),neg=arr.filter(d=>!d.y);let wins=0,total=pos.length*neg.length||1;pos.forEach(p=>neg.forEach(n=>{wins+=p.score>n.score?1:p.score===n.score?.5:0}));return wins/total}
+    function aucPr(arr){const totalPos=arr.filter(d=>d.y).length||1;let tp=0,fp=0,lastR=0,area=0;arr.forEach(d=>{if(d.y)tp++;else fp++;const r=tp/totalPos,p=tp/(tp+fp||1);area+=(r-lastR)*p;lastR=r});return area}
+    function curvePr(arr){const pts=[];const totalPos=arr.filter(d=>d.y).length||1;let tp=0,fp=0;pts.push([0,1]);arr.forEach(d=>{if(d.y)tp++;else fp++;pts.push([tp/totalPos,tp/(tp+fp||1)])});return pts}
+    function curveRoc(arr){const pos=arr.filter(d=>d.y).length||1,neg=arr.filter(d=>!d.y).length||1;let tp=0,fp=0;const pts=[[0,0]];arr.forEach(d=>{if(d.y)tp++;else fp++;pts.push([fp/neg,tp/pos])});return pts}
+    function resize(){const r=canvas.parentElement.getBoundingClientRect();const d=Math.min(devicePixelRatio||1,2);canvas.width=Math.max(320,Math.floor(r.width*d));canvas.height=Math.max(300,Math.floor(r.height*d));canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';ctx.setTransform(d,0,0,d,0,0);draw()}
+    function draw(){if(!canvas.width)return;const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);const arr=data(),m=metrics(arr);if(w<520){drawMobile(arr,m,w,h)}else{drawDesktop(arr,m,w,h)}updatePanel(m)}
+    function box(x,y,w,h,title){ctx.fillStyle='#0a1720';ctx.strokeStyle='#24485d';ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(x,y,w,h,14);ctx.fill();ctx.stroke();ctx.fillStyle='#dff3f7';ctx.font='800 14px Segoe UI';ctx.textAlign='left';ctx.fillText(title,x+14,y+26)}
+    function drawDesktop(arr,m,w,h){const top=110;box(26,top,330,255,'Ranked candidate edges');drawRank(arr,m,44,top+48,294,178);box(378,top,285,255,'Precision-Recall curve');drawCurve(curvePr(arr),378+36,top+54,215,160,'Recall','Precision','#58e0d3',Number(controls.prev.value)/100);box(685,top,285,255,'ROC curve');drawCurve(curveRoc(arr),685+36,top+54,215,160,'FPR','TPR','#54a8ff',.5);box(26,top+285,448,155,'Confusion matrix at threshold');drawConfusion(m,52,top+328,396,82);box(502,top+285,468,155,'Metric recommendation');drawRecommendation(m,530,top+330,410)}
+    function drawMobile(arr,m,w,h){const top=82;box(14,top,w-28,88,'Ranked candidates');drawRank(arr,m,28,top+38,w-56,42);const cy=top+100,cw=(w-44)/2;box(14,cy,cw,64,'PR');drawCurve(curvePr(arr),30,cy+30,cw-34,25,'','','#58e0d3',Number(controls.prev.value)/100);box(30+cw,cy,cw,64,'ROC');drawCurve(curveRoc(arr),46+cw,cy+30,cw-34,25,'','','#54a8ff',.5)}
+    function drawRank(arr,m,x,y,w,h){const n=Math.min(arr.length,40),gap=w/n;for(let i=0;i<n;i++){const d=arr[i],pred=d.score>=m.t;let c='#577584';if(pred&&d.y)c='#6ee7a8';else if(pred&&!d.y)c='#ff7a7a';else if(!pred&&d.y)c='#ff6d8b';ctx.fillStyle=c;ctx.fillRect(x+i*gap,y+h*(1-d.score),Math.max(2,gap-2),h*d.score)}const tx=x+w*(1-m.t);ctx.strokeStyle='#e8b857';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(tx,y-8);ctx.lineTo(tx,y+h+8);ctx.stroke();ctx.fillStyle='#e8b857';ctx.font='700 11px Segoe UI';ctx.fillText('threshold',Math.min(tx+4,x+w-70),y-12)}
+    function drawCurve(pts,x,y,w,h,xlab,ylab,color,baseline){ctx.strokeStyle='#284c60';ctx.lineWidth=1;ctx.strokeRect(x,y,w,h);ctx.strokeStyle='rgba(232,184,87,.55)';ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(x,y+h-h*baseline);ctx.lineTo(x+w,y+h-h*baseline);ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle=color;ctx.lineWidth=3;ctx.beginPath();pts.forEach((p,i)=>{const px=x+p[0]*w,py=y+h-p[1]*h;if(i)ctx.lineTo(px,py);else ctx.moveTo(px,py)});ctx.stroke();ctx.fillStyle='#9fb9c6';ctx.font='11px Segoe UI';if(xlab)ctx.fillText(xlab,x+w-24,y+h+16);if(ylab){ctx.save();ctx.translate(x-18,y+32);ctx.rotate(-Math.PI/2);ctx.fillText(ylab,0,0);ctx.restore()}}
+    function drawConfusion(m,x,y,w,h){const cells=[['TP',m.tp,'#6ee7a8'],['FP',m.fp,'#ff7a7a'],['FN',m.fn,'#ff6d8b'],['TN',m.tn,'#577584']];const cw=w/4;cells.forEach((c,i)=>{ctx.fillStyle=c[2];ctx.globalAlpha=.18;ctx.fillRect(x+i*cw,y,cw-8,h);ctx.globalAlpha=1;ctx.strokeStyle=c[2];ctx.strokeRect(x+i*cw,y,cw-8,h);ctx.fillStyle='#e9f6f8';ctx.font='800 18px Segoe UI';ctx.textAlign='center';ctx.fillText(c[1],x+i*cw+(cw-8)/2,y+32);ctx.fillStyle='#9fb9c6';ctx.font='700 12px Segoe UI';ctx.fillText(c[0],x+i*cw+(cw-8)/2,y+h-16)})}
+    function drawRecommendation(m,x,y,w){const focus=controls.focus.value;let title='Use PR-AUC when positives are rare.';if(focus==='roc')title='Use ROC-AUC for broad ranking, but inspect PR under imbalance.';if(focus==='f1')title='Use F1 only after choosing a threshold policy.';if(focus==='topk')title='Use Hits@K when wet-lab validation has a fixed budget.';ctx.fillStyle='#e9f6f8';ctx.font='800 18px Segoe UI';ctx.textAlign='left';wrap(title,x,y,w,22);ctx.fillStyle='#9fb9c6';ctx.font='13px Segoe UI';wrap('Accuracy can look stable while rare biological positives are missed. Report the metric family that matches the scientific decision.',x,y+60,w,18)}
+    function wrap(text,x,y,w,line){const words=text.split(' ');let s='',yy=y;for(const word of words){const t=s?`${s} ${word}`:word;if(ctx.measureText(t).width>w){ctx.fillText(s,x,yy);s=word;yy+=line}else s=t}if(s)ctx.fillText(s,x,yy)}
+    function updatePanel(m){out.thr.textContent=(Number(controls.thr.value)/100).toFixed(2);out.prev.textContent=controls.prev.value;out.sep.textContent=controls.sep.value;out.k.textContent=controls.k.value;out.precision.textContent=Math.round(m.precision*100)+'%';out.recall.textContent=Math.round(m.recall*100)+'%';out.f1.textContent=Math.round(m.f1*100)+'%';out.hits.textContent=Math.round(m.hits*100)+'%';out.subtitle.textContent=controls.task.options[controls.task.selectedIndex].text+' with '+controls.focus.options[controls.focus.selectedIndex].text+'.';out.bars.innerHTML='';[['AUROC',m.auroc,'#54a8ff'],['AUPRC',m.aupr,'#58e0d3'],['Accuracy',m.acc,'#a78bfa'],['Specificity',m.specificity,'#e8b857'],['MRR',m.mrr,'#ff6d8b']].forEach(row=>{const el=document.createElement('div');el.className='bar-row';el.innerHTML='<b>'+row[0]+'</b><div class="track"><div class="fill" style="width:'+Math.round(row[1]*100)+'%;background:'+row[2]+'"></div></div><em>'+Math.round(row[1]*100)+'%</em>';out.bars.appendChild(el)});let text='For rare biological positives, PR and top-K usually say more than accuracy. A high ROC score can still hide many false discoveries.';if(controls.focus.value==='f1')text='F1 balances precision and recall at one threshold. It is useful only after the threshold policy is scientifically meaningful.';if(controls.focus.value==='topk')text='Top-K asks whether the first candidates are worth validating in the lab. This is often closer to GRN discovery than global accuracy.';if(Number(controls.prev.value)>35)text='With higher prevalence, accuracy and ROC become less misleading, but threshold costs still matter.';out.insight.textContent=text;snapshot={precision:m.precision,recall:m.recall,f1:m.f1,hits:m.hits,auroc:m.auroc,aupr:m.aupr,threshold:m.t,prevalence:Number(controls.prev.value)/100}}
+    if(!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);return this}}
+    Object.values(controls).forEach(el=>el.addEventListener('input',draw));window.addEventListener('resize',resize);window.__A14LabSnapshot=()=>snapshot;window.__A14LabReady=true;resize();
+  </script>
+</body>
+</html>

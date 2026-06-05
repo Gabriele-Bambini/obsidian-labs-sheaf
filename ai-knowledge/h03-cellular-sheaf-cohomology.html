@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H03 Cellular Sheaves And Cohomology</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=h05-intuitive-v11-h03-concrete-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="sheaf" data-lab-id="h03" data-keywords="cellular sheaf cochains coboundary cohomology triangle circulation delta0 delta1 H0 H1">
+    <section class="visual-stack">
+      <div class="stage">
+        <div class="lab-viewport">
+          <canvas id="canvas" aria-label="H03 triangular cellular sheaf cohomology visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>H03</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">C0 --delta0--> C1 --delta1--> C2</strong></div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>0-cochain vertex</strong></div>
+      </div>
+      <div class="command-bar controls">
+        <select id="ruleMode" aria-label="Restriction rule">
+          <option value="constant">Constant restrictions</option>
+          <option value="signed">Signed restrictions</option>
+          <option value="rotated">Rotational restrictions</option>
+        </select>
+        <select id="complexMode" aria-label="Complex mode">
+          <option value="filled">Filled face</option>
+          <option value="hole">Open hole</option>
+          <option value="weighted">Weighted face</option>
+        </select>
+        <div class="command-control">
+          <label for="vertexSignal">Cochain degree <output data-output="vertexSignal">0.74</output></label>
+          <input id="vertexSignal" type="range" min="0.1" max="1.3" step="0.02" value="0.74">
+        </div>
+        <div class="command-control">
+          <label for="twist">Restriction twist <output data-output="twist">0.28</output></label>
+          <input id="twist" type="range" min="0" max="1" step="0.02" value="0.28">
+        </div>
+        <div class="command-control">
+          <label for="faceWeight">Face weight <output data-output="faceWeight">1.00</output></label>
+          <input id="faceWeight" type="range" min="0.2" max="1.6" step="0.02" value="1">
+        </div>
+        <div class="command-control">
+          <label for="circulationDefect">Cycle defect <output data-output="circulationDefect">0.18</output></label>
+          <input id="circulationDefect" type="range" min="0" max="1" step="0.02" value="0.18">
+        </div>
+        <div class="command-control">
+          <label for="harmonicAnchor">Harmonic anchor <output data-output="harmonicAnchor">0.55</output></label>
+          <input id="harmonicAnchor" type="range" min="0" max="1" step="0.02" value="0.55">
+        </div>
+        <button id="computeDelta0" class="primary" data-action="step" type="button">Compute d0</button>
+        <button id="harmonize" data-action="step" type="button">Project H0</button>
+        <button id="showCocycle" data-action="pulse" type="button">Show H1</button>
+        <button id="resetH03" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block H 3D lab</p>
+        <h1>H03 Cellular Sheaves And Cohomology</h1>
+        <p class="subtitle">A triangular cell complex showing 0-cochains on vertices, 1-cochain edge residuals, 2-cochain face circulation, coboundary norm, Cycle circulation, and cohomology diagnostics.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Coboundary norm"><span>Coboundary norm</span><strong id="coboundaryLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Cycle circulation"><span>Cycle circulation</span><strong id="faceLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Cell coverage"><span>Cell coverage</span><strong id="h0Label">H0 0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Harmonic gap"><span>Status</span><strong id="statusLabel">Ready</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading triangular cochain complex diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">delta0 sends vertex stalk values to edge stalk residuals. delta1 reads circulation around the face; a missing face leaves an H1 loop.</p>
+    </aside>
+  </main>
+  <!-- {"visual":{"kind":"cellular-triangle","graphStyle":"anchors"},"profile":{"preferredMetric":"Coboundary norm"},"graph":{"nodes":["0-cochain vertex","1-cochain edge residual","face circulation defect"],"edges":["delta0 endpoint","delta1 boundary","cohomology quotient"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=h05-intuitive-v11-h03-concrete-v2"></script>
+  <script src="shared/sheaf-concrete-labs.js?math3d=h05-intuitive-v11-h03-concrete-v3"></script>
+  <script>
+    window.__h03LabReady = false;
+    window.__h03LabSnapshot = window.__h03LabSnapshot || function () { return null; };
+    createH03CellularCohomologyLab();
+  </script>
+</body>
+</html>

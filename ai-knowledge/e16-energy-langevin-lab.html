@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E16 Energy Langevin</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=e16-ebm-canonical-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e16" data-keywords="energy based model partition function Langevin positive negative phase replay buffer score field">
+    <section class="visual-stack" aria-label="Interactive 3D energy-based model and Langevin sampling visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E16 Energy Langevin 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E16</strong></div>
+          <div class="formula-chip"><span>EBM sketch</span>Low energy raises probability; positive phase lowers data valleys, negative phase raises model samples, and Langevin mixes through gradients plus noise.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected chain</span><strong>Energy landscape geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.74fr) minmax(0,.72fr) repeat(6,minmax(0,.74fr)) repeat(4,minmax(0,.56fr));">
+        <select id="energyLandscape" data-control="energyLandscape" aria-label="Energy landscape">
+          <option value="twoValleys">Two valleys</option>
+          <option value="ring">Ring modes</option>
+          <option value="tilted">Tilted basin</option>
+          <option value="conditional">Conditional</option>
+        </select>
+        <select id="samplerMode" data-control="samplerMode" aria-label="Sampler mode">
+          <option value="langevin">Langevin</option>
+          <option value="gradient">No-noise descent</option>
+          <option value="replay">Replay buffer</option>
+        </select>
+        <div class="command-control">
+          <label for="temperature">Temp <output data-output="temperature">0.55</output></label>
+          <input id="temperature" data-param="temperature" type="range" min="0" max="1.2" step="0.01" value="0.55">
+        </div>
+        <div class="command-control">
+          <label for="stepSize">Step <output data-output="stepSize">0.24</output></label>
+          <input id="stepSize" data-param="stepSize" type="range" min="0.05" max="0.6" step="0.01" value="0.24">
+        </div>
+        <div class="command-control">
+          <label for="samplerSteps">Chain <output data-output="samplerSteps">5</output></label>
+          <input id="samplerSteps" data-param="samplerSteps" type="range" min="1" max="12" step="1" value="5">
+        </div>
+        <div class="command-control">
+          <label for="replayMix">Replay <output data-output="replayMix">0.35</output></label>
+          <input id="replayMix" data-param="replayMix" type="range" min="0" max="1" step="0.01" value="0.35">
+        </div>
+        <div class="command-control">
+          <label for="energyScale">Scale <output data-output="energyScale">1.00</output></label>
+          <input id="energyScale" data-param="energyScale" type="range" min="0.45" max="1.8" step="0.01" value="1">
+        </div>
+        <div class="command-control">
+          <label for="negativePressure">Neg <output data-output="negativePressure">0.42</output></label>
+          <input id="negativePressure" data-param="negativePressure" type="range" min="0" max="1" step="0.01" value="0.42">
+        </div>
+        <button id="langevinStep" class="primary" data-action="step" type="button">Langevin step</button>
+        <button id="trainPhase" data-action="pulse" type="button">Train phases</button>
+        <button id="toggleReplay" data-action="pulse" type="button">Replay negatives</button>
+        <button id="resetEbm" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E16 Energy Langevin</h1>
+        <p class="subtitle">Rotate low-energy data valleys, barriers, score arrows, Langevin chains, temperature halos, positive/negative phase forces, partition rings, replay particles, and mixing warnings.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Data energy"><span>Data E</span><strong id="dataEnergyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Negative energy"><span>Neg E</span><strong id="negativeEnergyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Mixing"><span>Mixing</span><strong id="mixingLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Partition"><span>Z proxy</span><strong id="partitionLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading energy-based model geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: temperature changes exploration, step size changes chain stability, replay changes persistent negatives, and negative pressure shows how training raises bad model samples.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=e16-ebm-canonical-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=e16-ebm-canonical-v3"></script>
+  <script>
+    window.__e16LabSnapshot = window.__e16LabSnapshot || function () { return null; };
+    // __e16LabReady = true is set by createE16EnergyLangevinLab after the first render setup.
+    createE16EnergyLangevinLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

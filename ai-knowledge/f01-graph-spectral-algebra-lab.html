@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>F01 Graph Spectral Algebra</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=f01-graph-operators-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="graph" data-lab-id="f01" data-keywords="graph spectral algebra adjacency incidence Laplacian spectrum cuts diffusion">
+    <section class="visual-stack" aria-label="Interactive 3D graph operators, spectrum, diffusion, and cut visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="F01 graph spectral algebra 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>F01</strong></div>
+          <div class="formula-chip"><span>Operator sketch</span>Edges become matrices; incidence differences create Laplacian energy, diffusion smooths signals, and spectra reveal components and bottlenecks.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected operator</span><strong>Graph operator geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.68fr) minmax(0,.72fr) repeat(5,minmax(0,.72fr)) repeat(3,minmax(0,.56fr));">
+        <select id="mode" data-control="mode" aria-label="Operator view">
+          <option value="operators">Operators</option>
+          <option value="spectrum">Spectrum</option>
+          <option value="diffusion">Diffusion</option>
+          <option value="cuts">Cuts</option>
+        </select>
+        <select id="graphType" data-control="graphType" aria-label="Graph topology">
+          <option value="bridge">Bridge</option>
+          <option value="path">Path</option>
+          <option value="cycle">Cycle</option>
+          <option value="disconnected">Disconnected</option>
+        </select>
+        <div class="command-control">
+          <label for="edgeWeight">Weight <output data-output="edgeWeight">1.00</output></label>
+          <input id="edgeWeight" data-param="edgeWeight" type="range" min="0.2" max="2.4" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="signalContrast">Signal <output data-output="signalContrast">0.65</output></label>
+          <input id="signalContrast" data-param="signalContrast" type="range" min="0.1" max="1.4" step="0.01" value="0.65">
+        </div>
+        <div class="command-control">
+          <label for="heatRate">Heat <output data-output="heatRate">0.28</output></label>
+          <input id="heatRate" data-param="heatRate" type="range" min="0.04" max="0.65" step="0.01" value="0.28">
+        </div>
+        <div class="command-control">
+          <label for="cutBalance">Cut <output data-output="cutBalance">0.50</output></label>
+          <input id="cutBalance" data-param="cutBalance" type="range" min="0.15" max="0.85" step="0.01" value="0.5">
+        </div>
+        <div class="command-control">
+          <label for="spectrumSharpness">Modes <output data-output="spectrumSharpness">0.55</output></label>
+          <input id="spectrumSharpness" data-param="spectrumSharpness" type="range" min="0.1" max="1" step="0.01" value="0.55">
+        </div>
+        <button id="stepHeat" class="primary" data-action="step" type="button">Diffuse</button>
+        <button id="pulseSpectrum" data-action="pulse" type="button">Modes</button>
+        <button id="resetF01" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block F 3D lab</p>
+        <h1>F01 Graph Spectral Algebra</h1>
+        <p class="subtitle">Rotate adjacency edges, incidence differences, Laplacian energy, spectrum bars, Fiedler bottleneck, heat diffusion, cut boundary, connected-component nullspace, and graph Fourier modes.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Laplacian energy"><span>Energy</span><strong id="energyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Algebraic connectivity"><span>Lambda2</span><strong id="lambdaLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Cut conductance"><span>Cut</span><strong id="cutLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Nullity"><span>Nullity</span><strong id="nullityLabel">0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading graph operator geometry.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Controls are live: topology changes components, edge weight changes operator strength, heat lowers Dirichlet energy, and cut balance moves the Fiedler-style split.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=f01-graph-operators-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=f01-graph-operators-v2"></script>
+  <script>
+    window.__f01LabSnapshot = window.__f01LabSnapshot || function () { return null; };
+    createF01GraphSpectralAlgebraLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

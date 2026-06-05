@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A14 Complex Analysis</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a13-a14-canonical-clarity-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a14" data-keywords="complex analysis Cauchy Riemann analytic contour integral residue theorem Laurent pole branch cut winding number">
+    <section class="visual-stack" aria-label="Interactive 3D mathematical visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom. Click objects to inspect.">
+          <canvas id="canvas" aria-label="A14 Complex Analysis 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>A14</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>Complex plane, Cauchy-Riemann local rule, contour integral, pole/residue, Laurent annulus, and branch sheets in one orbitable scene.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Click a node to inspect local structure.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select data-control="mode" aria-label="Concept mode">
+            <option value="cr">Cauchy-Riemann</option>
+            <option value="contour">Contour integral</option>
+            <option value="residue">Residue theorem</option>
+            <option value="laurent">Laurent pole</option>
+            <option value="branch">Branch cut</option>
+        </select>
+        <div class="command-control">
+          <label for="a14-radius">contour radius <output data-output="radius">1.25</output></label>
+          <input id="a14-radius" data-param="radius" type="range" min="0.45" max="2.2" step="0.05" value="1.25">
+        </div>
+        <div class="command-control">
+          <label for="a14-pole">pole distance <output data-output="pole">0.72</output></label>
+          <input id="a14-pole" data-param="pole" type="range" min="0" max="2.4" step="0.05" value="0.72">
+        </div>
+        <div class="command-control">
+          <label for="a14-residue">residue scale <output data-output="residue">1</output></label>
+          <input id="a14-residue" data-param="residue" type="range" min="-2" max="2" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="a14-winding">winding <output data-output="winding">1</output></label>
+          <input id="a14-winding" data-param="winding" type="range" min="-2" max="3" step="1" value="1">
+        </div>
+        <div class="command-control">
+          <label for="a14-branch">branch cut <output data-output="branch">0.25</output></label>
+          <input id="a14-branch" data-param="branch" type="range" min="0" max="1" step="0.02" value="0.25">
+        </div>
+        <button class="primary" data-action="pulse" type="button">Pulse</button>
+        <button data-action="step" type="button">Step</button>
+        <button data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block A 3D lab</p>
+        <h1>A14 Complex Analysis</h1>
+        <p class="subtitle">Orbit / rotate / zoom the system, select objects, then change parameters to experiment with complex analysis Cauchy Riemann analytic contour integral residue theorem Laurent pole branch cut winding number.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Winding number">
+          <span>Winding number</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Residue integral">
+          <span>Residue integral</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="CR defect">
+          <span>CR defect</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Pole distance">
+          <span>Pole distance</span>
+          <strong>0.00</strong>
+        </div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading the 3D mathematical system.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Command bar controls are live: every slider changes geometry, active channels, metrics, or selected-object state. Blue/cyan shows signal, amber shows frontier, red shows perturbation.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=a13-a14-canonical-clarity-v3"></script>
+  <script>
+    const labState = createGnnLab({"id":"a14","kind":"algebra","title":"A14 Complex Analysis","modes":[{"value":"cr","label":"Cauchy-Riemann"},{"value":"contour","label":"Contour integral"},{"value":"residue","label":"Residue theorem"},{"value":"laurent","label":"Laurent pole"},{"value":"branch","label":"Branch cut"}],"parameters":[{"key":"radius","label":"contour radius","min":0.45,"max":2.2,"step":0.05,"value":1.25},{"key":"pole","label":"pole distance","min":0,"max":2.4,"step":0.05,"value":0.72},{"key":"residue","label":"residue scale","min":-2,"max":2,"step":0.05,"value":1},{"key":"winding","label":"winding","min":-2,"max":3,"step":1,"value":1},{"key":"branch","label":"branch cut","min":0,"max":1,"step":0.02,"value":0.25}],"metrics":["Winding number","Residue integral","CR defect","Pole distance"],"visual":{"kind":"complex-analysis-contour-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Winding number","formula":"oint_C f(z) dz = 2 pi i * sum Res(f,a) * wind(C,a)","insight":"A14 makes the residue theorem operational: a contour samples analytic structure globally, a pole contributes only when enclosed with nonzero winding, and branch cuts mark where analytic continuation changes sheet."}});
+    window.__a14LabSnapshot = () => window.__gLabSnapshot();
+    Object.defineProperty(window, "__a14LabReady", { get: () => window.__gLabReady === true });
+  </script>
+</body>
+</html>

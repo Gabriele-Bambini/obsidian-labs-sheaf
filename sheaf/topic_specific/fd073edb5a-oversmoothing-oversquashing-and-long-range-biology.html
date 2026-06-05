@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true" data-topic-specific="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Oversmoothing, oversquashing, and long-range biology - topic-specific visual</title>
+  <link rel="stylesheet" href="../shared/topic-visual-core.css">
+</head>
+<body>
+  <main class="topic-lab">
+    <section class="stage" aria-label="Topic-specific interactive visualization">
+      <canvas id="viz"></canvas>
+      <div class="topbar">
+        <div class="chip"><span>Topic visual</span><strong data-family>Oversmoothing / oversquashing</strong></div>
+        <div class="chip formula"><span>Formal hook</span><strong data-formula></strong></div>
+      </div>
+      <div class="legend"></div>
+    </section>
+    <aside class="controls">
+      <header>
+        <p class="eyebrow">Generated from this note</p>
+        <h1 data-title>Oversmoothing, oversquashing, and long-range biology</h1>
+        <p class="subtitle" data-question></p>
+      </header>
+      <div class="mode-grid">
+        <select data-mode aria-label="View mode">
+          <option value="object">Object view</option>
+          <option value="process">Process view</option>
+          <option value="formal">Formal view</option>
+          <option value="failure">Failure mode</option>
+        </select>
+        <button type="button" data-action="simulate">Simulate</button>
+        <button type="button" data-action="stress">Stress failure</button>
+        <button type="button" data-action="reset">Reset</button>
+      </div>
+      <div class="control-grid"></div>
+      <div class="metric-grid"></div>
+      <div class="explain">
+        <h2>How to read it</h2>
+        <p data-state></p>
+      </div>
+      <p class="footer">Portable local HTML: no CDN. The iframe and full-screen link use relative vault paths, so the visual can travel with an Obsidian sync folder.</p>
+    </aside>
+  </main>
+  <script id="topic-config" type="application/json">{"title": "Oversmoothing, oversquashing, and long-range biology", "path": "A12 - Oversmoothing, oversquashing, and long-range biology.md", "family": "graph-flow", "subtype": "oversmoothing-bottleneck", "subtypeName": "Oversmoothing / oversquashing", "familyName": "Graph flow", "formula": "many distant signals -> narrow update channel", "question": "When do repeated layers make features indistinguishable or compress too much distant information?", "terms": ["oversmoothing", "oversquashing", "long-range", "biology", "lens", "object", "evidence", "changes"], "parameters": [{"name": "layer depth", "value": 6, "min": 1, "max": 12}, {"name": "mixing rate", "value": 70, "min": 0, "max": 100}, {"name": "long-range demand", "value": 74, "min": 0, "max": 100}, {"name": "channel width", "value": 26, "min": 0, "max": 100}], "metrics": ["signal", "edge strength", "noise control", "bottleneck"], "initialExplanation": "This visual was generated from this exact note: 'Oversmoothing, oversquashing, and long-range biology'. It uses the Oversmoothing / oversquashing representation and highlights oversmoothing, oversquashing, long-range, biology."}</script>
+  <script src="../shared/topic-visual-core.js"></script>
+  <script>
+    try { createTopicVisual(); }
+    catch (error) {
+      document.body.innerHTML = '<pre style="color:white;background:#05090d;padding:16px;white-space:pre-wrap">Topic visual failed: ' + error.message + '</pre>';
+      console.error(error);
+    }
+  </script>
+</body>
+</html>

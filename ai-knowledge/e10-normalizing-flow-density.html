@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E10 Normalizing Flow Density</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=e10-flow-specific-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e10" data-keywords="normalizing flow density invertible jacobian log-det likelihood coupling">
+    <section class="visual-stack" aria-label="Interactive 3D normalizing-flow density visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E10 normalizing flow density 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E10</strong></div>
+          <div class="formula-chip"><span>Flow sketch</span>Follow x through z=f(x): the base Gaussian score, local volume tile, and log-det ledger combine into exact log p(x).</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected point</span><strong>Flow density map is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.74fr) minmax(0,.66fr) repeat(6,minmax(0,.76fr)) repeat(3,minmax(0,.56fr));">
+        <select id="flowType" data-control="flowType" aria-label="Flow type">
+          <option value="affine">Affine</option>
+          <option value="coupling">Coupling</option>
+          <option value="spline">Spline</option>
+        </select>
+        <select id="direction" aria-label="Direction">
+          <option value="density">x to z</option>
+          <option value="sample">z to x</option>
+        </select>
+        <div class="command-control">
+          <label for="layers">Layers <output data-output="layers">3</output></label>
+          <input id="layers" data-param="layers" type="range" min="1" max="8" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="bendStrength">Bend <output data-output="bendStrength">0.85</output></label>
+          <input id="bendStrength" data-param="bendStrength" type="range" min="0" max="1.8" step="0.05" value="0.85">
+        </div>
+        <div class="command-control">
+          <label for="xPoint">x <output data-output="xPoint">0.45</output></label>
+          <input id="xPoint" data-param="xPoint" type="range" min="-2.4" max="2.4" step="0.05" value="0.45">
+        </div>
+        <div class="command-control">
+          <label for="scaleClamp">Scale <output data-output="scaleClamp">0.55</output></label>
+          <input id="scaleClamp" data-param="scaleClamp" type="range" min="0.1" max="1.2" step="0.05" value="0.55">
+        </div>
+        <div class="command-control">
+          <label for="dequantization">Dequant <output data-output="dequantization">0.10</output></label>
+          <input id="dequantization" data-param="dequantization" type="range" min="0" max="0.6" step="0.01" value="0.1">
+        </div>
+        <div class="command-control">
+          <label for="conditionShift">Shift <output data-output="conditionShift">0.20</output></label>
+          <input id="conditionShift" data-param="conditionShift" type="range" min="-1.2" max="1.2" step="0.05" value="0.2">
+        </div>
+        <button id="warp" class="primary" data-action="step" type="button">Trace x to z</button>
+        <button id="inverseSample" data-action="pulse" type="button">Draw inverse sample</button>
+        <button id="resetFlow" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E10 Normalizing Flow Density</h1>
+        <p class="subtitle">Rotate the base Gaussian, induced data density, invertible warp grid, mass tiles, volume element, Jacobian ledger, coupling split, and forward/inverse paths.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Log-det"><span>Log-det</span><strong id="logdetLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Likelihood"><span>Like</span><strong id="likelihoodLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Base"><span>Base</span><strong id="baseLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Volume"><span>Volume</span><strong id="volumeLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading normalizing-flow density geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: bend and layers warp f, x moves the evaluated bead, scale changes log-det/volume, dequant widens the bin, and direction swaps density with sampling.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=e10-flow-specific-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=e10-flow-specific-v3"></script>
+  <script>
+    window.__e10LabSnapshot = window.__e10LabSnapshot || function () { return null; };
+    // __e10LabReady = true is set by createE10NormalizingFlowDensityLab after the first render setup.
+    createE10NormalizingFlowDensityLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

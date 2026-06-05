@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D05 Clustering Algorithms</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=d04-d05-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="learning" data-lab-id="d05" data-keywords="clustering K-means DBSCAN Gaussian mixture spectral Laplacian graph cut">
+    <section class="visual-stack" aria-label="Interactive 3D clustering visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="D05 Clustering Algorithms 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>D05</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>Clustering changes meaning with the assumption: centroid distance, density reachability, mixture responsibility, or graph connectivity.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Clustering geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.82fr) minmax(0,.78fr) repeat(5,minmax(0,1fr)) repeat(3,minmax(0,.62fr));">
+        <select id="viewMode" data-control="mode" aria-label="Clustering view">
+          <option value="kmeans">K-means</option>
+          <option value="dbscan">DBSCAN</option>
+          <option value="gmm">GMM</option>
+          <option value="spectral">Spectral</option>
+        </select>
+        <select id="dataset" aria-label="Dataset">
+          <option value="blobs">Blobs</option>
+          <option value="moons">Moons</option>
+        </select>
+        <div class="command-control">
+          <label for="clusterK">K / comps <output data-output="clusterK">3</output></label>
+          <input id="clusterK" data-param="clusterK" type="range" min="2" max="5" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="epsilon">Epsilon <output data-output="epsilon">0.38</output></label>
+          <input id="epsilon" data-param="epsilon" type="range" min="0.16" max="0.82" step="0.01" value="0.38">
+        </div>
+        <div class="command-control">
+          <label for="neighborCount">Neighbors <output data-output="neighborCount">8</output></label>
+          <input id="neighborCount" data-param="neighborCount" type="range" min="4" max="18" step="1" value="8">
+        </div>
+        <div class="command-control">
+          <label for="clusterSpread">Spread <output data-output="clusterSpread">0.28</output></label>
+          <input id="clusterSpread" data-param="clusterSpread" type="range" min="0" max="1" step="0.02" value="0.28">
+        </div>
+        <div class="command-control">
+          <label for="initSpread">Init spread <output data-output="initSpread">0.55</output></label>
+          <input id="initSpread" data-param="initSpread" type="range" min="0" max="1" step="0.01" value="0.55">
+        </div>
+        <button id="fitClustering" class="primary" data-action="pulse" type="button">Converge</button>
+        <button id="stepAlgo" data-action="step" type="button">Lloyd</button>
+        <button id="resetClustering" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block D 3D lab</p>
+        <h1>D05 Clustering Algorithms</h1>
+        <p class="subtitle">Rotate centroid cells, density neighborhoods, responsibility ellipses, and Laplacian graph cuts.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Inertia"><span>Inertia</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Silhouette"><span>Silhouette</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Clusters"><span>Clusters</span><strong>0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Uncertainty"><span>Signal</span><strong>0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading clustering geometry.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Controls are live: Step runs Lloyd-style movement, epsilon resizes DBSCAN neighborhoods, K changes centroid/component count, and neighbors rewires the spectral graph.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=d04-d05-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=d04-d05-canonical-clarity-v2"></script>
+  <script>
+    window.__d05LabSnapshot = window.__d05LabSnapshot || function () { return null; };
+    createD05ClusteringLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

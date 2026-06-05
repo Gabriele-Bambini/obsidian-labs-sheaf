@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>F12 Graphon Sampling</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=f12-graphon-sampling-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="graphon" data-lab-id="f12" data-keywords="graphon sampling graph limits latent order exchangeability cut norm finite graph draw">
+    <section class="visual-stack" aria-label="Interactive 3D graphon sampling visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="F12 graphon sampling 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>F12</strong></div>
+          <div class="formula-chip"><span id="formulaText">Block graphon: high probability inside communities</span>A continuous probability surface W(x,y) generates finite adjacency matrices as noisy draws from latent coordinates.</div>
+        </div>
+        <div class="concept-rail" aria-hidden="true">
+          <span data-visual-key="graphon-surface">Graphon surface W(x,y)</span>
+          <span data-visual-key="latent-ruler">Latent ruler U_i</span>
+          <span data-visual-key="step-graphon">Step graphon</span>
+          <span data-visual-key="cut-rectangle">Cut rectangle</span>
+          <span data-visual-key="degree-curve">Degree curve</span>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected draw</span><strong>Graphon sampler is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.58fr)) repeat(5,minmax(0,.58fr)) repeat(4,minmax(0,.48fr));">
+        <select id="graphon" data-control="graphon" aria-label="Graphon family">
+          <option value="block">Block model</option>
+          <option value="band">Band graphon</option>
+          <option value="core">Core-periphery</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="Graphon view">
+          <option value="surface">Surface</option>
+          <option value="matrix">Matrix</option>
+          <option value="cut">Cut view</option>
+          <option value="degree">Degree curve</option>
+        </select>
+        <select id="sampleSize" data-control="sampleSize" aria-label="Finite sample size">
+          <option value="16">n = 16</option>
+          <option value="20" selected>n = 20</option>
+          <option value="24">n = 24</option>
+        </select>
+        <div class="command-control">
+          <label for="density">Density <output data-output="density">0.34</output></label>
+          <input id="density" data-param="density" type="range" min="0.08" max="0.82" step="0.01" value="0.34">
+        </div>
+        <div class="command-control">
+          <label for="contrast">Contrast <output data-output="contrast">0.70</output></label>
+          <input id="contrast" data-param="contrast" type="range" min="0" max="1.2" step="0.01" value="0.70">
+        </div>
+        <div class="command-control">
+          <label for="bandwidth">Bandwidth <output data-output="bandwidth">0.22</output></label>
+          <input id="bandwidth" data-param="bandwidth" type="range" min="0.08" max="0.55" step="0.01" value="0.22">
+        </div>
+        <div class="command-control">
+          <label for="sampleSeed">Seed <output data-output="sampleSeed">3</output></label>
+          <input id="sampleSeed" data-param="sampleSeed" type="range" min="1" max="12" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="nodeSize">Node size <output data-output="nodeSize">0.72</output></label>
+          <input id="nodeSize" data-param="nodeSize" type="range" min="0.35" max="1.25" step="0.01" value="0.72">
+        </div>
+        <button id="compareDraws" class="primary" data-action="pulse" type="button">Draw again</button>
+        <button id="sortLatent" data-action="step" type="button">Relabel phi</button>
+        <button id="alignBlocks" data-action="step" type="button">Align U</button>
+        <button id="resample" data-action="reset" type="button">Resample G</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block F 3D lab</p>
+        <h1>F12 Graphon Sampling</h1>
+        <p class="subtitle">Rotate the graphon probability surface, the finite sampled graph, the adjacency matrix, a second draw on the same latent points, and the cut/degree diagnostics.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Density"><span>Density</span><strong id="densityLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Triangles"><span>Triangles</span><strong id="triangleLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Contrast"><span>Contrast</span><strong id="contrastLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Order"><span>Order</span><strong id="orderLabel">sorted</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading graphon surface and finite sample diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: family changes W(x,y), density/contrast/bandwidth reshape the probability surface, Compare draws another noisy adjacency matrix on the same latent points, and Shuffle shows exchangeable relabeling.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=f12-graphon-sampling-v1"></script>
+  <script src="shared/ml-lab-core.js?math3d=f12-graphon-sampling-v1"></script>
+  <script>
+    window.__f12LabSnapshot = window.__f12LabSnapshot || function () { return null; };
+    createF12GraphonSamplingLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>F03 Graph Laplacian Energy</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=f03-laplacian-energy-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="graph" data-lab-id="f03" data-keywords="graph Laplacian Dirichlet energy heat flow nullspace">
+    <section class="visual-stack" aria-label="Interactive 3D graph Laplacian energy and heat-flow visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="F03 graph Laplacian energy 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>F03</strong></div>
+          <div class="formula-chip"><span>Laplacian physics</span>The graph Laplacian turns edge disagreement into force: rough signals pay Dirichlet energy, heat flow descends it, and the nullspace is constant on components.</div>
+        </div>
+        <div class="concept-rail" data-visual-key="f03 physical legend" style="grid-template-columns:repeat(6,minmax(0,1fr));">
+          <span>Signal pillars x_i node values</span>
+          <span>Edge springs difference</span>
+          <span>Lx force arrows</span>
+          <span>Energy basin x^T L x</span>
+          <span>Heat runway x &lt;- x-alpha Lx</span>
+          <span>Nullspace deck component average</span>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected state</span><strong>Graph Laplacian energy field is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(4,minmax(0,.58fr)) repeat(5,minmax(0,.64fr)) repeat(3,minmax(0,.5fr));">
+        <select id="graph" data-control="graph" aria-label="Graph topology">
+          <option value="bridge">Bridge</option>
+          <option value="chain">Chain</option>
+          <option value="hub">Hub</option>
+          <option value="components">Components</option>
+        </select>
+        <select id="operator" data-control="operator" aria-label="Laplacian operator">
+          <option value="combinatorial">Combinatorial L</option>
+          <option value="normalized">Symmetric normalized L</option>
+          <option value="randomWalk">Random-walk L</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="Concept view">
+          <option value="energy">Energy basin</option>
+          <option value="diffusion">Heat runway</option>
+          <option value="nullspace">Nullspace deck</option>
+        </select>
+        <select id="signalPreset" data-control="signalPreset" aria-label="Signal preset">
+          <option value="rough">Rough signal</option>
+          <option value="peak">Local peak</option>
+          <option value="step">Step signal</option>
+          <option value="smooth">Smooth ramp</option>
+        </select>
+        <div class="command-control">
+          <label for="alpha">Alpha <output data-output="alpha">0.06</output></label>
+          <input id="alpha" data-param="alpha" type="range" min="0.01" max="0.18" step="0.01" value="0.06">
+        </div>
+        <div class="command-control">
+          <label for="weightScale">Weight <output data-output="weightScale">1.00</output></label>
+          <input id="weightScale" data-param="weightScale" type="range" min="0.2" max="1.8" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="regularizer">Epsilon <output data-output="regularizer">0.00</output></label>
+          <input id="regularizer" data-param="regularizer" type="range" min="0" max="0.25" step="0.01" value="0">
+        </div>
+        <div class="command-control">
+          <label for="forceGain">Force <output data-output="forceGain">0.55</output></label>
+          <input id="forceGain" data-param="forceGain" type="range" min="0.2" max="1.2" step="0.01" value="0.55">
+        </div>
+        <div class="command-control">
+          <label for="surfaceLift">Surface <output data-output="surfaceLift">0.65</output></label>
+          <input id="surfaceLift" data-param="surfaceLift" type="range" min="0.2" max="1.4" step="0.01" value="0.65">
+        </div>
+        <button id="heat" class="primary" data-action="step" type="button">Heat step</button>
+        <button id="project" data-action="pulse" type="button">Project</button>
+        <button id="resetF03" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block F 3D lab</p>
+        <h1>F03 Graph Laplacian Energy</h1>
+        <p class="subtitle">Rotate the graph signal, edge-disagreement rods, Lx force arrows, heat descent trail, normalized-degree correction, component-average projection, and zero-energy nullspace plane.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Dirichlet energy"><span>Energy</span><strong id="energyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Max disagreement"><span>Max edge</span><strong id="disagreementLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Step"><span>Step</span><strong id="stepLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Nullity"><span>Nullity</span><strong id="nullityLabel">1</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading graph Laplacian energy geometry.</p>
+        <p id="stateBox" class="state-box"><span id="stateText">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: graph changes the nullspace, operator changes degree scaling, heat applies x &lt;- x - alpha Lx, and project collapses to component averages.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=f03-laplacian-energy-v1"></script>
+  <script src="shared/ml-lab-core.js?math3d=f03-laplacian-energy-v1"></script>
+  <script>
+    window.__f03LabSnapshot = window.__f03LabSnapshot || function () { return null; };
+    createF03GraphLaplacianEnergyLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

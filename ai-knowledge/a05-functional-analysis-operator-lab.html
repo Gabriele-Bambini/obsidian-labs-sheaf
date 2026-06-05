@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A05 Functional Analysis</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a05-a06-canonical-clarity-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a05" data-keywords="functional analysis Hilbert Banach operators projection basis coefficients compact derivative dual Riesz">
+    <section class="visual-stack" aria-label="Interactive 3D mathematical visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom. Click objects to inspect.">
+          <canvas id="canvas" aria-label="A05 Functional Analysis 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>A05</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>Function f, Norms, Basis, Operator T, Projection, and Dual/RKHS are concrete objects you can rotate and change.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Click a node to inspect local structure.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select data-control="mode" aria-label="Concept mode">
+            <option value="projection">Hilbert projection</option>
+            <option value="compact">Compact smoothing</option>
+            <option value="derivative">Derivative stress</option>
+            <option value="dual">Dual functional</option>
+        </select>
+        <div class="command-control">
+          <label for="a05-truncation">basis cutoff <output data-output="truncation">5</output></label>
+          <input id="a05-truncation" data-param="truncation" type="range" min="1" max="12" step="1" value="5">
+        </div>
+        <div class="command-control">
+          <label for="a05-frequency">frequency <output data-output="frequency">6</output></label>
+          <input id="a05-frequency" data-param="frequency" type="range" min="1" max="12" step="1" value="6">
+        </div>
+        <div class="command-control">
+          <label for="a05-strength">op strength <output data-output="strength">0.9</output></label>
+          <input id="a05-strength" data-param="strength" type="range" min="0.2" max="2" step="0.05" value="0.9">
+        </div>
+        <div class="command-control">
+          <label for="a05-smoothness">smoothness <output data-output="smoothness">0.45</output></label>
+          <input id="a05-smoothness" data-param="smoothness" type="range" min="0" max="1" step="0.02" value="0.45">
+        </div>
+        <div class="command-control">
+          <label for="a05-probe">dual probe <output data-output="probe">0.62</output></label>
+          <input id="a05-probe" data-param="probe" type="range" min="0.08" max="0.92" step="0.01" value="0.62">
+        </div>
+        <button class="primary" data-action="pulse" type="button">Pulse</button>
+        <button data-action="step" type="button">Step</button>
+        <button data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block A 3D lab</p>
+        <h1>A05 Functional Analysis</h1>
+        <p class="subtitle">Orbit / rotate / zoom the system, select objects, then change parameters to experiment with functional analysis Hilbert Banach operators projection basis coefficients compact derivative dual Riesz.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Input norm">
+          <span>Input norm</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Output norm">
+          <span>Output norm</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Operator gain">
+          <span>Operator gain</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Residual norm">
+          <span>Residual norm</span>
+          <strong>0.00</strong>
+        </div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading the 3D mathematical system.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Command bar controls are live: every slider changes geometry, active channels, metrics, or selected-object state. Blue/cyan shows signal, amber shows frontier, red shows perturbation.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=a05-a06-canonical-clarity-v1"></script>
+  <script>
+    const labState = createGnnLab({"id":"a05","kind":"algebra","title":"A05 Functional Analysis","modes":[{"value":"projection","label":"Hilbert projection"},{"value":"compact","label":"Compact smoothing"},{"value":"derivative","label":"Derivative stress"},{"value":"dual","label":"Dual functional"}],"parameters":[{"key":"truncation","label":"basis cutoff","min":1,"max":12,"step":1,"value":5},{"key":"frequency","label":"frequency","min":1,"max":12,"step":1,"value":6},{"key":"strength","label":"op strength","min":0.2,"max":2,"step":0.05,"value":0.9},{"key":"smoothness","label":"smoothness","min":0,"max":1,"step":0.02,"value":0.45},{"key":"probe","label":"dual probe","min":0.08,"max":0.92,"step":0.01,"value":0.62}],"metrics":["Input norm","Output norm","Operator gain","Residual norm"],"visual":{"kind":"functional-operator-space","graphStyle":"hidden"},"profile":{"preferredMetric":"Operator gain","formula":"T: f = sum a_k e_k -> sum b_k e_k,  ||T|| = sup ||Tf||/||f||","insight":"A05 treats functions as vectors: coefficient towers are coordinates, waveforms are the same vector in physical space, and each operator shows whether geometry is preserved, compressed, amplified, or read by a dual functional."},"graph":{"nodes":[{"label":"function f","position":[-2.7,-0.65,-0.55],"group":0},{"label":"basis coefficients","position":[-1,-1.45,0.85],"group":1},{"label":"operator T","position":[0.55,-1,0],"group":2},{"label":"projection","position":[1.8,-1.3,0.65],"group":3},{"label":"dual functional","position":[2.75,-0.55,-0.65],"group":4}],"edges":[[0,1,"basis expansion",1],[1,2,"operator on modes",1],[2,3,"closed subspace",1],[2,4,"scalar readout",1],[3,0,"residual geometry",1]]}});
+    window.__a05LabSnapshot = () => window.__gLabSnapshot();
+    Object.defineProperty(window, "__a05LabReady", { get: () => window.__gLabReady === true });
+  </script>
+</body>
+</html>

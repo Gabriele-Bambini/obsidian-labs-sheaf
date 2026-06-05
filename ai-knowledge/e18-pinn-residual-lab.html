@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E18 PINN Residual</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=e18-pinn-specific-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e18" data-keywords="PINN physics informed neural network residual collocation boundary PDE derivative">
+    <section class="visual-stack" aria-label="Interactive 3D PINN residual and collocation visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E18 PINN Residual 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E18</strong></div>
+          <div class="formula-chip"><span>PINN sketch</span>A neural field fits sparse data while collocation points penalize PDE residuals and boundary terms select the physical solution.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected residual</span><strong>PINN residual geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.72fr) minmax(0,.72fr) repeat(6,minmax(0,.74fr)) repeat(4,minmax(0,.56fr));">
+        <select id="pdePreset" data-control="pdePreset" aria-label="PDE preset">
+          <option value="heat">Heat</option>
+          <option value="burgers">Burgers</option>
+          <option value="poisson">Poisson</option>
+          <option value="ode">Simple ODE</option>
+        </select>
+        <select id="boundaryMode" data-control="boundaryMode" aria-label="Boundary enforcement">
+          <option value="soft">Soft boundary</option>
+          <option value="hard">Hard transform</option>
+          <option value="mixed">Mixed</option>
+        </select>
+        <div class="command-control">
+          <label for="physicsWeight">Physics <output data-output="physicsWeight">0.55</output></label>
+          <input id="physicsWeight" data-param="physicsWeight" type="range" min="0" max="1" step="0.01" value="0.55">
+        </div>
+        <div class="command-control">
+          <label for="dataWeight">Data <output data-output="dataWeight">0.65</output></label>
+          <input id="dataWeight" data-param="dataWeight" type="range" min="0" max="1" step="0.01" value="0.65">
+        </div>
+        <div class="command-control">
+          <label for="boundaryWeight">Boundary <output data-output="boundaryWeight">0.50</output></label>
+          <input id="boundaryWeight" data-param="boundaryWeight" type="range" min="0" max="1" step="0.01" value="0.5">
+        </div>
+        <div class="command-control">
+          <label for="collocationDensity">Colloc <output data-output="collocationDensity">9</output></label>
+          <input id="collocationDensity" data-param="collocationDensity" type="range" min="4" max="18" step="1" value="9">
+        </div>
+        <div class="command-control">
+          <label for="alphaEstimate">Alpha <output data-output="alphaEstimate">0.42</output></label>
+          <input id="alphaEstimate" data-param="alphaEstimate" type="range" min="0.1" max="1" step="0.01" value="0.42">
+        </div>
+        <div class="command-control">
+          <label for="noiseLevel">Noise <output data-output="noiseLevel">0.08</output></label>
+          <input id="noiseLevel" data-param="noiseLevel" type="range" min="0" max="0.35" step="0.01" value="0.08">
+        </div>
+        <button id="trainPinn" class="primary" data-action="step" type="button">Fit PINN</button>
+        <button id="resampleCollocation" data-action="pulse" type="button">Resample residuals</button>
+        <button id="toggleHardConstraint" data-action="pulse" type="button">Hard boundary</button>
+        <button id="resetPinn" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E18 PINN Residual</h1>
+        <p class="subtitle">Rotate sparse measurements, neural field surface, collocation residual halos, derivative stencils, boundary clamp rails, loss balance scales, adaptive hotspot sampler, alpha inverse gauge, and validation heatmap.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Data loss"><span>Data</span><strong id="dataLossLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Physics loss"><span>Physics</span><strong id="physicsLossLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Boundary loss"><span>Boundary</span><strong id="boundaryLossLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Alpha error"><span>Alpha</span><strong id="alphaLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading PINN residual geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: data, physics and boundary weights pull the neural field differently; collocation density exposes residual coverage; hard constraints clamp boundary leakage by construction.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=e18-pinn-specific-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=e18-pinn-specific-v3"></script>
+  <script>
+    window.__e18LabSnapshot = window.__e18LabSnapshot || function () { return null; };
+    // __e18LabReady = true is set by createE18PinnResidualLab after the first render setup.
+    createE18PinnResidualLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

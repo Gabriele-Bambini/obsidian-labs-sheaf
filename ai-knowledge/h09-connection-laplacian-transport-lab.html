@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H09 Connection Laplacian Transport</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=h05-intuitive-v11-h09-concrete-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="sheaf" data-lab-id="h09" data-keywords="connection laplacian parallel transport holonomy local frame orthogonal transport gauge">
+    <section class="visual-stack">
+      <div class="stage">
+        <div class="lab-viewport">
+          <canvas id="canvas" aria-label="H09 concrete connection Laplacian parallel transport visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>H09</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">x_u - O_uv x_v</strong></div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>local frame and transport loop</strong></div>
+      </div>
+      <div class="command-bar controls">
+        <select id="preset" aria-label="Connection preset">
+          <option value="curved">Curved loop</option>
+          <option value="flat">Flat loop</option>
+          <option value="noisy">Noisy frame estimates</option>
+          <option value="reflection">Reflection relation</option>
+        </select>
+        <select id="view" aria-label="Connection view">
+          <option value="transport">Parallel transport</option>
+          <option value="holonomy">Loop holonomy</option>
+          <option value="matrix">Connection-Laplacian blocks</option>
+          <option value="gauge">Gauge frame change</option>
+        </select>
+        <div class="command-control">
+          <label for="loopTraversals">Loop traversals <output data-output="loopTraversals">3</output></label>
+          <input id="loopTraversals" type="range" min="1" max="8" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="rotationScale">Rotation sharpness <output data-output="rotationScale">1.00</output></label>
+          <input id="rotationScale" type="range" min="0.4" max="1.6" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="frameNoise">Frame error <output data-output="frameNoise">0.14</output></label>
+          <input id="frameNoise" type="range" min="0" max="0.8" step="0.02" value="0.14">
+        </div>
+        <div class="command-control">
+          <label for="visibleTransports">Visible transports <output data-output="visibleTransports">4</output></label>
+          <input id="visibleTransports" type="range" min="1" max="4" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="normLock">Norm preservation <output data-output="normLock">0.72</output></label>
+          <input id="normLock" type="range" min="0" max="1" step="0.02" value="0.72">
+        </div>
+        <button id="transportVector" class="primary" data-action="step" type="button">Transport vector</button>
+        <button id="runLoop" data-action="pulse" type="button">Run loop</button>
+        <button id="diffuse" data-action="step" type="button">Diffuse</button>
+        <button id="gaugeShift" data-action="step" type="button">Gauge shift</button>
+        <button id="resetH09" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block H 3D lab</p>
+        <h1>H09 Connection Laplacian Transport</h1>
+        <p class="subtitle">Local tangent frames on a four-cycle, SO(2) transport matrices on edges, loop holonomy at the center, and connection-Laplacian blocks acting on vector fields.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Holonomy angle"><span>Holonomy angle</span><strong id="twistLabel">0.0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Transport norm"><span>Transport norm</span><strong id="normLabel">1.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Loop coverage"><span>Energy</span><strong id="energyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Curvature defect"><span>Cursor</span><strong id="cursorLabel">0/4</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading connection diagnostics.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Every node has its own frame. Edge matrices rotate vectors into the next frame; a closed loop can return with a holonomy angle even though every step preserves norm.</p>
+    </aside>
+  </main>
+  <!-- {"visual":{"kind":"connection-loop","graphStyle":"anchors"},"profile":{"preferredMetric":"Holonomy angle"},"graph":{"nodes":["local transport frame","holonomy curvature defect","parallel transport loop","connection Laplacian block matrix","gauge frame ring"],"edges":["orthogonal transport","loop product","connection diffusion"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=h05-intuitive-v11-h09-concrete-v2"></script>
+  <script src="shared/sheaf-dynamics-labs.js?math3d=h05-intuitive-v11-h09-concrete-v2"></script>
+  <script>
+    window.__h09LabReady = false;
+    window.__h09LabSnapshot = window.__h09LabSnapshot || function () { return null; };
+    createH09ConnectionLaplacianConcreteLab();
+  </script>
+</body>
+</html>

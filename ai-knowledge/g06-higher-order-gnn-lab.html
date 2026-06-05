@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G06 Higher-Order GNN Lift</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g06-higher-order-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="higher-order" data-lab-id="g06" data-keywords="motif subgraph higher-order pair tuple ring trace">
+    <section class="visual-stack" aria-label="Interactive 3D higher-order GNN lift visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G06 higher-order GNN 3D lift visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G06</strong></div>
+          <div class="formula-chip"><span id="formulaText">state unit: node -> pair -> tuple / subgraph</span>Higher-order models change what object receives a representation.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected lift</span><strong>Higher-order evidence is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.58fr)) repeat(5,minmax(0,.58fr)) repeat(5,minmax(0,.42fr));">
+        <select id="liftMode" data-control="liftMode" aria-label="Higher-order lift mode">
+          <option value="baseline">1-WL baseline</option>
+          <option value="pairs">2-WL pair states</option>
+          <option value="triangles">Triangle trace</option>
+          <option value="subgraphs">Subgraph sampler</option>
+        </select>
+        <select id="evidenceView" data-control="evidenceView" aria-label="Evidence view">
+          <option value="comparison">C6 vs two triangles</option>
+          <option value="tensor">Pair tensor</option>
+          <option value="ring">Ring-GNN trace</option>
+          <option value="budget">Budget tradeoff</option>
+        </select>
+        <select id="subgraphFamily" data-control="subgraphFamily" aria-label="Subgraph family">
+          <option value="triples">3-node induced</option>
+          <option value="ego">Ego-net samples</option>
+          <option value="deleted">Node-deleted views</option>
+        </select>
+        <div class="command-control">
+          <label for="tupleOrder">Order <output data-output="tupleOrder">2</output></label>
+          <input id="tupleOrder" data-param="tupleOrder" type="range" min="1" max="4" step="1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="updateRounds">Rounds <output data-output="updateRounds">2</output></label>
+          <input id="updateRounds" data-param="updateRounds" type="range" min="1" max="6" step="1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="sparsification">Sparse <output data-output="sparsification">0.22</output></label>
+          <input id="sparsification" data-param="sparsification" type="range" min="0" max="0.9" step="0.01" value="0.22">
+        </div>
+        <div class="command-control">
+          <label for="motifBudget">Budget <output data-output="motifBudget">6</output></label>
+          <input id="motifBudget" data-param="motifBudget" type="range" min="1" max="12" step="1" value="6">
+        </div>
+        <div class="command-control">
+          <label for="nodeAnchor">Anchor <output data-output="nodeAnchor">0.36</output></label>
+          <input id="nodeAnchor" data-param="nodeAnchor" type="range" min="0" max="1" step="0.01" value="0.36">
+        </div>
+        <button id="liftPairs" class="primary" data-action="pulse" type="button">Lift pairs</button>
+        <button id="showTriangles" data-action="step" type="button">Trace A^3</button>
+        <button id="sampleSubgraphs" data-action="step" type="button">Sample motifs</button>
+        <button id="compareCost" data-action="step" type="button">Show O(n^k)</button>
+        <button id="liftOrder" data-action="reset" type="button">2-WL tensor</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G06 Higher-Order GNN Lift</h1>
+        <p class="subtitle">Rotate the same C6 versus two-triangle pair, then lift from node-local 1-WL to pair tensors, ring traces, sampled subgraphs, and explicit cost growth.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Lifted states"><span>Lifted states</span><strong id="liftedStatesLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Memory cost"><span>Memory cost</span><strong id="memoryCostLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Motif signal"><span>Motif signal</span><strong id="motifSignalLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Expressivity gap"><span>Distinguish</span><strong id="distinguishLabel">no</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading higher-order expressivity diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: pair lift turns nodes into n^2 tuple states, trace mode counts closed length-3 walks, subgraph budget controls motif coverage, and tuple order exposes the memory price of expressivity.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g06-higher-order-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=g06-higher-order-v3"></script>
+  <script>
+    window.__g06LabSnapshot = window.__g06LabSnapshot || function () { return null; };
+    createG06HigherOrderGnnLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>B11 - Temporal Dynamic GNN Evidence Clock Lab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#071015;--line:#25485b;--text:#edf9fb;--muted:#a8c1cb;--cyan:#58e0d3;--blue:#54a8ff;--gold:#e8b857;--pink:#ff6d8b;--green:#6ee7a8;--violet:#b49cff}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.42 Inter,Segoe UI,system-ui,Arial,sans-serif}
+    .shell{height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:12px;padding:12px;background:radial-gradient(circle at 18% 10%,rgba(88,224,211,.14),transparent 30%),radial-gradient(circle at 75% 38%,rgba(180,156,255,.12),transparent 28%),linear-gradient(135deg,#050b10,#0b1720 64%,#05090d)}
+    .stage,.panel{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(11,27,37,.97),rgba(6,15,21,.98));box-shadow:0 18px 52px rgba(0,0,0,.34);min-width:0;min-height:0}
+    .stage{display:grid;grid-template-rows:minmax(0,1fr) auto;overflow:hidden;position:relative}.canvas-wrap{position:relative;min-height:0}canvas{display:block;width:100%;height:100%;min-height:340px;touch-action:none}
+    .overlay{position:absolute;left:14px;right:14px;top:14px;display:flex;gap:10px;justify-content:space-between;pointer-events:none}.badge,.formula{border:1px solid rgba(143,216,242,.25);background:rgba(7,16,21,.78);backdrop-filter:blur(8px);border-radius:12px;padding:9px 11px}.badge span,.formula span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.badge strong{font-size:18px}.formula{max-width:850px;color:#cfe5ec}.formula code{color:var(--cyan);font-weight:800}
+    .controls{display:grid;grid-template-columns:1fr .95fr .88fr .7fr .7fr .7fr;gap:10px;padding:10px;border-top:1px solid var(--line);background:#091720}.control{min-width:0;overflow:hidden}.control label{display:flex;justify-content:space-between;margin-bottom:4px;color:var(--muted);font-size:12px}.control output{color:var(--text);font-weight:800}select,input{width:100%;min-width:0;border:1px solid #315b70;border-radius:10px;background:#102838;color:var(--text);font:inherit}select{height:38px;padding:0 10px}input[type=range]{height:38px;accent-color:var(--cyan)}
+    .panel{display:flex;flex-direction:column;gap:12px;padding:14px;overflow:auto}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--cyan)!important}.panel h1{font-size:22px;line-height:1.1;margin:0}.panel p{margin:0;color:var(--muted)}
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:10px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;margin-top:4px;font-size:19px}
+    .card{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:12px}.card h2{font-size:15px;margin:0 0 6px}.timeline{display:grid;gap:7px}.event{display:grid;grid-template-columns:58px 1fr 50px;gap:8px;align-items:center;color:#cfe5ec}.track{height:12px;border:1px solid #203c4d;background:#08131a;border-radius:999px;overflow:hidden}.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),var(--blue));width:0}.event em{font-style:normal;text-align:right;color:var(--muted);font-size:12px}.legend{display:flex;flex-wrap:wrap;gap:7px}.legend span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:var(--muted)}.dot{width:9px;height:9px;border-radius:99px;display:inline-block}
+    @media(max-width:920px){html,body{height:100%;overflow:hidden;max-width:100vw}.shell{width:100vw;height:100vh;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,55vh) minmax(0,1fr);gap:8px;padding:8px;overflow:hidden}.stage,.panel{width:100%;max-width:100%;overflow:hidden}.canvas-wrap{min-height:0}canvas{min-height:230px}.overlay{display:none}.controls{grid-template-columns:repeat(3,minmax(0,1fr));max-height:166px;overflow:hidden;padding:8px;gap:7px}.control label{display:block;font-size:11px;line-height:1.15}.control output{float:right;font-size:11px}select,input[type=range]{height:30px}select{font-size:12px;padding:0 6px;text-overflow:ellipsis}.panel{min-height:0;padding:10px;gap:9px;overflow:auto}.panel h1{font-size:17px;line-height:1.14;overflow-wrap:break-word}.metric-grid{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:8px}.metric strong{font-size:17px}.legend{display:none}.card:nth-of-type(2){display:none}}
+    @media(max-width:480px){.shell{grid-template-rows:minmax(0,55vh) minmax(0,1fr)}.controls{grid-template-columns:repeat(2,minmax(0,1fr));max-height:190px}.metric-grid{grid-template-columns:1fr}.panel header p:not(.eyebrow){display:none}.timeline .event:nth-child(n+5){display:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="stage" aria-label="Interactive temporal dynamic GNN visualization">
+      <div class="canvas-wrap">
+        <canvas id="scene" aria-label="Temporal graph evidence clock canvas"></canvas>
+        <div class="overlay">
+          <div class="badge"><span>Chapter lab</span><strong>B11</strong></div>
+          <div class="formula"><span>Temporal message passing</span><code>h_v(t+) = update(memory_v(t-), messages before t)</code></div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control"><label>Biology process</label><select id="process"><option value="diff" selected>differentiation</option><option value="perturb">perturb-seq time course</option><option value="drug">drug response</option><option value="disease">disease progression</option></select></div>
+        <div class="control"><label>Temporal model</label><select id="model"><option value="snapshot">snapshot GNN</option><option value="evolve">EvolveGCN</option><option value="tgat">TGAT attention</option><option value="tgn" selected>TGN memory</option></select></div>
+        <div class="control"><label>Prediction</label><select id="task"><option value="next" selected>next-state edge</option><option value="forecast">gene expression forecast</option><option value="fate">cell fate transition</option><option value="perturb">perturbation response</option></select></div>
+        <div class="control"><label>Time <output id="timeOut">55</output></label><input id="time" type="range" min="0" max="100" value="55"></div>
+        <div class="control"><label>Memory <output id="memOut">70</output></label><input id="mem" type="range" min="0" max="100" value="70"></div>
+        <div class="control"><label>Leak guard <output id="guardOut">85</output></label><input id="guard" type="range" min="0" max="100" value="85"></div>
+      </div>
+    </section>
+    <aside class="panel">
+      <header><p class="eyebrow">Temporal dynamic GNN lab</p><h1>What did the model know before this biological time point?</h1><p id="subtitle">Move the clock and compare snapshot, evolving-parameter, temporal-attention, and memory-based views.</p></header>
+      <div class="metric-grid">
+        <div class="metric"><span>Past evidence used</span><strong id="pastMetric">0%</strong></div>
+        <div class="metric"><span>Temporal memory</span><strong id="memoryMetric">0%</strong></div>
+        <div class="metric"><span>Forecast stability</span><strong id="forecastMetric">0%</strong></div>
+        <div class="metric"><span>Future leakage risk</span><strong id="leakMetric">0%</strong></div>
+      </div>
+      <div class="card"><h2>Timed evidence channels</h2><div id="events" class="timeline"></div></div>
+      <div class="card"><h2>Interpretation</h2><p id="insight">Dynamic graph learning is useful only when the temporal split matches the biological question.</p></div>
+      <div class="legend"><span><i class="dot" style="background:var(--blue)"></i> expression snapshot</span><span><i class="dot" style="background:var(--green)"></i> regulatory event</span><span><i class="dot" style="background:var(--gold)"></i> perturbation</span><span><i class="dot" style="background:var(--pink)"></i> future forbidden</span></div>
+    </aside>
+  </main>
+  <script>
+    const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
+    const controls={process:document.getElementById('process'),model:document.getElementById('model'),task:document.getElementById('task'),time:document.getElementById('time'),mem:document.getElementById('mem'),guard:document.getElementById('guard')};
+    const out={time:document.getElementById('timeOut'),mem:document.getElementById('memOut'),guard:document.getElementById('guardOut'),past:document.getElementById('pastMetric'),memory:document.getElementById('memoryMetric'),forecast:document.getElementById('forecastMetric'),leak:document.getElementById('leakMetric'),events:document.getElementById('events'),insight:document.getElementById('insight'),subtitle:document.getElementById('subtitle')};
+    const colors={expr:'#54a8ff',reg:'#6ee7a8',pert:'#e8b857',future:'#ff6d8b',mem:'#b49cff',grid:'#244a5d'};
+    const processes={
+      diff:{label:'cell differentiation',why:'Cells move through pseudotime; regulatory edges and gene expression change along the trajectory.',events:['RNA snapshot','TF activity','chromatin opens','fate edge','future branch']},
+      perturb:{label:'perturb-seq time course',why:'A perturbation at t0 causes delayed regulatory and expression responses; future post-treatment labels must stay hidden.',events:['KO event','early response','TF rewiring','late expression','future phenotype']},
+      drug:{label:'drug response',why:'Drug-target evidence appears before downstream pathway and expression changes; side effects may arrive later.',events:['drug dose','target binding','pathway shift','expression response','future toxicity']},
+      disease:{label:'disease progression',why:'Disease graphs evolve as cell states, inflammation, fibrosis, and gene modules change over ordered time.',events:['baseline','cell-state drift','module edge','clinical state','future relapse']}
+    };
+    let state={};
+    function params(){return {process:controls.process.value,model:controls.model.value,task:controls.task.value,time:Number(controls.time.value)/100,mem:Number(controls.mem.value)/100,guard:Number(controls.guard.value)/100}}
+    function compute(){
+      const p=params(),proc=processes[p.process];
+      const model={snapshot:{past:.58,mem:.18,stable:.46,leak:.34},evolve:{past:.72,mem:.54,stable:.62,leak:.24},tgat:{past:.78,mem:.48,stable:.68,leak:.18},tgn:{past:.86,mem:.86,stable:.72,leak:.12}}[p.model];
+      const timeShape=.35+.65*p.time;
+      const guardBoost=p.guard;
+      const metrics={
+        past:Math.min(1,model.past*timeShape+.12*p.guard),
+        memory:Math.min(1,model.mem*(.35+.65*p.mem)),
+        forecast:Math.min(1,model.stable*(.45+.55*p.mem)*(0.65+0.35*p.guard)),
+        leak:Math.max(0,Math.min(1,model.leak+(1-p.guard)*.55+(p.model==='snapshot'?0.12:0)-p.mem*.08))
+      };
+      const positions=[.08,.26,.45,.66,.88];
+      const events=proc.events.map((name,i)=>({name,t:positions[i],kind:i===0?'expr':i===1||i===2?'reg':i===3?'pert':'future',active:positions[i]<=p.time,weight:Math.max(.05,1-Math.abs(p.time-positions[i])*1.6)}));
+      state={p,proc,events,metrics}; return state;
+    }
+    function fit(){const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));const r=canvas.getBoundingClientRect();canvas.width=Math.max(320,Math.floor(r.width*dpr));canvas.height=Math.max(240,Math.floor(r.height*dpr));ctx.setTransform(dpr,0,0,dpr,0,0)}
+    function rr(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}}
+    function line(x1,y1,x2,y2,c,w=2){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+    function draw(){
+      const s=compute(),w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);
+      if(w<560){drawMobileOverview(12,12,w-24,h-24,s);window.__B11_LAB_READY__=true;window.__B11LabReady=true;window.__B11_LAST_METRICS__=s.metrics;window.__B11LabSnapshot=s.metrics;return}
+      const pad=w<720?14:24,gap=w<720?10:18,top=w<720?16:64,colW=(w-pad*2-gap*2)/3,panelH=h-top-24;
+      const labels=colW<180?['clock','events','memory']:['biological clock','timed graph events','memory and forecast'];
+      labels.forEach((t,k)=>{const x=pad+k*(colW+gap);rr(x,top,colW,panelH,18,'rgba(7,20,28,.88)','#244a5d');ctx.fillStyle='#dff7fb';ctx.font='700 15px Segoe UI';ctx.fillText(t,x+14,top+28)});
+      drawClock(pad,top,colW,panelH,s);drawEvents(pad+colW+gap,top,colW,panelH,s);drawMemory(pad+2*(colW+gap),top,colW,panelH,s);
+      window.__B11_LAB_READY__=true;window.__B11LabReady=true;window.__B11_LAST_METRICS__=s.metrics;window.__B11LabSnapshot=s.metrics;
+    }
+    function labelText(name,w){const short={RNA:'RNA',TF:'TF',chromatin:'Chr',fate:'fate',future:'future',KO:'KO',early:'early',late:'late',drug:'drug',target:'target',pathway:'path',expression:'expr',baseline:'base',cell:'cell',module:'module',clinical:'clin'};const first=name.split(' ')[0];return w<145?(short[first]||first.slice(0,4)):first}
+    function drawMobileOverview(x,y,w,h,s){
+      rr(x,y,w,h,16,'rgba(7,20,28,.92)','#244a5d');
+      ctx.fillStyle='#58e0d3';ctx.font='800 11px Segoe UI';ctx.textAlign='left';ctx.fillText('B11 TEMPORAL GNN',x+14,y+22);
+      ctx.fillStyle='#dff7fb';ctx.font='800 15px Segoe UI';ctx.fillText('past evidence -> memory -> future claim',x+14,y+43);
+      const gaugeX=x+58,gaugeY=y+92,r=Math.min(34,w*.11);ctx.strokeStyle='#244a5d';ctx.lineWidth=7;ctx.beginPath();ctx.arc(gaugeX,gaugeY,r,Math.PI*.85,Math.PI*2.15);ctx.stroke();ctx.strokeStyle=colors.expr;ctx.beginPath();ctx.arc(gaugeX,gaugeY,r,Math.PI*.85,Math.PI*.85+Math.PI*1.3*s.p.time);ctx.stroke();ctx.fillStyle='#dff7fb';ctx.font='800 17px Segoe UI';ctx.textAlign='center';ctx.fillText(Math.round(s.p.time*100)+'%',gaugeX,gaugeY+6);ctx.fillStyle='#9fb9c6';ctx.font='10px Segoe UI';ctx.fillText('time',gaugeX,gaugeY+r+17);
+      const bx=x+116,bw=Math.max(112,w-138),by=y+70;drawMiniBar(bx,by,bw,12,s.metrics.memory,colors.mem,'memory');drawMiniBar(bx,by+28,bw,12,1-s.metrics.leak,colors.reg,'leak guard');drawMiniBar(bx,by+56,bw,12,s.metrics.forecast,colors.blue,'forecast');
+      const left=x+18,right=x+w-18,base=y+Math.min(h*.62,166);line(left,base,right,base,'#244a5d',4);
+      s.events.forEach((ev,i)=>{const px=left+(right-left)*ev.t,stem=Math.max(20,28+ev.weight*24),top=base-stem;line(px,base,px,top,ev.active?colors[ev.kind]:'#334b58',2.5);ctx.beginPath();ctx.arc(px,top,ev.active?9:7,0,Math.PI*2);ctx.fillStyle=ev.active?colors[ev.kind]:'#1a303c';ctx.fill();ctx.strokeStyle='#dff7fb';ctx.stroke();ctx.fillStyle=ev.active?'#dff7fb':'#7e98a5';ctx.font='800 9px Segoe UI';ctx.textAlign='center';ctx.fillText(labelText(ev.name,w),px,base+18)});
+      const ct=left+(right-left)*s.p.time;line(ct,base-58,ct,base+8,colors.future,2);ctx.fillStyle=colors.future;ctx.font='800 10px Segoe UI';ctx.textAlign='center';ctx.fillText('now',ct,base-64);
+      const gy=Math.min(y+h-48,base+54),gx=x+w*.5;const nodes=[[-70,0,'TF',colors.reg],[-18,22,'gene',colors.expr],[38,-10,'cell',colors.mem],[82,18,'peak',colors.pert]];
+      [[0,1,colors.reg],[2,1,colors.expr],[3,1,colors.pert],[0,3,colors.mem]].forEach(e=>{const a=nodes[e[0]],b=nodes[e[1]];line(gx+a[0],gy+a[1],gx+b[0],gy+b[1],e[2],2.4)});
+      nodes.forEach(n=>{ctx.beginPath();ctx.arc(gx+n[0],gy+n[1],12,0,Math.PI*2);ctx.fillStyle=n[3];ctx.fill();ctx.strokeStyle='#dff7fb';ctx.stroke();if(w>420){ctx.fillStyle='#061018';ctx.font='800 8px Segoe UI';ctx.textAlign='center';ctx.fillText(n[2],gx+n[0],gy+n[1]+3)}});
+    }
+    function drawMiniBar(x,y,w,h,value,color,label){rr(x,y,w,h,h/2,'#08131a','#203c4d');rr(x,y,w*value,h,h/2,color);ctx.fillStyle='#9fb9c6';ctx.font='10px Segoe UI';ctx.textAlign='left';ctx.fillText(label,x,y-4);ctx.textAlign='right';ctx.fillText(Math.round(value*100)+'%',x+w,y-4)}
+    function drawClock(x,y,w,h,s){
+      const cx=x+w/2,cy=y+h*.54,r=Math.min(w,h)*.28;ctx.strokeStyle='#244a5d';ctx.lineWidth=8;ctx.beginPath();ctx.arc(cx,cy,r,Math.PI*.85,Math.PI*2.15);ctx.stroke();
+      ctx.strokeStyle=colors.expr;ctx.lineWidth=9;ctx.beginPath();ctx.arc(cx,cy,r,Math.PI*.85,Math.PI*.85+Math.PI*1.3*s.p.time);ctx.stroke();
+      const angle=Math.PI*.85+Math.PI*1.3*s.p.time;const px=cx+Math.cos(angle)*r,py=cy+Math.sin(angle)*r;ctx.beginPath();ctx.arc(px,py,13,0,Math.PI*2);ctx.fillStyle=colors.reg;ctx.fill();ctx.strokeStyle='#eaf7fb';ctx.stroke();
+      ['t0','t1','t2','t3'].forEach((lab,i)=>{const a=Math.PI*.85+Math.PI*1.3*(i/3);const tx=cx+Math.cos(a)*(r+24),ty=cy+Math.sin(a)*(r+24);ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.textAlign='center';ctx.fillText(lab,tx,ty)});
+      ctx.fillStyle='#dff7fb';ctx.font='800 22px Segoe UI';ctx.textAlign='center';ctx.fillText(Math.round(s.p.time*100)+'%',cx,cy+7);if(w>190){ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.fillText('current biological time',cx,y+h-28)}
+    }
+    function drawEvents(x,y,w,h,s){
+      const left=x+24,right=x+w-24,base=y+h*.70;line(left,base,right,base,'#244a5d',5);
+      s.events.forEach(ev=>{const px=left+(right-left)*ev.t, top=base-60-ev.weight*90;line(px,base,px,top,ev.active?colors[ev.kind]:'#334b58',3);ctx.beginPath();ctx.arc(px,top,ev.active?12:9,0,Math.PI*2);ctx.fillStyle=ev.active?colors[ev.kind]:'#1a303c';ctx.fill();ctx.strokeStyle='#dff7fb';ctx.stroke();if(w>170){ctx.fillStyle=ev.active?'#dff7fb':'#7e98a5';ctx.font=w<230?'700 8px Segoe UI':'700 10px Segoe UI';ctx.textAlign='center';ctx.fillText(labelText(ev.name,w),px,top-16)}});
+      const ct=left+(right-left)*s.p.time;line(ct,y+58,ct,base+22,colors.future,2);ctx.fillStyle=colors.future;ctx.font='800 11px Segoe UI';ctx.textAlign='center';ctx.fillText('now',ct,y+50);if(w>190){ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.fillText('future events are forbidden',x+w/2,y+h-28)}
+    }
+    function drawMemory(x,y,w,h,s){
+      const cx=x+w/2,cy=y+h*.48;const nodes=[[-.55,-.22,'TF'],[-.25,.2,'gene'],[.15,-.25,'cell'],[.48,.18,'peak']];
+      nodes.forEach((n,i)=>{const px=cx+n[0]*w*.72,py=cy+n[1]*h*.62;ctx.beginPath();ctx.arc(px,py,w<190?13:17,0,Math.PI*2);ctx.fillStyle=[colors.reg,colors.expr,colors.mem,colors.pert][i];ctx.fill();ctx.strokeStyle='#dff7fb';ctx.stroke();if(w>210){ctx.fillStyle='#061018';ctx.font='800 9px Segoe UI';ctx.textAlign='center';ctx.fillText(n[2],px,py+3)}});
+      [[0,1,colors.reg],[2,1,colors.expr],[3,1,colors.pert],[0,3,colors.mem]].forEach(e=>{const a=nodes[e[0]],b=nodes[e[1]],x1=cx+a[0]*w*.72,y1=cy+a[1]*h*.62,x2=cx+b[0]*w*.72,y2=cy+b[1]*h*.62;line(x1,y1,x2,y2,e[2],3)});
+      const mh=Math.max(8,100*s.metrics.memory);rr(x+w*.18,y+h*.70,w*.64,18,9,'#08131a','#203c4d');rr(x+w*.18,y+h*.70,w*.64*s.metrics.memory,18,9,colors.mem);ctx.fillStyle='#dff7fb';ctx.font=w<190?'800 10px Segoe UI':'800 12px Segoe UI';ctx.textAlign='center';ctx.fillText(w<190?'memory':'node memory m_v(t)',x+w/2,y+h*.70+13);if(w>190){ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.fillText('memory carries past evidence',x+w/2,y+h-28)}
+    }
+    function updatePanel(){
+      const s=state,m=s.metrics,p=s.p;out.time.textContent=Math.round(p.time*100);out.mem.textContent=Math.round(p.mem*100);out.guard.textContent=Math.round(p.guard*100);
+      out.past.textContent=Math.round(m.past*100)+'%';out.memory.textContent=Math.round(m.memory*100)+'%';out.forecast.textContent=Math.round(m.forecast*100)+'%';out.leak.textContent=Math.round(m.leak*100)+'%';out.subtitle.textContent=s.proc.why;
+      out.events.innerHTML=s.events.map(ev=>`<div class="event"><b>${ev.name.split(' ')[0]}</b><span class="track"><span class="fill" style="width:${Math.round(ev.weight*100)}%;background:${colors[ev.kind]}"></span></span><em>${ev.active?'past':'future'}</em></div>`).join('');
+      const modelText=p.model==='snapshot'?'Snapshot models process a sequence of graph states. They are simple, but the binning choice can hide event order.':p.model==='evolve'?'EvolveGCN evolves GNN parameters over graph snapshots, useful when node sets change and persistent embeddings are awkward.':p.model==='tgat'?'TGAT treats embeddings as functions of time and uses temporal attention with time encoding.':'TGN represents dynamic graphs as timed events and updates node memory from past interactions.';
+      out.insight.textContent=modelText+' For biology, the split must train on earlier evidence and forecast later state, response, or edge formation.';
+    }
+    function render(){draw();updatePanel()}
+    Object.values(controls).forEach(el=>el.addEventListener('input',render));window.addEventListener('resize',()=>{fit();render()});fit();render();
+  </script>
+</body>
+</html>

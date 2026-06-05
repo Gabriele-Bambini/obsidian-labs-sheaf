@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true" data-topic-specific="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Surfing on the Neural Sheaf - topic-specific visual</title>
+  <link rel="stylesheet" href="../shared/topic-visual-core.css">
+</head>
+<body>
+  <main class="topic-lab">
+    <section class="stage" aria-label="Topic-specific interactive visualization">
+      <canvas id="viz"></canvas>
+      <div class="topbar">
+        <div class="chip"><span>Topic visual</span><strong data-family>Source evidence lens</strong></div>
+        <div class="chip formula"><span>Formal hook</span><strong data-formula></strong></div>
+      </div>
+      <div class="legend"></div>
+    </section>
+    <aside class="controls">
+      <header>
+        <p class="eyebrow">Generated from this note</p>
+        <h1 data-title>Surfing on the Neural Sheaf</h1>
+        <p class="subtitle" data-question></p>
+      </header>
+      <div class="mode-grid">
+        <select data-mode aria-label="View mode">
+          <option value="object">Object view</option>
+          <option value="process">Process view</option>
+          <option value="formal">Formal view</option>
+          <option value="failure">Failure mode</option>
+        </select>
+        <button type="button" data-action="simulate">Simulate</button>
+        <button type="button" data-action="stress">Stress failure</button>
+        <button type="button" data-action="reset">Reset</button>
+      </div>
+      <div class="control-grid"></div>
+      <div class="metric-grid"></div>
+      <div class="explain">
+        <h2>How to read it</h2>
+        <p data-state></p>
+      </div>
+      <p class="footer">Portable local HTML: no CDN. The iframe and full-screen link use relative vault paths, so the visual can travel with an Obsidian sync folder.</p>
+    </aside>
+  </main>
+  <script id="topic-config" type="application/json">{"title": "Surfing on the Neural Sheaf", "path": "02_Sheaf_GNN/surfing-on-the-neural-sheaf.md", "family": "source-lens", "subtype": "source-evidence", "subtypeName": "Source evidence lens", "familyName": "Source evidence lens", "formula": "source value = relevance + method + limitation + implementation hook", "question": "What does this source change in the vault's mental model?", "terms": ["surfing", "sheaf", "affects", "vault", "should", "additional", "lens", "not"], "parameters": [{"name": "relevance", "value": 70, "min": 0, "max": 100}, {"name": "method clarity", "value": 55, "min": 0, "max": 100}, {"name": "biology fit", "value": 52, "min": 0, "max": 100}, {"name": "implementation value", "value": 44, "min": 0, "max": 100}], "metrics": ["relevance", "method", "biology", "implementation"], "initialExplanation": "This visual was generated from this exact note: 'Surfing on the Neural Sheaf'. It uses the Source evidence lens representation and highlights surfing, sheaf, affects, vault."}</script>
+  <script src="../shared/topic-visual-core.js"></script>
+  <script>
+    try { createTopicVisual(); }
+    catch (error) {
+      document.body.innerHTML = '<pre style="color:white;background:#05090d;padding:16px;white-space:pre-wrap">Topic visual failed: ' + error.message + '</pre>';
+      console.error(error);
+    }
+  </script>
+</body>
+</html>

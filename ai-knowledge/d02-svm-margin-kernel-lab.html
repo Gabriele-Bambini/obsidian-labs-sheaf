@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D02 SVM Margin Kernel</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=d02-d03-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="learning" data-lab-id="d02" data-keywords="support vector machine maximum margin hinge loss dual weights kernel trick RBF gamma">
+    <section class="visual-stack" aria-label="Interactive 3D support vector machine visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="D02 SVM Margin Kernel 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>D02</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>max margin: f(x)=0, f(x)=+/-1, hinge slack, dual alpha, and kernel score surfaces are different views of the same SVM.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>SVM geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.82fr) minmax(0,.78fr) repeat(5,minmax(0,1fr)) repeat(3,minmax(0,.62fr));">
+        <select id="viewMode" data-control="mode" aria-label="SVM view">
+          <option value="margin">Margin</option>
+          <option value="hinge">Hinge</option>
+          <option value="dual">Dual</option>
+          <option value="kernel">Kernel</option>
+        </select>
+        <select id="kernel" aria-label="Kernel">
+          <option value="linear">Linear</option>
+          <option value="rbf">RBF</option>
+        </select>
+        <div class="command-control">
+          <label for="cPenalty">C penalty <output data-output="cPenalty">1.20</output></label>
+          <input id="cPenalty" data-param="cPenalty" type="range" min="0.2" max="5" step="0.05" value="1.20">
+        </div>
+        <div class="command-control">
+          <label for="gamma">Gamma <output data-output="gamma">0.90</output></label>
+          <input id="gamma" data-param="gamma" type="range" min="0.2" max="3" step="0.05" value="0.90">
+        </div>
+        <div class="command-control">
+          <label for="svmOverlap">Overlap <output data-output="overlap">0.18</output></label>
+          <input id="svmOverlap" data-param="overlap" type="range" min="0" max="1" step="0.02" value="0.18">
+        </div>
+        <div class="command-control">
+          <label for="supportBias">SV focus <output data-output="supportBias">0.42</output></label>
+          <input id="supportBias" data-param="supportBias" type="range" min="0" max="1" step="0.02" value="0.42">
+        </div>
+        <div class="command-control">
+          <label for="softness">Softness <output data-output="softness">0.30</output></label>
+          <input id="softness" data-param="softness" type="range" min="0" max="1" step="0.02" value="0.30">
+        </div>
+        <button id="fitModel" class="primary" data-action="pulse" type="button">Fit margin</button>
+        <button id="stepSmo" data-action="step" type="button">SMO step</button>
+        <button id="resetSvm" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block D 3D lab</p>
+        <h1>D02 SVM Margin Kernel</h1>
+        <p class="subtitle">Rotate the margin slabs, hinge violations, support-vector dual weights, and RBF kernel surface.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Margin"><span>Margin</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Support vectors"><span>Support vectors</span><strong>0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Hinge"><span>Hinge</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Accuracy"><span>Accuracy</span><strong>0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading the SVM margin system.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Every slider changes geometry: C tightens slack pressure, gamma changes RBF locality, overlap moves the classes, SV focus changes alpha emphasis, and softness opens the margin/slack tradeoff.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=d02-d03-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=d02-d03-canonical-clarity-v2"></script>
+  <script>
+    window.__d02LabSnapshot = window.__d02LabSnapshot || function () { return null; };
+    createD02SvmLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

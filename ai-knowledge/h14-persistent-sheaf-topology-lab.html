@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H14 Sheaves And Persistent Topology</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=h05-intuitive-v11-h14-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="sheaf" data-lab-id="h14" data-keywords="persistent topology filtration vietoris rips sheaf cohomology barcode stalk restriction holonomy defect">
+    <section class="visual-stack">
+      <div class="stage">
+        <div class="lab-viewport">
+          <canvas id="canvas" aria-label="H14 concrete persistent sheaf topology point-cloud filtration"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>H14</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">delta0 x = F_v<=e x_v - F_u<=e x_u</strong></div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>point cloud filtration</strong></div>
+      </div>
+      <div class="command-bar controls">
+        <select id="scenario" aria-label="Persistent sheaf scenario">
+          <option value="sensor-loop" selected>Clean sensor loop</option>
+          <option value="biased">Biased sensor</option>
+          <option value="flip">Orientation flip</option>
+          <option value="annulus">Noisy annulus</option>
+        </select>
+        <select id="restriction" aria-label="Restriction model">
+          <option value="identity" selected>Identity restrictions</option>
+          <option value="sign">Sign flip</option>
+          <option value="scale">Scale calibration</option>
+          <option value="bias">Bias defect</option>
+          <option value="holonomy">Holonomy obstruction</option>
+        </select>
+        <select id="view" aria-label="Persistent sheaf view">
+          <option value="filtration" selected>Filtration</option>
+          <option value="defect">Defect heat</option>
+          <option value="barcode">Barcode comparison</option>
+        </select>
+        <div class="command-control">
+          <label for="radius">Filtration radius <output data-output="radius">0.72</output></label>
+          <input id="radius" type="range" min="0.2" max="1.55" step="0.01" value="0.72">
+        </div>
+        <div class="command-control">
+          <label for="defectBias">Calibration defect <output data-output="defectBias">0.18</output></label>
+          <input id="defectBias" type="range" min="0" max="0.8" step="0.02" value="0.18">
+        </div>
+        <div class="command-control">
+          <label for="signalNoise">Signal noise <output data-output="signalNoise">0.16</output></label>
+          <input id="signalNoise" type="range" min="0" max="0.8" step="0.02" value="0.16">
+        </div>
+        <div class="command-control">
+          <label for="barThreshold">Barcode threshold <output data-output="barThreshold">0.52</output></label>
+          <input id="barThreshold" type="range" min="0.1" max="1" step="0.02" value="0.52">
+        </div>
+        <div class="command-control">
+          <label for="faceFill">Face fill <output data-output="faceFill">0.56</output></label>
+          <input id="faceFill" type="range" min="0" max="1" step="0.02" value="0.56">
+        </div>
+        <button id="growFiltration" class="primary" data-action="step" type="button">Grow filtration</button>
+        <button id="projectSection" data-action="step" type="button">Project section</button>
+        <button id="toggleBarcode" data-action="pulse" type="button">Show barcodes</button>
+        <button id="showHolonomy" data-action="pulse" type="button">Pulse obstruction</button>
+        <button id="resetH14" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block H 3D lab</p>
+        <h1>H14 Sheaves And Persistent Topology</h1>
+        <p class="subtitle">A point cloud filtration with radius balls, active edges, filled faces, vertex stalks, restriction maps, ordinary barcode, Sheaf persistence barcode, and holonomy obstruction heat.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Persistent defect"><span>Cells</span><strong id="cellsLabel">0 edges / 0 faces</strong></div>
+        <div class="metric" data-role="metric" data-metric="Cycle strength"><span>Ordinary Betti</span><strong id="bettiLabel">b0=8 b1=0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Cell coverage"><span>Sheaf H0</span><strong id="sheafLabel">dim H0(F)=8</strong></div>
+        <div class="metric" data-role="metric" data-metric="Sheaf barcode gap"><span>Defect</span><strong id="defectLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading persistent sheaf filtration.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">The same radius cursor drives both barcode strips. Ordinary topology asks when loops appear; the sheaf layer asks whether local stalk values glue around those loops.</p>
+    </aside>
+  </main>
+  <!-- {"visual":{"kind":"persistence-filtration","graphStyle":"anchors"},"profile":{"preferredMetric":"Persistent defect"},"graph":{"nodes":["filtration point","cell birth edge","sheaf barcode","sheaf barcode defect","holonomy obstruction","ordinary barcode strip"],"edges":["radius birth","triangle fill death","restriction map","defect heat","global section projection"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=h05-intuitive-v11-h14-clarity-v2"></script>
+  <script src="shared/sheaf-dynamics-labs.js?math3d=h05-intuitive-v11-h14-clarity-v2"></script>
+  <script>
+    window.__h14LabReady = false;
+    window.__h14LabSnapshot = window.__h14LabSnapshot || function () { return null; };
+    createH14PersistentSheafConcreteLab();
+  </script>
+</body>
+</html>

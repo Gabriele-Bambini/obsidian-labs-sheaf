@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>I05 Quantum Graph Circuit</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?quantum=i05-concrete-v1">
+</head>
+<body>
+  <main class="lab-shell lab-3d-shell gnn-lab math-3d-lab" data-lab-kind="quantum" data-lab-id="i05" data-keywords="QGNN graph qubits edge entanglers QAOA Max-Cut Hamiltonian readout">
+    <section class="visual-stack" aria-label="Interactive 3D quantum graph neural network visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to rotate the 3D QGNN workbench. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="I05 graph qubits, edge entanglers, QAOA layers, and QGNN readouts"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>I05</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">Encode node features, apply graph edge entanglers, mix, measure &lt;Z_v&gt; and &lt;Z_uZ_v&gt;.</strong></div>
+        </div>
+        <div class="hud quantum-hud"><h1>Graph nodes are qubits, edges are two-qubit gates, layers alternate ZZ cost and RX mixer, readout becomes graph features.</h1></div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong id="selectedLabel">Four-node Max-Cut feature circuit</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select id="graphPreset" aria-label="Graph preset">
+          <option value="cycle4" selected>C4 Max-Cut</option>
+          <option value="path5">Path P5</option>
+          <option value="star6">Star S6</option>
+          <option value="molecule">Molecule</option>
+        </select>
+        <select id="encoding" aria-label="Node encoding">
+          <option value="angle" selected>Angle RY/RZ</option>
+          <option value="basis">Basis bits</option>
+          <option value="amplitude">Amplitude caveat</option>
+        </select>
+        <select id="entangler" aria-label="Edge entangler">
+          <option value="zz" selected>ZZ cost</option>
+          <option value="xx">XX+ZZ typed</option>
+          <option value="identity">Identity ablation</option>
+        </select>
+        <div class="command-control">
+          <label for="depth">Depth p <output data-output="depth">2</output></label>
+          <input id="depth" type="range" min="1" max="5" step="1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="shots">Shots <output data-output="shots">256</output></label>
+          <input id="shots" type="range" min="32" max="4096" step="32" value="256">
+        </div>
+        <div class="command-control">
+          <label for="noise">Noise <output data-output="noise">0.04</output></label>
+          <input id="noise" type="range" min="0" max="0.35" step="0.01" value="0.04">
+        </div>
+        <button id="applyLayer" class="primary" type="button">Apply layer</button>
+        <button id="runDepth" type="button">Run p layers</button>
+        <button id="measure" type="button">Measure</button>
+        <button id="toggleEdges" type="button">Shuffle edges</button>
+        <button id="randomize" type="button">Randomize x</button>
+        <button id="resetI05" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block I 3D lab</p>
+        <h1>I05 Quantum Graph Neural Networks</h1>
+        <p class="subtitle">A graph-shaped variational circuit: node features become qubit rotations, graph edges become entangling gates, and measurements become classical graph features.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Entanglement"><span>Entanglement</span><strong id="entangleLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Energy"><span>Energy &lt;H_G&gt;</span><strong id="energyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Depth cost"><span>Depth cost</span><strong id="depthCostLabel">0 gates</strong></div>
+        <div class="metric" data-role="metric" data-metric="Nodes"><span>Graph</span><strong><span id="nodeLabel">4 q</span> / <span id="edgeLabel">4 e</span></strong></div>
+        <div class="metric" data-role="metric" data-metric="Shots"><span>Shots</span><strong id="shotLabel">256</strong></div>
+        <div class="metric" data-role="metric" data-metric="Shot error"><span>Shot stderr</span><strong id="shotErrorLabel">0.06</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Delete or shuffle edges: if readouts barely move, the circuit is not using graph structure.</p>
+        <p id="state" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">QGNN evidence comes from ablations: graph edges, entanglers, measurements, shot cost, noise, and classical baselines all matter.</p>
+    </aside>
+  </main>
+  <!-- compatibility marker: class="lab-shell lab-3d-shell" -->
+  <!-- visual labels: node features -> qubits; edge entanglers = graph wiring; ZZ cost layer; RX mixer layer; measurement readout <Z_v>; pair readout <Z_uZ_v>; text2("q" + i; entangling layers; node lift changes -->
+  <!-- {"visual":{"kind":"qgnn-graph-circuit-readout","graphStyle":"concrete"},"graph":{"nodes":["graph qubits","node encoding gates","edge ZZ entanglers","RX mixer layer","Hamiltonian terms","node readout bars","pair readout bars"],"edges":["node feature to qubit","graph edge to entangler","measurement to classical head"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/quantum-labs.js?quantum=i05-canonical-clarity-v1"></script>
+  <script>
+    window.__i05LabReady = false;
+    window.__i05LabSnapshot = window.__i05LabSnapshot || function () { return null; };
+    createI05QuantumGraphCircuitLab();
+  </script>
+</body>
+</html>

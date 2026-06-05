@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true" data-topic-specific="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>DeepSEM and neural structural equation models - topic-specific visual</title>
+  <link rel="stylesheet" href="../shared/topic-visual-core.css">
+</head>
+<body>
+  <main class="topic-lab">
+    <section class="stage" aria-label="Topic-specific interactive visualization">
+      <canvas id="viz"></canvas>
+      <div class="topbar">
+        <div class="chip"><span>Topic visual</span><strong data-family>Structural equation GRN</strong></div>
+        <div class="chip formula"><span>Formal hook</span><strong data-formula></strong></div>
+      </div>
+      <div class="legend"></div>
+    </section>
+    <aside class="controls">
+      <header>
+        <p class="eyebrow">Generated from this note</p>
+        <h1 data-title>DeepSEM and neural structural equation models</h1>
+        <p class="subtitle" data-question></p>
+      </header>
+      <div class="mode-grid">
+        <select data-mode aria-label="View mode">
+          <option value="object">Object view</option>
+          <option value="process">Process view</option>
+          <option value="formal">Formal view</option>
+          <option value="failure">Failure mode</option>
+        </select>
+        <button type="button" data-action="simulate">Simulate</button>
+        <button type="button" data-action="stress">Stress failure</button>
+        <button type="button" data-action="reset">Reset</button>
+      </div>
+      <div class="control-grid"></div>
+      <div class="metric-grid"></div>
+      <div class="explain">
+        <h2>How to read it</h2>
+        <p data-state></p>
+      </div>
+      <p class="footer">Portable local HTML: no CDN. The iframe and full-screen link use relative vault paths, so the visual can travel with an Obsidian sync folder.</p>
+    </aside>
+  </main>
+  <script id="topic-config" type="application/json">{"title": "DeepSEM and neural structural equation models", "path": "F06 - DeepSEM and neural structural equation models.md", "family": "grn", "subtype": "sem-grn", "subtypeName": "Structural equation GRN", "familyName": "GRN evidence graph", "formula": "x_gene = f(parents_gene) + noise", "question": "Which parent variables explain the target under a structural equation?", "terms": ["deepsem", "structural", "equation", "lens", "object", "evidence", "changes", "study"], "parameters": [{"name": "parent strength", "value": 60, "min": 0, "max": 100}, {"name": "nonlinearity", "value": 54, "min": 0, "max": 100}, {"name": "noise", "value": 26, "min": 0, "max": 100}, {"name": "causal penalty", "value": 45, "min": 0, "max": 100}], "metrics": ["motif", "accessibility", "expression", "perturbation"], "initialExplanation": "This visual was generated from this exact note: 'DeepSEM and neural structural equation models'. It uses the Structural equation GRN representation and highlights deepsem, structural, equation, lens."}</script>
+  <script src="../shared/topic-visual-core.js"></script>
+  <script>
+    try { createTopicVisual(); }
+    catch (error) {
+      document.body.innerHTML = '<pre style="color:white;background:#05090d;padding:16px;white-space:pre-wrap">Topic visual failed: ' + error.message + '</pre>';
+      console.error(error);
+    }
+  </script>
+</body>
+</html>

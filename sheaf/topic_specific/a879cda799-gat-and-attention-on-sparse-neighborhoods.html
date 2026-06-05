@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true" data-topic-specific="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>GAT and attention on sparse neighborhoods - topic-specific visual</title>
+  <link rel="stylesheet" href="../shared/topic-visual-core.css">
+</head>
+<body>
+  <main class="topic-lab">
+    <section class="stage" aria-label="Topic-specific interactive visualization">
+      <canvas id="viz"></canvas>
+      <div class="topbar">
+        <div class="chip"><span>Topic visual</span><strong data-family>GAT attention heads</strong></div>
+        <div class="chip formula"><span>Formal hook</span><strong data-formula></strong></div>
+      </div>
+      <div class="legend"></div>
+    </section>
+    <aside class="controls">
+      <header>
+        <p class="eyebrow">Generated from this note</p>
+        <h1 data-title>GAT and attention on sparse neighborhoods</h1>
+        <p class="subtitle" data-question></p>
+      </header>
+      <div class="mode-grid">
+        <select data-mode aria-label="View mode">
+          <option value="object">Object view</option>
+          <option value="process">Process view</option>
+          <option value="formal">Formal view</option>
+          <option value="failure">Failure mode</option>
+        </select>
+        <button type="button" data-action="simulate">Simulate</button>
+        <button type="button" data-action="stress">Stress failure</button>
+        <button type="button" data-action="reset">Reset</button>
+      </div>
+      <div class="control-grid"></div>
+      <div class="metric-grid"></div>
+      <div class="explain">
+        <h2>How to read it</h2>
+        <p data-state></p>
+      </div>
+      <p class="footer">Portable local HTML: no CDN. The iframe and full-screen link use relative vault paths, so the visual can travel with an Obsidian sync folder.</p>
+    </aside>
+  </main>
+  <script id="topic-config" type="application/json">{"title": "GAT and attention on sparse neighborhoods", "path": "B03 - GAT and attention on sparse neighborhoods.md", "family": "graph-flow", "subtype": "gat-heads", "subtypeName": "GAT attention heads", "familyName": "Graph flow", "formula": "h_i' = ||_k sum_j alpha_ij^k W^k h_j", "question": "Which attention head attends to which neighbor, and how do heads combine?", "terms": ["gat", "attention", "sparse", "neighborhoods", "lens", "changes", "object", "evidence"], "parameters": [{"name": "head 1 focus", "value": 64, "min": 0, "max": 100}, {"name": "head 2 focus", "value": 42, "min": 0, "max": 100}, {"name": "softmax temperature", "value": 36, "min": 0, "max": 100}, {"name": "dropout", "value": 20, "min": 0, "max": 100}], "metrics": ["signal", "edge strength", "noise control", "bottleneck"], "initialExplanation": "This visual was generated from this exact note: 'GAT and attention on sparse neighborhoods'. It uses the GAT attention heads representation and highlights gat, attention, sparse, neighborhoods."}</script>
+  <script src="../shared/topic-visual-core.js"></script>
+  <script>
+    try { createTopicVisual(); }
+    catch (error) {
+      document.body.innerHTML = '<pre style="color:white;background:#05090d;padding:16px;white-space:pre-wrap">Topic visual failed: ' + error.message + '</pre>';
+      console.error(error);
+    }
+  </script>
+</body>
+</html>

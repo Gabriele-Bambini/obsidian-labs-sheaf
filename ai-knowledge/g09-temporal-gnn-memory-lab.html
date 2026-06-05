@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G09 Temporal GNN Memory Stream</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g09-temporal-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="temporal" data-lab-id="g09" data-keywords="temporal memory event causal attention history">
+    <section class="visual-stack" aria-label="Interactive 3D temporal GNN memory visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G09 temporal GNN memory stream 3D visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G09</strong></div>
+          <div class="formula-chip"><span id="formulaText">events before predictions</span>Each event updates only touched memories; future events stay outside the causal boundary.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected temporal state</span><strong>Temporal memory stream is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.58fr)) repeat(5,minmax(0,.58fr)) repeat(5,minmax(0,.42fr));">
+        <select id="scenarioMode" data-control="scenarioMode" aria-label="Temporal scenario">
+          <option value="payments">Payment stream</option>
+          <option value="messages">Message stream</option>
+          <option value="sensors">Sensor contacts</option>
+        </select>
+        <select id="aggregatorMode" data-control="aggregatorMode" aria-label="Message aggregator">
+          <option value="last">Last message</option>
+          <option value="mean">Mean batch</option>
+          <option value="attention">Attention batch</option>
+        </select>
+        <select id="splitMode" data-control="splitMode" aria-label="Temporal split">
+          <option value="causal">Causal split</option>
+          <option value="leaky">Leaky full graph</option>
+          <option value="inductive">New-node split</option>
+        </select>
+        <div class="command-control">
+          <label for="eventCursor">Event <output data-output="eventCursor">0</output></label>
+          <input id="eventCursor" data-param="eventCursor" type="range" min="0" max="17" step="1" value="0">
+        </div>
+        <div class="command-control">
+          <label for="memoryGate">Gate <output data-output="memoryGate">0.62</output></label>
+          <input id="memoryGate" data-param="memoryGate" type="range" min="0.1" max="1" step="0.01" value="0.62">
+        </div>
+        <div class="command-control">
+          <label for="decayRate">Decay <output data-output="decayRate">0.32</output></label>
+          <input id="decayRate" data-param="decayRate" type="range" min="0" max="1.2" step="0.01" value="0.32">
+        </div>
+        <div class="command-control">
+          <label for="historyWindow">Window <output data-output="historyWindow">5</output></label>
+          <input id="historyWindow" data-param="historyWindow" type="range" min="1" max="12" step="1" value="5">
+        </div>
+        <div class="command-control">
+          <label for="attentionSharpness">Attention <output data-output="attentionSharpness">0.74</output></label>
+          <input id="attentionSharpness" data-param="attentionSharpness" type="range" min="0.05" max="1.6" step="0.01" value="0.74">
+        </div>
+        <button id="processEvent" class="primary" data-action="pulse" type="button">Write memory</button>
+        <button id="predictBefore" data-action="step" type="button">Score before</button>
+        <button id="showLeakage" data-action="step" type="button">Show leak</button>
+        <button id="attentionReplay" data-action="step" type="button">TGAT focus</button>
+        <button id="resetG09" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G09 Temporal GNN Memory Stream</h1>
+        <p class="subtitle">Rotate the event stream, process interactions in order, compare causal prediction to future leakage, and focus temporal neighbors by recency.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Memory magnitude"><span>Memory</span><strong id="memoryLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Stale nodes"><span>Stale</span><strong id="staleLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Causal score"><span>Causal</span><strong id="causalLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Attention peak"><span>Attention</span><strong id="attentionLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading temporal memory diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: event cursor changes history, gate and decay reshape node memories, window changes staleness, and attention sharpness changes temporal neighbor weights.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g09-temporal-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=g09-temporal-v3"></script>
+  <script>
+    window.__g09LabSnapshot = window.__g09LabSnapshot || function () { return null; };
+    createG09TemporalGnnLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

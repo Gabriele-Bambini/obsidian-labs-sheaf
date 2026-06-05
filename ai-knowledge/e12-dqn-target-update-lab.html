@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E12 DQN Target Update</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=e12-dqn-specific-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e12" data-keywords="DQN target network replay buffer TD error Double DQN deep reinforcement learning">
+    <section class="visual-stack" aria-label="Interactive 3D DQN target-update visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E12 DQN target update 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E12</strong></div>
+          <div class="formula-chip"><span>DQN sketch</span>A replay tuple feeds y = r + gamma max Q_target(s',a'); the online Q head updates only the chosen action and the target tower stays delayed.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected transition</span><strong>DQN target geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.72fr) minmax(0,.78fr) repeat(5,minmax(0,.78fr)) repeat(4,minmax(0,.58fr));">
+        <select id="targetMode" data-control="targetMode" aria-label="Target mode">
+          <option value="target">Target net</option>
+          <option value="online">Fresh online</option>
+          <option value="double">Double DQN</option>
+        </select>
+        <select id="replayMode" aria-label="Replay mode">
+          <option value="uniform">Uniform replay</option>
+          <option value="prioritized">Prioritized</option>
+          <option value="recent">Recent correlated</option>
+        </select>
+        <div class="command-control">
+          <label for="learningRate">LR <output data-output="learningRate">0.22</output></label>
+          <input id="learningRate" data-param="learningRate" type="range" min="0.04" max="0.55" step="0.01" value="0.22">
+        </div>
+        <div class="command-control">
+          <label for="discount">Gamma <output data-output="discount">0.90</output></label>
+          <input id="discount" data-param="discount" type="range" min="0.35" max="0.99" step="0.01" value="0.9">
+        </div>
+        <div class="command-control">
+          <label for="targetLag">Lag <output data-output="targetLag">0.45</output></label>
+          <input id="targetLag" data-param="targetLag" type="range" min="0" max="1" step="0.01" value="0.45">
+        </div>
+        <div class="command-control">
+          <label for="batchSize">Batch <output data-output="batchSize">4</output></label>
+          <input id="batchSize" data-param="batchSize" type="range" min="1" max="8" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="terminalMix">Done <output data-output="terminalMix">0.15</output></label>
+          <input id="terminalMix" data-param="terminalMix" type="range" min="0" max="0.75" step="0.01" value="0.15">
+        </div>
+        <button id="trainDqn" class="primary" data-action="step" type="button">Apply TD update</button>
+        <button id="sampleReplay" data-action="pulse" type="button">Draw replay tuple</button>
+        <button id="syncTarget" data-action="pulse" type="button">Copy target net</button>
+        <button id="resetDqn" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E12 DQN Target Update</h1>
+        <p class="subtitle">Rotate the online/target Q heads, replay conveyor, transition tuple, Bellman target blocks, TD gap bridge, terminal gate, sync bridge, and instability meter.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="TD error"><span>TD</span><strong id="tdLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Target gap"><span>Gap</span><strong id="targetGapLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Replay priority"><span>Priority</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Instability"><span>Risk</span><strong>0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading DQN target-network geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: target mode changes y, replay mode changes sampled priority, Done closes bootstrap, Train Q moves online values, and Sync target copies the tower.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=e12-dqn-specific-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=e12-dqn-specific-v3"></script>
+  <script>
+    window.__e12LabSnapshot = window.__e12LabSnapshot || function () { return null; };
+    // __e12LabReady = true is set by createE12DqnTargetUpdateLab after the first render setup.
+    createE12DqnTargetUpdateLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+
+const html = fs.readFileSync(path.join(__dirname, 'book_chapters', 'C06-cell-simplicial-biological-relations-lab.html'), 'utf8');
+assert(html.includes('window.__C06LabReady'), 'missing C06 LabReady flag');
+assert(html.includes('window.__C06_LAB_READY__'), 'missing C06 alternate ready flag');
+assert(html.includes('window.__C06LabSnapshot'), 'missing C06 snapshot function');
+assert(html.includes('Graph: E subset VxV'), 'missing graph formula');
+assert(html.includes('Simplicial: sigma in K'), 'missing closure formula');
+assert(html.includes('Cell: boundary specified'), 'missing cell complex formula');
+assert(html.includes('Closure violations'), 'missing closure metric');
+assert(html.includes('Overclaim risk'), 'missing overclaim metric');
+assert(html.includes('Add simplex') && html.includes('Add irregular cell'), 'missing topic-specific buttons');
+assert(!html.includes('https://cdn') && !html.includes('http://cdn'), 'must not use CDN assets');
+assert(!/<script\s+src=/i.test(html), 'lab must be self-contained for Android srcdoc');
+const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
+assert(scripts.length >= 1, 'expected inline script');
+for (const script of scripts) new Function(script);
+console.log('C06_cell_simplicial_complex_lab_smoke=PASS');

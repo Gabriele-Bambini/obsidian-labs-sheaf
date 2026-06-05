@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A02 Vectors, Spaces and Linear Maps</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a01-a02-canonical-clarity-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a02" data-keywords="vector spaces linear maps domain codomain kernel image rank nullity dual functional">
+    <section class="visual-stack" aria-label="Interactive 3D mathematical visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom. Click objects to inspect.">
+          <canvas id="canvas" aria-label="A02 Vectors, Spaces and Linear Maps 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>A02</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>Vector space V is mapped to W by T. The transformed grid, kernel tunnel, image plane, rank-nullity scale, basis-coordinate bridge, dual measuring plane, and dual/quotient stack make the linear map concrete.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Click a node to inspect local structure.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select data-control="mode" aria-label="Concept mode">
+            <option value="map">Map T</option>
+            <option value="kernel">Kernel / image</option>
+            <option value="dual">Dual action</option>
+        </select>
+        <div class="command-control">
+          <label for="a02-stretch">Stretch <output data-output="stretch">1.2</output></label>
+          <input id="a02-stretch" data-param="stretch" type="range" min="0.35" max="2.4" step="0.05" value="1.2">
+        </div>
+        <div class="command-control">
+          <label for="a02-shear">Shear <output data-output="shear">0.25</output></label>
+          <input id="a02-shear" data-param="shear" type="range" min="-1.2" max="1.2" step="0.05" value="0.25">
+        </div>
+        <div class="command-control">
+          <label for="a02-collapse">Collapse <output data-output="collapse">0.18</output></label>
+          <input id="a02-collapse" data-param="collapse" type="range" min="0" max="1" step="0.02" value="0.18">
+        </div>
+        <div class="command-control">
+          <label for="a02-angle">Input angle <output data-output="angle">35</output></label>
+          <input id="a02-angle" data-param="angle" type="range" min="-180" max="180" step="1" value="35">
+        </div>
+        <div class="command-control">
+          <label for="a02-dual">Dual probe <output data-output="dual">0.3</output></label>
+          <input id="a02-dual" data-param="dual" type="range" min="-1" max="1" step="0.05" value="0.3">
+        </div>
+        <button class="primary" data-action="pulse" type="button">Pulse</button>
+        <button data-action="step" type="button">Step</button>
+        <button data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block A 3D lab</p>
+        <h1>A02 Vectors, Spaces and Linear Maps</h1>
+        <p class="subtitle">Orbit / rotate / zoom the system, select objects, then change parameters to experiment with vector spaces linear maps domain codomain kernel image rank nullity dual functional.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Rank of T">
+          <span>Rank of T</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Kernel dim">
+          <span>Kernel dim</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Image norm">
+          <span>Image norm</span>
+          <strong>0.00</strong>
+        </div>
+        <div class="metric" data-role="metric" data-metric="Dual value">
+          <span>Dual value</span>
+          <strong>0.00</strong>
+        </div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading the 3D mathematical system.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Command bar controls are live: every slider changes geometry, active channels, metrics, or selected-object state. Blue/cyan shows signal, amber shows frontier, red shows perturbation.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=a01-a02-canonical-clarity-v1"></script>
+  <script>
+    const labState = createGnnLab({"id":"a02","kind":"algebra","title":"A02 Vectors, Spaces and Linear Maps","modes":[{"value":"map","label":"Map T"},{"value":"kernel","label":"Kernel / image"},{"value":"dual","label":"Dual action"}],"parameters":[{"key":"stretch","label":"Stretch","min":0.35,"max":2.4,"step":0.05,"value":1.2},{"key":"shear","label":"Shear","min":-1.2,"max":1.2,"step":0.05,"value":0.25},{"key":"collapse","label":"Collapse","min":0,"max":1,"step":0.02,"value":0.18},{"key":"angle","label":"Input angle","min":-180,"max":180,"step":1,"value":35},{"key":"dual","label":"Dual probe","min":-1,"max":1,"step":0.05,"value":0.3}],"metrics":["Rank of T","Kernel dim","Image norm","Dual value"],"visual":{"kind":"linear-map-3d","graphStyle":"hidden"},"profile":{"preferredMetric":"Rank of T","formula":"T(v) = A v; dim(domain) = rank(T) + dim ker(T)","insight":"A02 reads a linear map as movement between spaces: the domain vector v is transformed into T(v), the transformed axes show the image, a red direction marks the kernel when collapse removes information, and the dual probe reads a scalar from the output."},"graph":{"nodes":[{"label":"domain V","position":[-2.4,-1.3,-0.2],"group":0},{"label":"vector v","position":[-1.45,-0.65,0.7],"group":1},{"label":"linear map T","position":[0,-0.55,0.3],"group":2},{"label":"codomain W","position":[2.15,-1.3,-0.2],"group":3},{"label":"image T(v)","position":[2.85,-0.45,0.55],"group":4},{"label":"image subspace","position":[2.15,-1.15,0.75],"group":5},{"label":"kernel direction","position":[-2.65,-1.1,1],"group":6},{"label":"dual probe","position":[2.7,0.25,0.95],"group":7}],"edges":[[0,1,"choose input vector",1],[1,2,"apply T",1.4],[2,4,"output image vector",1.3],[3,4,"codomain coordinates",1],[3,5,"reachable image",1.1],[0,6,"kernel invisible input",0.8],[4,7,"dual functional reads scalar",0.9],[6,5,"rank-nullity ledger",0.7]]}});
+    window.__a02LabSnapshot = () => window.__gLabSnapshot();
+    Object.defineProperty(window, "__a02LabReady", { get: () => window.__gLabReady === true });
+  </script>
+</body>
+</html>

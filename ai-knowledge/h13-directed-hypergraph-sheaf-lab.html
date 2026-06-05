@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H13 Directed Sheaves And Hypergraphs</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=h05-intuitive-v11-h13-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="sheaf" data-lab-id="h13" data-keywords="directed sheaf hypergraph incidence hyperedge group stalk gather correct broadcast clique expansion">
+    <section class="visual-stack">
+      <div class="stage">
+        <div class="lab-viewport">
+          <canvas id="canvas" aria-label="H13 concrete directed and hypergraph sheaf incidence visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>H13</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">r_e = B_tgt x_v - B_src x_u</strong></div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>directed edge stalk</strong></div>
+      </div>
+      <div class="command-bar controls">
+        <select id="mode" aria-label="Directed hypergraph mode">
+          <option value="directed" selected>Directed edge sheaf</option>
+          <option value="hypergraph">Hyperedge stalk</option>
+          <option value="directed-hyperedge">Tail-head hyperedge</option>
+          <option value="clique">Clique shadow</option>
+        </select>
+        <select id="mapFamily" aria-label="Incidence map family">
+          <option value="role" selected>Role weights</option>
+          <option value="diagonal">Diagonal maps</option>
+          <option value="rotation">Rotation maps</option>
+          <option value="projection">Projection maps</option>
+        </select>
+        <select id="residualView" aria-label="Residual view">
+          <option value="projected" selected>Projected residuals</option>
+          <option value="raw">Raw values</option>
+          <option value="broadcast">Broadcast correction</option>
+        </select>
+        <div class="command-control">
+          <label for="stepSize">Step size eta <output data-output="stepSize">0.46</output></label>
+          <input id="stepSize" type="range" min="0.05" max="0.9" step="0.01" value="0.46">
+        </div>
+        <div class="command-control">
+          <label for="roleAsymmetry">Role asymmetry <output data-output="roleAsymmetry">0.58</output></label>
+          <input id="roleAsymmetry" type="range" min="0" max="1" step="0.02" value="0.58">
+        </div>
+        <div class="command-control">
+          <label for="hyperedgeSize">Hyperedge size <output data-output="hyperedgeSize">4</output></label>
+          <input id="hyperedgeSize" type="range" min="3" max="6" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="tolerance">Tolerance epsilon <output data-output="tolerance">0.18</output></label>
+          <input id="tolerance" type="range" min="0" max="0.8" step="0.02" value="0.18">
+        </div>
+        <div class="command-control">
+          <label for="normalization">Normalize |e| <output data-output="normalization">0.62</output></label>
+          <input id="normalization" type="range" min="0" max="1" step="0.02" value="0.62">
+        </div>
+        <button id="toggleMode" class="primary" data-action="pulse" type="button">Toggle group</button>
+        <button id="flowStep" data-action="step" type="button">Gather-correct</button>
+        <button id="flipDirection" data-action="pulse" type="button">Reverse arrow</button>
+        <button id="balance" data-action="step" type="button">Project agreement</button>
+        <button id="showClique" data-action="pulse" type="button">Clique shadow</button>
+        <button id="resetH13" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block H 3D lab</p>
+        <h1>H13 Directed Sheaves And Hypergraphs</h1>
+        <p class="subtitle">Directed edge sheaf, tail-head hyperedge, Hyperedge stalk, incidence maps, gather-correct-broadcast flow, and the clique expansion failure mode.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Asymmetry signal"><span>Asymmetry signal</span><strong id="modeLabel">directed</strong></div>
+        <div class="metric" data-role="metric" data-metric="Hyperedge coherence"><span>Energy</span><strong id="energyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Incidence coverage"><span>Clique loss</span><strong id="cliqueLabel">1 group stalk</strong></div>
+        <div class="metric" data-role="metric" data-metric="Projection defect"><span>Projection defect</span><strong id="defectLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading incidence system.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Compatibility is tested inside the edge or hyperedge stalk. Reversing a directed edge changes source/target maps; clique expansion removes the one shared group relation.</p>
+    </aside>
+  </main>
+  <!-- {"visual":{"kind":"directed-hypergraph","graphStyle":"anchors"},"profile":{"preferredMetric":"Asymmetry signal"},"graph":{"nodes":["directed edge stalk","hyperedge membrane","group hyperedge stalk","incidence projection","tail-head residual","clique expansion shadow"],"edges":["source restriction","target restriction","member projection","group coherence","broadcast correction"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=h05-intuitive-v11-h13-clarity-v2"></script>
+  <script src="shared/sheaf-dynamics-labs.js?math3d=h05-intuitive-v11-h13-clarity-v2"></script>
+  <script>
+    window.__h13LabReady = false;
+    window.__h13LabSnapshot = window.__h13LabSnapshot || function () { return null; };
+    createH13DirectedHypergraphConcreteLab();
+  </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H10 Sheaves And Heterophily</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=h05-intuitive-v11-h10-concrete-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="sheaf" data-lab-id="h10" data-keywords="sheaves heterophily role compatibility matrix signed relation edge stalk restriction maps">
+    <section class="visual-stack">
+      <div class="stage">
+        <div class="lab-viewport">
+          <canvas id="canvas" aria-label="H10 concrete sheaf heterophily role compatibility visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>H10</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">B_u x_u = B_v x_v</strong></div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Role compatibility matrix</strong></div>
+      </div>
+      <div class="command-bar controls">
+        <select id="scenario" aria-label="Heterophily scenario">
+          <option value="bipartite">Bipartite buyer-seller</option>
+          <option value="alternating">Alternating cycle</option>
+          <option value="mixed">Mixed relations</option>
+          <option value="homophily">Homophily cluster</option>
+          <option value="noisy">Noisy relations</option>
+        </select>
+        <select id="relationFamily" aria-label="Relation family">
+          <option value="identity">Identity maps</option>
+          <option value="signed" selected>Signed relations</option>
+          <option value="diagonal">Diagonal maps</option>
+          <option value="projection">Projection maps</option>
+        </select>
+        <select id="view" aria-label="Heterophily view">
+          <option value="matrix">Compatibility matrix</option>
+          <option value="sheaf">Sheaf restrictions</option>
+          <option value="graph">Raw graph smoothing</option>
+        </select>
+        <div class="command-control">
+          <label for="propagationRounds">Propagation rounds <output data-output="propagationRounds">4</output></label>
+          <input id="propagationRounds" type="range" min="1" max="10" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="compatibilitySharpness">Compatibility threshold <output data-output="compatibilitySharpness">1.00</output></label>
+          <input id="compatibilitySharpness" type="range" min="0.35" max="1.8" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="relationNoise">Mis-specified relation <output data-output="relationNoise">0.20</output></label>
+          <input id="relationNoise" type="range" min="0" max="0.8" step="0.02" value="0.2">
+        </div>
+        <div class="command-control">
+          <label for="relationTypes">Relation types <output data-output="relationTypes">4</output></label>
+          <input id="relationTypes" type="range" min="1" max="6" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="roleIdentity">Role identity <output data-output="roleIdentity">0.58</output></label>
+          <input id="roleIdentity" type="range" min="0" max="1" step="0.02" value="0.58">
+        </div>
+        <button id="learnRelations" class="primary" data-action="step" type="button">Learn relations</button>
+        <button id="stepSheaf" data-action="step" type="button">Step sheaf</button>
+        <button id="runGraph" data-action="pulse" type="button">Run graph</button>
+        <button id="resetH10" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block H 3D lab</p>
+        <h1>H10 Sheaves And Heterophily</h1>
+        <p class="subtitle">A small role graph, a label compatibility matrix, raw Laplacian collapse, and sheaf edge-stalk comparisons that keep different-but-compatible roles distinct.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Neighbor help"><span>Neighbor help</span><strong id="helpLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Role agreement"><span>Map agreement</span><strong id="mapLabel">0%</strong></div>
+        <div class="metric" data-role="metric" data-metric="Relation coverage"><span>Homophily h</span><strong id="homophilyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Raw smoothing loss"><span>Over-smoothing</span><strong id="smoothLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading heterophily diagnostics.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">The matrix separates structured heterophily from noise. Edge-stalk plates show where unlike roles become compatible after signed or projected restrictions.</p>
+    </aside>
+  </main>
+  <!-- {"visual":{"kind":"heterophily-roles","graphStyle":"hybrid"},"profile":{"preferredMetric":"Neighbor help"},"graph":{"nodes":["role compatibility matrix","role embedding tower","translated role signal","edge-stalk relation plate","raw averaging failure"],"edges":["same role","opposite role","restriction map","raw smoothing collapse"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=h05-intuitive-v11-h10-concrete-v2"></script>
+  <script src="shared/sheaf-dynamics-labs.js?math3d=h05-intuitive-v11-h10-concrete-v2"></script>
+  <script>
+    window.__h10LabReady = false;
+    window.__h10LabSnapshot = window.__h10LabSnapshot || function () { return null; };
+    createH10HeterophilyConcreteLab();
+  </script>
+</body>
+</html>

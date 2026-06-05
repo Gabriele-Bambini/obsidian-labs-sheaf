@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>I02 Qubit Gates And Circuits</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?quantum=i02-concrete-v1">
+</head>
+<body>
+  <main class="lab-shell lab-3d-shell gnn-lab math-3d-lab" data-lab-kind="quantum" data-lab-id="i02" data-keywords="qubit bloch sphere gates circuits cnot bell tensor product measurement">
+    <section class="visual-stack" aria-label="Interactive 3D qubit gates and circuit visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to rotate the 3D Bloch sphere and circuit. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="I02 Bloch vector, gate rotations, circuit diagram, CNOT Bell state, amplitudes, and measurement histogram"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>I02</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">unitary gate rotates |psi>, CNOT entangles tensor-product branches</strong></div>
+        </div>
+        <div class="hud quantum-hud"><h1>Bloch vector + selected gate + circuit wires + tensor-product basis</h1></div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong id="selectedLabel">Bloch vector and circuit diagram</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select id="preset" aria-label="State preset">
+          <option value="0" selected>State |0></option>
+          <option value="1">State |1></option>
+          <option value="+">State |+></option>
+          <option value="-">State |-></option>
+          <option value="+i">State |+i></option>
+          <option value="-i">State |-i></option>
+        </select>
+        <select id="gateSelect" aria-label="Selected gate">
+          <option value="H" selected>Gate H</option>
+          <option value="X">Gate X</option>
+          <option value="Y">Gate Y</option>
+          <option value="Z">Gate Z</option>
+          <option value="S">Gate S</option>
+          <option value="T">Gate T</option>
+          <option value="Rx">Gate Rx</option>
+          <option value="Ry">Gate Ry</option>
+          <option value="Rz">Gate Rz</option>
+        </select>
+        <div class="command-control">
+          <label for="rotationAngle">Rotation angle <output data-output="rotationAngle">1.57</output></label>
+          <input id="rotationAngle" type="range" min="-3.1416" max="3.1416" step="0.01" value="1.57">
+        </div>
+        <div class="command-control">
+          <label for="shotCount">Shots <output data-output="shotCount">96</output></label>
+          <input id="shotCount" type="range" min="16" max="384" step="16" value="96">
+        </div>
+        <div class="command-control">
+          <label for="entangleStrength">Bell mix <output data-output="entangleStrength">1.00</output></label>
+          <input id="entangleStrength" type="range" min="0" max="1" step="0.02" value="1">
+        </div>
+        <button data-gate="H" class="primary" type="button">H</button>
+        <button data-gate="X" type="button">X</button>
+        <button data-gate="Y" type="button">Y</button>
+        <button data-gate="Z" type="button">Z</button>
+        <button data-gate="S" type="button">S</button>
+        <button data-gate="T" type="button">T</button>
+        <button id="stepGate" type="button">Apply gate</button>
+        <button id="bell" type="button">Build Bell</button>
+        <button id="cnot" type="button">CNOT</button>
+        <button id="measureCircuit" type="button">Measure Z</button>
+        <button id="undoGate" type="button">Undo</button>
+        <button id="resetI02" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block I 3D lab</p>
+        <h1>I02 Qubit Gates And Circuits</h1>
+        <p class="subtitle">A concrete circuit workbench: Bloch vector, gate rotation arc, unitary gate boxes, two-wire CNOT, Bell pair amplitudes, tensor-product basis, and measurement histogram.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="State"><span>State</span><strong id="stateName">|0></strong></div>
+        <div class="metric" data-role="metric" data-metric="Probabilities"><span>p(0) / p(1)</span><strong id="probLabel">1.00 / 0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Selected gate"><span>selected gate</span><strong id="gateLabel">H</strong></div>
+        <div class="metric" data-role="metric" data-metric="Entanglement"><span>Entangled?</span><strong id="entangleLabel">No</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Gate buttons rotate the Bloch vector and append real circuit boxes. Build Bell draws q0 -- H -- CNOT and exposes only |00>, |11> amplitudes.</p>
+        <p id="state" class="state-box">Waiting for the first render.</p>
+        <p id="sampleLabel" class="state-box">0:0 1:0</p>
+      </div>
+      <p class="hint">Use named gates for textbook rotations, continuous Rx/Ry/Rz for angles, and Build Bell to see why H(q0) then CNOT creates correlated tensor-product amplitudes.</p>
+    </aside>
+  </main>
+  <!-- compatibility marker: class="lab-shell lab-3d-shell" -->
+  <!-- {"visual":{"kind":"bloch-gate-cnot-bell","graphStyle":"concrete"},"profile":{"preferredMetric":"Selected gate"},"graph":{"nodes":["Bloch vector","selected gate","gate rotation arc","circuit wires","CNOT control","Bell pair amplitudes","tensor-product basis","measurement histogram"],"edges":["unitary rotation","gate appended to circuit","H creates superposition","CNOT entangles branches"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/quantum-labs.js?quantum=i02-canonical-clarity-v1"></script>
+  <script>
+    window.__i02LabReady = false;
+    window.__i02LabSnapshot = window.__i02LabSnapshot || function () { return null; };
+    createI02QuantumGatesCircuitLab();
+  </script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H06 Sheaf Diffusion</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=h05-intuitive-v11-h06-concrete-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="sheaf" data-lab-id="h06" data-keywords="sheaf diffusion heat equation laplacian flow spectral damping global section edge residuals">
+    <section class="visual-stack">
+      <div class="stage">
+        <div class="lab-viewport">
+          <canvas id="canvas" aria-label="H06 concrete sheaf diffusion heat equation visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>H06</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">x(t)=exp(-t L_F)x0</strong></div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>stalk signal and heat trace</strong></div>
+      </div>
+      <div class="command-bar controls">
+        <select id="sheafPreset" aria-label="Sheaf relation preset">
+          <option value="constant">Constant sheaf</option>
+          <option value="signed">Signed sheaf</option>
+          <option value="projection">Projection sheaf</option>
+          <option value="rotation">Rotating sheaf</option>
+        </select>
+        <select id="viewSelect" aria-label="Diffusion view">
+          <option value="heat">Heat equation</option>
+          <option value="residuals">Edge residuals</option>
+          <option value="spectrum">Spectral damping</option>
+          <option value="kernel">Global section</option>
+          <option value="matrix">L_F matrix</option>
+        </select>
+        <div class="command-control">
+          <label for="diffusionTime">Time steps <output data-output="diffusionTime">4</output></label>
+          <input id="diffusionTime" type="range" min="1" max="12" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="spectralGap">Spectral damping <output data-output="spectralGap">0.90</output></label>
+          <input id="spectralGap" type="range" min="0.25" max="1.8" step="0.05" value="0.9">
+        </div>
+        <div class="command-control">
+          <label for="noiseLevel">Signal noise <output data-output="noiseLevel">0.22</output></label>
+          <input id="noiseLevel" type="range" min="0" max="0.8" step="0.02" value="0.22">
+        </div>
+        <div class="command-control">
+          <label for="visibleModes">Visible modes <output data-output="visibleModes">4</output></label>
+          <input id="visibleModes" type="range" min="1" max="7" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="harmonicWeight">Harmonic mass <output data-output="harmonicWeight">0.58</output></label>
+          <input id="harmonicWeight" type="range" min="0" max="1" step="0.02" value="0.58">
+        </div>
+        <button id="edgeResidual" data-action="pulse" type="button">Residuals</button>
+        <button id="runHeat" class="primary" data-action="step" type="button">Heat step</button>
+        <button id="projectGlobal" data-action="step" type="button">Project H0</button>
+        <button id="resetH06" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block H 3D lab</p>
+        <h1>H06 Sheaf Diffusion</h1>
+        <p class="subtitle">A concrete sheaf heat equation: stalk-valued node signals restrict into edge residuals, spectral modes decay under L_F, and the harmonic global section remains.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Energy decay"><span>Energy decay</span><strong id="energy">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Harmonic mass"><span>Harmonic mass</span><strong id="kernelLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Spectral damping"><span>Spectral damping</span><strong id="residualLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Step stability"><span>Status</span><strong id="modeLabel">Ready</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading sheaf heat-flow diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">The bars on nodes are the signal x, red rods are delta x residuals, the spectrum shows exp(-t lambda), and the green surface is the global-section limit.</p>
+    </aside>
+  </main>
+  <!-- {"visual":{"kind":"diffusion-spectrum","graphStyle":"reference"},"profile":{"preferredMetric":"Energy decay"},"graph":{"nodes":["spectral eigenmode damping","heat decay trace","harmonic heat surface","edge residual rod","global section kernel"],"edges":["restriction residual","L_F action","exp(-t L_F) damping"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=h05-intuitive-v11-h06-concrete-v2"></script>
+  <script src="shared/sheaf-dynamics-labs.js?math3d=h05-intuitive-v11-h06-concrete-v2"></script>
+  <script>
+    window.__h06LabReady = false;
+    window.__h06LabSnapshot = window.__h06LabSnapshot || function () { return null; };
+    createH06SheafDiffusionConcreteLab();
+  </script>
+</body>
+</html>

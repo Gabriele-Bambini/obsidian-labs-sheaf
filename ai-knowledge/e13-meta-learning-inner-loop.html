@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E13 Meta Learning Inner Loop</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=e13-meta-specific-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e13" data-keywords="meta-learning MAML support query inner loop outer loop prototypical networks Reptile">
+    <section class="visual-stack" aria-label="Interactive 3D meta-learning inner and outer loop visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E13 meta-learning inner and outer loop 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E13</strong></div>
+          <div class="formula-chip"><span>Meta sketch</span>Support points move theta to theta-prime in the inner loop; query loss sends the outer meta-gradient back to the shared initialization.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected task</span><strong>Meta-learning adaptation geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.7fr) minmax(0,.76fr) repeat(6,minmax(0,.74fr)) repeat(4,minmax(0,.56fr));">
+        <select id="taskFamily" data-control="taskFamily" aria-label="Task family">
+          <option value="linear">Linear tasks</option>
+          <option value="sinusoid">Sinusoid tasks</option>
+          <option value="classes">Few-shot classes</option>
+        </select>
+        <select id="adaptationMode" aria-label="Adaptation mode">
+          <option value="maml">MAML</option>
+          <option value="reptile">Reptile</option>
+          <option value="proto">Prototypes</option>
+        </select>
+        <div class="command-control">
+          <label for="innerSteps">Inner <output data-output="innerSteps">1</output></label>
+          <input id="innerSteps" data-param="innerSteps" type="range" min="1" max="5" step="1" value="1">
+        </div>
+        <div class="command-control">
+          <label for="innerLR">Inner LR <output data-output="innerLR">0.30</output></label>
+          <input id="innerLR" data-param="innerLR" type="range" min="0.05" max="0.75" step="0.01" value="0.3">
+        </div>
+        <div class="command-control">
+          <label for="metaLR">Meta LR <output data-output="metaLR">0.18</output></label>
+          <input id="metaLR" data-param="metaLR" type="range" min="0.02" max="0.45" step="0.01" value="0.18">
+        </div>
+        <div class="command-control">
+          <label for="shots">Shots <output data-output="shots">1</output></label>
+          <input id="shots" data-param="shots" type="range" min="1" max="5" step="1" value="1">
+        </div>
+        <div class="command-control">
+          <label for="taskSpread">Tasks <output data-output="taskSpread">1.00</output></label>
+          <input id="taskSpread" data-param="taskSpread" type="range" min="0.4" max="1.8" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="queryShift">Shift <output data-output="queryShift">0.15</output></label>
+          <input id="queryShift" data-param="queryShift" type="range" min="0" max="0.7" step="0.01" value="0.15">
+        </div>
+        <button id="adaptTask" class="primary" data-action="step" type="button">Adapt on support</button>
+        <button id="outerUpdate" data-action="pulse" type="button">Backprop query loss</button>
+        <button id="compareProto" data-action="pulse" type="button">Build prototypes</button>
+        <button id="resetMeta" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E13 Meta Learning Inner Loop</h1>
+        <p class="subtitle">Rotate the support/query episode, task-optima constellation, theta basin, inner gradient path, outer meta-gradient, Reptile pull, prototype anchors, and shift warning.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Support loss"><span>Support</span><strong id="supportLossLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Query loss"><span>Query</span><strong id="queryLossLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Adapt gain"><span>Gain</span><strong id="adaptGainLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Meta gap"><span>Meta</span><strong id="metaGapLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading meta-learning geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: support shots reshape evidence, inner steps move theta-prime, meta update shifts theta, prototypes show centroid adaptation, and query shift exposes overfit.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=e13-meta-specific-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=e13-meta-specific-v3"></script>
+  <script>
+    window.__e13LabSnapshot = window.__e13LabSnapshot || function () { return null; };
+    // __e13LabReady = true is set by createE13MetaLearningInnerLoopLab after the first render setup.
+    createE13MetaLearningInnerLoopLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

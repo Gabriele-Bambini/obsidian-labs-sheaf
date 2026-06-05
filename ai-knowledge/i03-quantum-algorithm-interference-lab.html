@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>I03 Quantum Algorithm Interference</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?quantum=i03-concrete-v1">
+</head>
+<body>
+  <main class="lab-shell lab-3d-shell gnn-lab math-3d-lab" data-lab-kind="quantum" data-lab-id="i03" data-keywords="Grover QFT phase estimation Shor amplitude amplification oracle diffuser">
+    <section class="visual-stack" aria-label="Interactive 3D quantum algorithm visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to rotate the 3D algorithm workbench. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="I03 Grover, QFT, phase estimation, and Shor algorithm workbench"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>I03</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">Oracle marks phase -1; diffuser reflects about the mean; QFT turns period into peaks.</strong></div>
+        </div>
+        <div class="hud quantum-hud"><h1>Signed amplitude bars, phase wheel, Grover rotation plane, QFT comb, QPE dials, and Shor gcd post-processing.</h1></div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong id="selectedLabel">Grover uniform register</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization">
+        <select id="algorithm" aria-label="Algorithm mode">
+          <option value="Grover" selected>Grover</option>
+          <option value="QFT">QFT</option>
+          <option value="Phase Estimation">Phase Est.</option>
+          <option value="Shor N=15">Shor N=15</option>
+        </select>
+        <div class="command-control">
+          <label for="markedState">Marked <output data-output="markedState">5</output></label>
+          <input id="markedState" type="range" min="0" max="31" step="1" value="5">
+        </div>
+        <div class="command-control">
+          <label for="stateCount">States <output data-output="stateCount">16</output></label>
+          <input id="stateCount" type="range" min="8" max="32" step="8" value="16">
+        </div>
+        <div class="command-control">
+          <label for="period">Period <output data-output="period">4</output></label>
+          <input id="period" type="range" min="2" max="8" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="phase">Phase <output data-output="phase">0.25</output></label>
+          <input id="phase" type="range" min="0" max="0.94" step="0.01" value="0.25">
+        </div>
+        <button id="oracleStep" class="primary" type="button">Oracle flip</button>
+        <button id="diffuseStep" type="button">Diffuse / transform</button>
+        <button id="switchAlgorithm" type="button">Next algorithm</button>
+        <button id="runOptimal" type="button">Run optimal</button>
+        <button id="resetI03" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block I 3D lab</p>
+        <h1>I03 Quantum Algorithm Interference</h1>
+        <p class="subtitle">Concrete algorithm mechanics: marked amplitudes become negative, diffuser reflection amplifies them, periodic signals become QFT peaks, and Shor finishes with classical gcd.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Algorithm"><span>Algorithm</span><strong id="algorithmLabel">Grover</strong></div>
+        <div class="metric" data-role="metric" data-metric="Marked probability"><span>Probability</span><strong id="probLabel">6.3%</strong></div>
+        <div class="metric" data-role="metric" data-metric="Iteration"><span>Iteration</span><strong id="iterationLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Readout"><span>Readout</span><strong id="auxLabel">mean 0.250</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Grover is two reflections in a 2D plane; QFT turns spacing into frequency peaks; Shor uses that period classically.</p>
+        <p id="state" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Every control moves a physical object: amplitude height/sign, mean plane, phase wheel, QFT peaks, phase-estimation dials, or gcd result panels.</p>
+    </aside>
+  </main>
+  <!-- compatibility marker: class="lab-shell lab-3d-shell" -->
+  <!-- visual labels: amber = marked state; radius = amplitude; phase wheel -->
+  <!-- {"visual":{"kind":"grover-qft-phase-shor","graphStyle":"concrete"},"graph":{"nodes":["signed amplitude bars","oracle phase flip","diffuser mean plane","Grover rotation plane","QFT periodic comb","phase estimation dials","Shor gcd boxes"],"edges":["phase flip to reflection","comb to frequency peaks","period to factors"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/quantum-labs.js?quantum=i03-canonical-clarity-v1"></script>
+  <script>
+    window.__i03LabReady = false;
+    window.__i03LabSnapshot = window.__i03LabSnapshot || function () { return null; };
+    createI03QuantumAlgorithmLab();
+  </script>
+</body>
+</html>

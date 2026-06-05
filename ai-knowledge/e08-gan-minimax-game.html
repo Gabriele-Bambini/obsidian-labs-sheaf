@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E08 GAN Minimax Game</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=e08-e09-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e08" data-keywords="GAN generator discriminator minimax WGAN mode collapse adversarial training">
+    <section class="visual-stack" aria-label="Interactive 3D GAN minimax visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E08 GAN minimax game 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E08</strong></div>
+          <div class="formula-chip"><span>GAN sketch</span>Latent noise flows through G(z); real and fake densities feed D(x), loss bars and coverage tiles show why the minimax game trains or collapses.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected game state</span><strong>GAN minimax board is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.7fr) minmax(0,.72fr) repeat(6,minmax(0,.8fr)) repeat(4,minmax(0,.54fr));">
+        <select id="dataModes" data-control="dataModes" aria-label="Real data modes">
+          <option value="one">One mode</option>
+          <option value="two">Two modes</option>
+          <option value="wide">Three modes</option>
+        </select>
+        <select id="lossMode" aria-label="GAN loss mode">
+          <option value="nonsat">Non-sat</option>
+          <option value="minimax">Minimax</option>
+          <option value="wgan">WGAN</option>
+        </select>
+        <div class="command-control">
+          <label for="generatorMean">G mean <output data-output="generatorMean">-0.80</output></label>
+          <input id="generatorMean" data-param="generatorMean" type="range" min="-2.4" max="2.4" step="0.05" value="-0.8">
+        </div>
+        <div class="command-control">
+          <label for="generatorSpread">G spread <output data-output="generatorSpread">0.80</output></label>
+          <input id="generatorSpread" data-param="generatorSpread" type="range" min="0.15" max="1.8" step="0.05" value="0.8">
+        </div>
+        <div class="command-control">
+          <label for="discriminatorStrength">D power <output data-output="discriminatorStrength">1.00</output></label>
+          <input id="discriminatorStrength" data-param="discriminatorStrength" type="range" min="0.2" max="2.2" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="collapsePressure">Collapse <output data-output="collapsePressure">0.25</output></label>
+          <input id="collapsePressure" data-param="collapsePressure" type="range" min="0" max="1" step="0.05" value="0.25">
+        </div>
+        <div class="command-control">
+          <label for="criticSmoothness">Smooth <output data-output="criticSmoothness">0.60</output></label>
+          <input id="criticSmoothness" data-param="criticSmoothness" type="range" min="0.15" max="1.4" step="0.05" value="0.6">
+        </div>
+        <div class="command-control">
+          <label for="updateRatio">D:G <output data-output="updateRatio">1</output></label>
+          <input id="updateRatio" data-param="updateRatio" type="range" min="1" max="5" step="1" value="1">
+        </div>
+        <button id="trainD" class="primary" data-action="step" type="button">Fit critic</button>
+        <button id="trainG" data-action="step" type="button">Move generator</button>
+        <button id="collapse" data-action="pulse" type="button">Show collapse</button>
+        <button id="resetGan" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E08 GAN Minimax Game</h1>
+        <p class="subtitle">Rotate the latent-to-generator path, real/fake densities, discriminator curtain, density-ratio cells, minimax loss bars, WGAN rail, and collapse diagnostics.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Gap"><span>Gap</span><strong id="gapLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Coverage"><span>Coverage</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Critic"><span>Critic</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Collapse"><span>Collapse</span><strong>0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading adversarial training geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: Fit critic raises D(x), Move generator shifts fake samples through G(z), WGAN changes the Lipschitz rail, and Show collapse removes mode coverage.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=e08-e09-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=e08-e09-canonical-clarity-v2"></script>
+  <script>
+    window.__e08LabSnapshot = window.__e08LabSnapshot || function () { return null; };
+    // __e08LabReady = true is set by createE08GanMinimaxLab after the first render setup.
+    createE08GanMinimaxLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

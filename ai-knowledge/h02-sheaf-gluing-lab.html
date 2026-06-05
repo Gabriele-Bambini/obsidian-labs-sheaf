@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H02 Sheaves On Topological Spaces</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=h05-intuitive-v11-h02-concrete-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="sheaf" data-lab-id="h02" data-keywords="topological sheaf presheaf open cover local sections restrictions overlap gluing locality germs sheafification">
+    <section class="visual-stack">
+      <div class="stage">
+        <div class="lab-viewport">
+          <canvas id="canvas" aria-label="H02 open cover local sections and gluing 3D visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>H02</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">s_i|Ui cap Uj = s_j|Ui cap Uj</strong></div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>open cover</strong></div>
+      </div>
+      <div class="command-bar controls">
+        <select id="coverMode" aria-label="Cover mode">
+          <option value="three">Three-patch cover</option>
+          <option value="two">Two-patch cover</option>
+        </select>
+        <select id="restrictionMode" aria-label="Restriction mode">
+          <option value="identity">Identity restrictions</option>
+          <option value="chart">Chart sign change</option>
+          <option value="scaled">Scaled restrictions</option>
+          <option value="germ">Germ comparison</option>
+        </select>
+        <div class="command-control">
+          <label for="uValue">Section U <output data-output="uValue">0.62</output></label>
+          <input id="uValue" type="range" min="-1" max="1" step="0.02" value="0.62">
+        </div>
+        <div class="command-control">
+          <label for="vValue">Section V <output data-output="vValue">-0.18</output></label>
+          <input id="vValue" type="range" min="-1" max="1" step="0.02" value="-0.18">
+        </div>
+        <div class="command-control">
+          <label for="wValue">Section W <output data-output="wValue">0.34</output></label>
+          <input id="wValue" type="range" min="-1" max="1" step="0.02" value="0.34">
+        </div>
+        <div class="command-control">
+          <label for="tolerance">Overlap tolerance <output data-output="tolerance">0.12</output></label>
+          <input id="tolerance" type="range" min="0.02" max="0.5" step="0.01" value="0.12">
+        </div>
+        <div class="command-control">
+          <label for="refinement">Germ density <output data-output="refinement">4</output></label>
+          <input id="refinement" type="range" min="1" max="10" step="1" value="4">
+        </div>
+        <button id="matchOverlap" data-action="step" type="button">Match overlap</button>
+        <button id="testGlue" data-action="pulse" type="button">Equalizer</button>
+        <button id="glueSections" class="primary" data-action="step" type="button">Glue section</button>
+        <button id="makeConflict" data-action="step" type="button">Break axiom</button>
+        <button id="sheafify" data-action="pulse" type="button">Add germs</button>
+        <button id="resetH02" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block H 3D lab</p>
+        <h1>H02 Sheaves On Topological Spaces</h1>
+        <p class="subtitle">Locality axiom, Gluing axiom, and Unique global section shown as an open cover with local section surfaces, overlap bands, germs, and restriction maps.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Overlap agreement"><span>Overlap agreement</span><strong id="agreementLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Max defect"><span>Max defect</span><strong id="defectLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Patch cover"><span>Patch cover</span><strong id="patchLabel">3</strong></div>
+        <div class="metric" data-role="metric" data-metric="Uniqueness gap"><span>Global</span><strong id="globalLabel">blocked</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading concrete open-cover gluing diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls move actual local sections on U, V, and W. Match aligns restrictions, Test checks the equalizer, Glue creates the global section, and Sheafify adds germs.</p>
+    </aside>
+  </main>
+  <!-- class="lab-shell lab-3d-shell" preserveDrawingBuffer static compatibility marker -->
+  <!-- {"visual":{"kind":"locality-cover","graphStyle":"anchors"},"profile":{"preferredMetric":"Overlap agreement"},"graph":{"nodes":["local section surface","overlap band","unique global surface"],"edges":["restriction map","locality axiom","gluing axiom"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=h05-intuitive-v11-h02-concrete-v2"></script>
+  <script src="shared/sheaf-concrete-labs.js?math3d=h05-intuitive-v11-h02-concrete-v3"></script>
+  <script>
+    window.__h02LabReady = false;
+    window.__h02LabSnapshot = window.__h02LabSnapshot || function () { return null; };
+    createH02TopologicalSheafLab();
+  </script>
+</body>
+</html>

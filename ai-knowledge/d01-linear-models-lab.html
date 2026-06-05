@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D01 Linear Models</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=c10-d01-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="learning" data-lab-id="d01" data-keywords="linear regression logistic regression ridge loss bowl residuals decision boundary">
+    <section class="visual-stack" aria-label="Interactive 3D linear models visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="D01 Linear Models 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>D01</strong></div>
+          <div class="formula-chip"><span>Model sketch</span>X rows become points; y projects to Xw, residual r is orthogonal to col(X), ridge shrinks w, and sigmoid(w^T x+b) draws the boundary.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>Linear model geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.82fr) minmax(0,.78fr) repeat(5,minmax(0,1fr)) repeat(3,minmax(0,.62fr));">
+        <select id="viewMode" data-control="mode" aria-label="Linear model view">
+          <option value="fit">Fit</option>
+          <option value="loss">Loss</option>
+          <option value="regularization">Ridge</option>
+          <option value="classification">Class</option>
+        </select>
+        <select id="model" aria-label="Model family">
+          <option value="ols">OLS</option>
+          <option value="ridge">Ridge</option>
+          <option value="logistic">Logit</option>
+        </select>
+        <div class="command-control">
+          <label for="lambda">Lambda <output data-output="lambda">0.30</output></label>
+          <input id="lambda" data-param="lambda" type="range" min="0" max="2.5" step="0.02" value="0.30">
+        </div>
+        <div class="command-control">
+          <label for="noise">Noise <output data-output="noise">0.16</output></label>
+          <input id="noise" data-param="noise" type="range" min="0" max="1" step="0.02" value="0.16">
+        </div>
+        <div class="command-control">
+          <label for="overlap">Overlap <output data-output="overlap">0.24</output></label>
+          <input id="overlap" data-param="overlap" type="range" min="0" max="1" step="0.02" value="0.24">
+        </div>
+        <div class="command-control">
+          <label for="stepSize">Step <output data-output="stepSize">0.32</output></label>
+          <input id="stepSize" data-param="stepSize" type="range" min="0.05" max="0.85" step="0.01" value="0.32">
+        </div>
+        <div class="command-control">
+          <label for="outlier">Outlier <output data-output="outlier">0.12</output></label>
+          <input id="outlier" data-param="outlier" type="range" min="0" max="1" step="0.02" value="0.12">
+        </div>
+        <button id="fitClosedForm" class="primary" data-action="pulse" type="button">Solve</button>
+        <button id="stepGradient" data-action="step" type="button">Grad</button>
+        <button id="resetModel" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block D 3D lab</p>
+        <h1>D01 Linear Models</h1>
+        <p class="subtitle">Orbit the fitted plane, coefficient loss bowl, ridge shrinkage path, and logistic probability sheet.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Loss"><span>Loss</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Residual RMS"><span>Residual RMS</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="R2"><span>R2</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Stability"><span>Stability</span><strong>0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading the linear model geometry.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Every control changes the displayed model: lambda shrinks coefficients, noise/outliers reshape residuals, overlap bends classification difficulty, and Step moves the current coefficient toward the shown solution.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=c10-d01-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=c10-d01-canonical-clarity-v2"></script>
+  <script>
+    window.__d01LabSnapshot = window.__d01LabSnapshot || function () { return null; };
+    createD01LinearModelsLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

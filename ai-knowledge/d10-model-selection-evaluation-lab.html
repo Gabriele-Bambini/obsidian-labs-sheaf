@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D10 Model Selection Evaluation</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=d10-e01-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="learning" data-lab-id="d10" data-keywords="model selection evaluation train validation test cross validation nested threshold calibration leakage">
+    <section class="visual-stack" aria-label="Interactive 3D model-selection visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="D10 Model Selection Evaluation 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>D10</strong></div>
+          <div class="formula-chip"><span>Protocol sketch</span>Train fits, validation chooses, test reports; CV rotates evidence, nested CV separates loops, thresholding turns scores into actions.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected protocol</span><strong>Evaluation protocol is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.95fr) repeat(6,minmax(0,.92fr)) repeat(3,minmax(0,.62fr));">
+        <select id="mode" data-control="mode" aria-label="Evaluation mode">
+          <option value="holdout">Holdout</option>
+          <option value="crossValidation">Cross-val</option>
+          <option value="nested">Nested CV</option>
+          <option value="threshold">Threshold</option>
+          <option value="leakage">Leakage</option>
+        </select>
+        <div class="command-control">
+          <label for="searchBreadth">Search <output data-output="searchBreadth">6</output></label>
+          <input id="searchBreadth" data-param="searchBreadth" type="range" min="2" max="24" step="1" value="6">
+        </div>
+        <div class="command-control">
+          <label for="folds">Folds <output data-output="folds">5</output></label>
+          <input id="folds" data-param="folds" type="range" min="3" max="10" step="1" value="5">
+        </div>
+        <div class="command-control">
+          <label for="threshold">Threshold <output data-output="threshold">0.50</output></label>
+          <input id="threshold" data-param="threshold" type="range" min="0.05" max="0.95" step="0.01" value="0.5">
+        </div>
+        <div class="command-control">
+          <label for="costRatio">Cost FN <output data-output="costRatio">2.0</output></label>
+          <input id="costRatio" data-param="costRatio" type="range" min="1" max="8" step="0.1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="leakage">Leakage <output data-output="leakage">0.10</output></label>
+          <input id="leakage" data-param="leakage" type="range" min="0" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="command-control">
+          <label for="classImbalance">Imbalance <output data-output="classImbalance">0.25</output></label>
+          <input id="classImbalance" data-param="classImbalance" type="range" min="0" max="0.75" step="0.01" value="0.25">
+        </div>
+        <button id="compareModels" class="primary" data-action="pulse" type="button">Expand search</button>
+        <button id="advanceProtocol" data-action="step" type="button">Next protocol</button>
+        <button id="resetProtocol" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block D 3D lab</p>
+        <h1>D10 Model Selection Evaluation</h1>
+        <p class="subtitle">Move through holdout selection, cross-validation, nested CV, threshold calibration, and leakage as distinct evidence flows.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Validation"><span>Validation</span><strong>0.000</strong></div>
+        <div class="metric" data-role="metric" data-metric="Test"><span>Test</span><strong>0.000</strong></div>
+        <div class="metric" data-role="metric" data-metric="Optimism"><span>Optimism</span><strong>0.000</strong></div>
+        <div class="metric" data-role="metric" data-metric="Cost"><span>Cost/Var</span><strong>0.000</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading evaluation geometry.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Controls are live: broader search raises optimism, folds reshape CV variance, threshold and costs move the operating point, and leakage draws forbidden evidence across split firewalls.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=d10-e01-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=d10-e01-canonical-clarity-v2"></script>
+  <script>
+    window.__d10LabSnapshot = window.__d10LabSnapshot || function () { return null; };
+    createD10ModelSelectionLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

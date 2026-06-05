@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G02 GCN Spectral Smoothing Lab</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g02-gcn-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="gcn" data-lab-id="g02" data-keywords="laplacian renormalization smoothing graph convolution self-loop">
+    <section class="visual-stack" aria-label="Interactive 3D GCN visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G02 GCN 3D interactive graph"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G02</strong></div>
+          <div class="formula-chip"><span id="formulaText">H' = D^-1/2 A~ D^-1/2 H W</span>A GCN layer is normalized neighborhood diffusion plus a learned feature transform.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected operator</span><strong>GCN propagation is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.58fr)) repeat(5,minmax(0,.58fr)) repeat(4,minmax(0,.48fr));">
+        <select id="normalization" data-control="normalization" aria-label="Normalization">
+          <option value="symmetric">Symmetric norm</option>
+          <option value="randomWalk">Random-walk norm</option>
+          <option value="raw">Raw adjacency</option>
+        </select>
+        <select id="graphType" data-control="graphType" aria-label="Graph type">
+          <option value="citation">Citation hub</option>
+          <option value="chain">Path graph</option>
+          <option value="community">Two communities</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="GCN view">
+          <option value="signal">Signal</option>
+          <option value="matrix">Matrix</option>
+          <option value="spectrum">Spectrum</option>
+          <option value="oversmooth">Over-smooth</option>
+        </select>
+        <div class="command-control">
+          <label for="layers">Layers <output data-output="layers">1</output></label>
+          <input id="layers" data-param="layers" type="range" min="1" max="10" step="1" value="1">
+        </div>
+        <div class="command-control">
+          <label for="selfLoop">Self loop <output data-output="selfLoop">0.70</output></label>
+          <input id="selfLoop" data-param="selfLoop" type="range" min="0" max="1.5" step="0.01" value="0.70">
+        </div>
+        <div class="command-control">
+          <label for="filterStrength">Filter <output data-output="filterStrength">0.62</output></label>
+          <input id="filterStrength" data-param="filterStrength" type="range" min="0.1" max="1" step="0.01" value="0.62">
+        </div>
+        <div class="command-control">
+          <label for="inputRoughness">Rough <output data-output="inputRoughness">0.74</output></label>
+          <input id="inputRoughness" data-param="inputRoughness" type="range" min="0" max="1.2" step="0.01" value="0.74">
+        </div>
+        <div class="command-control">
+          <label for="spectralCutoff">Cutoff <output data-output="spectralCutoff">3</output></label>
+          <input id="spectralCutoff" data-param="spectralCutoff" type="range" min="1" max="6" step="1" value="3">
+        </div>
+        <button id="applyLayer" class="primary" data-action="pulse" type="button">Apply layer</button>
+        <button id="showRenorm" data-action="step" type="button">Show A+I</button>
+        <button id="oversmooth" data-action="step" type="button">Over-smooth</button>
+        <button id="resetG02" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G02 Graph Convolutional Networks</h1>
+        <p class="subtitle">Rotate node signal heights, self-loop rings, normalized propagation weights, spectral smoothing bars, raw-degree bias, and the over-smoothing collapse.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Dirichlet energy"><span>Dirichlet</span><strong id="dirichletLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Node variance"><span>Variance</span><strong id="varianceLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Hub bias"><span>Hub bias</span><strong id="hubBiasLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Smoothing index"><span>Smoothing</span><strong id="smoothLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading GCN renormalization and smoothing diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: Renorm exposes self-loops and degree factors, Layer applies normalized adjacency, Raw adjacency shows degree bias, and Smooth stacks layers until node states become too similar.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g02-gcn-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=g02-gcn-v3"></script>
+  <script>
+    window.__g02LabSnapshot = window.__g02LabSnapshot || function () { return null; };
+    createG02GcnLayerLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

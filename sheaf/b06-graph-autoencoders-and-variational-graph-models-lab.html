@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>B06 - Graph Autoencoder Reconstruction Lab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#071015;--line:#25485b;--text:#edf9fb;--muted:#a8c1cb;--cyan:#58e0d3;--blue:#54a8ff;--gold:#e8b857;--pink:#ff6d8b;--green:#6ee7a8;--red:#ff817d}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.42 Inter,Segoe UI,system-ui,Arial,sans-serif}
+    .shell{height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:12px;padding:12px;background:radial-gradient(circle at 18% 10%,rgba(88,224,211,.14),transparent 30%),radial-gradient(circle at 77% 43%,rgba(232,184,87,.12),transparent 26%),linear-gradient(135deg,#050b10,#0b1720 64%,#05090d)}
+    .stage,.panel{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(11,27,37,.97),rgba(6,15,21,.98));box-shadow:0 18px 52px rgba(0,0,0,.34);min-width:0;min-height:0}
+    .stage{display:grid;grid-template-rows:minmax(0,1fr) auto;overflow:hidden;position:relative}.canvas-wrap{position:relative;min-height:0}canvas{display:block;width:100%;height:100%;min-height:340px;touch-action:none}
+    .overlay{position:absolute;left:14px;right:14px;top:14px;display:flex;gap:10px;justify-content:space-between;pointer-events:none}.badge,.formula{border:1px solid rgba(143,216,242,.25);background:rgba(7,16,21,.78);backdrop-filter:blur(8px);border-radius:12px;padding:9px 11px}.badge span,.formula span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.badge strong{font-size:18px}.formula{max-width:790px;color:#cfe5ec}.formula code{color:var(--cyan);font-weight:800}
+    .controls{display:grid;grid-template-columns:1fr .9fr .82fr .82fr .82fr .82fr;gap:10px;padding:10px;border-top:1px solid var(--line);background:#091720}.control{min-width:0;overflow:hidden}.control label{display:flex;justify-content:space-between;margin-bottom:4px;color:var(--muted);font-size:12px}.control output{color:var(--text);font-weight:800}select,input{width:100%;min-width:0;border:1px solid #315b70;border-radius:10px;background:#102838;color:var(--text);font:inherit}select{height:38px;padding:0 10px}input[type=range]{height:38px;accent-color:var(--cyan)}
+    .panel{display:flex;flex-direction:column;gap:12px;padding:14px;overflow:auto}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--cyan)!important}.panel h1{font-size:22px;line-height:1.1;margin:0}.panel p{margin:0;color:var(--muted)}
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:10px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;margin-top:4px;font-size:19px}
+    .bars{display:grid;gap:7px}.bar-row{display:grid;grid-template-columns:128px minmax(0,1fr) 54px;gap:8px;align-items:center}.track{height:13px;border:1px solid #203c4d;background:#08131a;border-radius:999px;overflow:hidden}.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),var(--blue));width:0}.bar-row b{font-size:12px}.bar-row em{font-style:normal;text-align:right;color:var(--muted);font-size:12px}
+    .card{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:12px}.card h2{font-size:15px;margin:0 0 6px}.legend{display:flex;flex-wrap:wrap;gap:7px}.legend span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:var(--muted)}.dot{width:9px;height:9px;border-radius:99px;display:inline-block}
+    @media(max-width:920px){html,body{height:100%;overflow:hidden;max-width:100vw}.shell{width:100vw;height:100vh;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,55vh) minmax(0,1fr);gap:8px;padding:8px;overflow:hidden}.stage,.panel{width:100%;max-width:100%;overflow:hidden}.canvas-wrap{min-height:0}canvas{min-height:230px}.overlay{display:none}.controls{grid-template-columns:repeat(3,minmax(0,1fr));max-height:166px;overflow:hidden;padding:8px;gap:7px}.control label{display:block;font-size:11px;line-height:1.15}.control output{float:right;font-size:11px}select,input[type=range]{height:30px}select{font-size:12px;padding:0 6px;text-overflow:ellipsis}.panel{min-height:0;padding:10px;gap:9px;overflow:auto}.panel h1{font-size:17px;line-height:1.14;overflow-wrap:break-word}.metric-grid{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:8px}.metric strong{font-size:17px}.legend{display:none}.card:nth-of-type(2){display:none}}
+    @media(max-width:480px){.shell{grid-template-rows:minmax(0,55vh) minmax(0,1fr)}.controls{grid-template-columns:repeat(2,minmax(0,1fr));max-height:190px}.metric-grid{grid-template-columns:1fr}.panel header p:not(.eyebrow){display:none}.bars .bar-row:nth-child(n+6){display:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="stage" aria-label="Interactive graph autoencoder reconstruction visualization">
+      <div class="canvas-wrap">
+        <canvas id="scene" aria-label="Graph autoencoder canvas"></canvas>
+        <div class="overlay">
+          <div class="badge"><span>Chapter lab</span><strong>B06</strong></div>
+          <div class="formula"><span>GAE / VGAE</span><code>Z=GNN(X,A); p(A_ij=1|Z)=sigmoid(score(z_i,z_j)); loss = BCE + beta KL</code></div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control"><label>Biology task</label><select id="scenario"><option value="grn">GRN link prediction</option><option value="cell">cell-cell graph recovery</option><option value="ppi">PPI missing-edge recovery</option><option value="drug">drug-target hypothesis</option></select></div>
+        <div class="control"><label>Model</label><select id="model"><option value="gae">GAE deterministic</option><option value="vgae">VGAE variational</option><option value="denoise">GAE denoising</option></select></div>
+        <div class="control"><label>Decoder</label><select id="decoder"><option value="inner">inner product</option><option value="bilinear">bilinear</option><option value="mlp">MLP score</option></select></div>
+        <div class="control"><label>KL / noise <output id="klOut">35</output></label><input id="kl" type="range" min="0" max="100" value="35"></div>
+        <div class="control"><label>Threshold <output id="thrOut">0.58</output></label><input id="thr" type="range" min="20" max="90" value="58"></div>
+        <div class="control"><label>False negatives <output id="fnOut">25</output></label><input id="fn" type="range" min="0" max="80" value="25"></div>
+      </div>
+    </section>
+    <aside class="panel">
+      <header><p class="eyebrow">Graph autoencoder lab</p><h1>Can the latent space reconstruct the biological graph without hallucinating biology?</h1><p id="subtitle">Move the controls and watch the input graph, latent coordinates, and reconstructed adjacency matrix change together.</p></header>
+      <div class="metric-grid">
+        <div class="metric"><span>Predicted positives</span><strong id="predMetric">0</strong></div>
+        <div class="metric"><span>Known-edge recall</span><strong id="recallMetric">0%</strong></div>
+        <div class="metric"><span>Uncertainty</span><strong id="uncMetric">0%</strong></div>
+        <div class="metric"><span>Leakage / false-neg risk</span><strong id="riskMetric">0%</strong></div>
+      </div>
+      <div class="card"><h2>Top reconstructed links</h2><div id="bars" class="bars"></div></div>
+      <div class="card"><h2>Interpretation</h2><p id="insight">Switch model or decoder to inspect the difference between reconstructing known evidence and discovering plausible missing links.</p></div>
+      <div class="legend"><span><i class="dot" style="background:var(--green)"></i> known edge</span><span><i class="dot" style="background:var(--gold)"></i> high-probability candidate</span><span><i class="dot" style="background:var(--pink)"></i> risky unknown/negative</span><span><i class="dot" style="background:var(--blue)"></i> latent coordinate</span></div>
+    </aside>
+  </main>
+  <script>
+    const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
+    const controls={scenario:document.getElementById('scenario'),model:document.getElementById('model'),decoder:document.getElementById('decoder'),kl:document.getElementById('kl'),thr:document.getElementById('thr'),fn:document.getElementById('fn')};
+    const out={kl:document.getElementById('klOut'),thr:document.getElementById('thrOut'),fn:document.getElementById('fnOut'),pred:document.getElementById('predMetric'),recall:document.getElementById('recallMetric'),unc:document.getElementById('uncMetric'),risk:document.getElementById('riskMetric'),bars:document.getElementById('bars'),insight:document.getElementById('insight'),subtitle:document.getElementById('subtitle')};
+    const colors={known:'#6ee7a8',candidate:'#e8b857',risky:'#ff6d8b',latent:'#54a8ff',muted:'#213b4b',cyan:'#58e0d3'};
+    const scenarios={
+      grn:{nodes:['TF1','GATA','MYC','IL7R','SOX2','KLF4'],known:[[0,1],[0,2],[2,3],[4,5],[5,1]],hidden:[[0,3],[4,1]],title:'GRN link prediction',why:'In GRN inference, a missing TF-target edge may be unmeasured rather than false. Negative sampling controls how risky the training target becomes.'},
+      cell:{nodes:['Stem','ProgA','ProgB','Mono','Tcell','Bcell'],known:[[0,1],[0,2],[1,3],[2,4],[4,5]],hidden:[[1,4],[2,5]],title:'cell-cell graph recovery',why:'In cell graphs, the decoder may recover neighborhood structure, lineage proximity, or batch artifacts. The audit asks which one is being reconstructed.'},
+      ppi:{nodes:['P53','MDM2','ATM','BRCA1','RAD51','CHK2'],known:[[0,1],[2,0],[2,3],[3,4],[2,5]],hidden:[[0,3],[5,0]],title:'PPI missing-edge recovery',why:'PPI graphs mix direct binding and functional association. A high score is a hypothesis, not proof of physical interaction.'},
+      drug:{nodes:['DrugA','EGFR','AKT','MAPK','GeneX','GeneY'],known:[[0,1],[1,2],[1,3],[2,4],[3,5]],hidden:[[0,4],[0,5]],title:'drug-target hypothesis',why:'Drug-target decoding can propose candidates, but chemical feasibility and perturbation validation must sit outside the reconstruction loss.'}
+    };
+    let state={pairs:[],points:[],metrics:{}};
+    function params(){return {scenario:controls.scenario.value,model:controls.model.value,decoder:controls.decoder.value,kl:Number(controls.kl.value)/100,thr:Number(controls.thr.value)/100,fn:Number(controls.fn.value)/100}}
+    function sigmoid(x){return 1/(1+Math.exp(-x))}
+    function hasEdge(list,i,j){return list.some(e=>(e[0]===i&&e[1]===j)||(e[0]===j&&e[1]===i))}
+    function project(p,w,h,centerX,centerY,scale){const z=1+p.z*.32;return {x:centerX+p.x*scale*z,y:centerY+p.y*scale*z,r:(8+p.unc*24)*z}}
+    function compute(){
+      const p=params(),s=scenarios[p.scenario],n=s.nodes.length;
+      const base=[[ -1.0,-.35,.25],[ -.38,-.95,.08],[ .38,-.9,.12],[ .92,-.18,-.10],[ .34,.86,.18],[ -.72,.64,-.18]];
+      const modelSpread=p.model==='vgae'?.75:p.model==='denoise'?.9:1.0;
+      const noise=p.model==='denoise'?p.kl*.45:p.model==='vgae'?p.kl*.7:p.kl*.25;
+      const points=base.map((b,i)=>{
+        const edgePull=s.known.filter(e=>e[0]===i||e[1]===i).length*.035;
+        return {x:b[0]*modelSpread+Math.sin(i*1.7+p.kl)*noise*.22,y:b[1]*modelSpread+Math.cos(i*1.3+p.fn)*noise*.18,z:b[2]+edgePull,unc:p.model==='vgae'?(.16+p.kl*.72):p.model==='denoise'?(.1+p.kl*.45):(.06+p.kl*.12)};
+      });
+      let pairs=[],knownRecovered=0,knownTotal=s.known.length,pred=0,unc=0,risky=0;
+      for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+        const a=points[i],b=points[j];let raw=a.x*b.x+a.y*b.y+a.z*b.z;
+        if(p.decoder==='bilinear')raw=1.22*a.x*b.x+.62*a.y*b.y+1.55*a.z*b.z;
+        if(p.decoder==='mlp'){const d=Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);raw=1.55-d+.32*Math.sin((i+1)*(j+2));}
+        const known=hasEdge(s.known,i,j),hidden=hasEdge(s.hidden,i,j);
+        if(known)raw+=1.1;if(hidden)raw+=.55;
+        raw-=p.fn*(known?0:.95);
+        if(p.model==='vgae')raw-=p.kl*.28;
+        if(p.model==='denoise')raw+=p.kl*(known?.35:.08);
+        const prob=sigmoid(raw);
+        const predicted=prob>=p.thr;
+        if(predicted)pred++;
+        if(known && predicted)knownRecovered++;
+        unc+=Math.abs(prob-.5)<.12?1:0;
+        if(predicted && !known)risky+=hidden?0.35:1;
+        pairs.push({i,j,prob,known,hidden,predicted,label:s.nodes[i]+' - '+s.nodes[j]});
+      }
+      pairs.sort((a,b)=>b.prob-a.prob);
+      state={pairs,points,metrics:{pred,recall:knownRecovered/knownTotal,unc:unc/pairs.length,risk:Math.min(1,risky/Math.max(1,pred)),scenario:s}};
+      return state;
+    }
+    function fit(){const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));const r=canvas.getBoundingClientRect();canvas.width=Math.max(320,Math.floor(r.width*dpr));canvas.height=Math.max(240,Math.floor(r.height*dpr));ctx.setTransform(dpr,0,0,dpr,0,0)}
+    function roundedRect(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}}
+    function line(x1,y1,x2,y2,c,w=2,dash=[]){ctx.save();ctx.setLineDash(dash);ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore()}
+    function draw(){
+      const p=params(),s=compute(),w=canvas.clientWidth,h=canvas.clientHeight;
+      ctx.clearRect(0,0,w,h);
+      const pad=w<720?14:24,gap=w<720?10:18;
+      const top=w<720?16:64;
+      const colW=(w-pad*2-gap*2)/3;
+      const panelH=h-top-24;
+      const labels=colW<180?['graph','latent','matrix']:['input graph','latent space','reconstructed adjacency'];
+      labels.forEach((t,k)=>{const x=pad+k*(colW+gap);roundedRect(x,top,colW,panelH,18,'rgba(7,20,28,.88)','#244a5d');ctx.fillStyle='#dff7fb';ctx.font='700 15px Segoe UI';ctx.fillText(t,x+14,top+28)});
+      drawInput(pad,top,colW,panelH,s.metrics.scenario);
+      drawLatent(pad+colW+gap,top,colW,panelH,s.metrics.scenario,s.points);
+      drawMatrix(pad+2*(colW+gap),top,colW,panelH,s.metrics.scenario,s.pairs,p.thr);
+      window.__B06_LAB_READY__=true;
+      window.__B06_LAST_METRICS__=s.metrics;
+    }
+    function drawInput(x,y,w,h,s){
+      const n=s.nodes.length,cx=x+w/2,cy=y+h*.55,rad=Math.min(w,h)*.29;
+      const pos=s.nodes.map((_,i)=>({x:cx+Math.cos(-Math.PI/2+i*2*Math.PI/n)*rad,y:cy+Math.sin(-Math.PI/2+i*2*Math.PI/n)*rad}));
+      s.known.forEach(e=>line(pos[e[0]].x,pos[e[0]].y,pos[e[1]].x,pos[e[1]].y,colors.known,3));
+      s.hidden.forEach(e=>line(pos[e[0]].x,pos[e[0]].y,pos[e[1]].x,pos[e[1]].y,colors.gold,2,[6,5]));
+      pos.forEach((p,i)=>{ctx.beginPath();ctx.arc(p.x,p.y,14,0,Math.PI*2);ctx.fillStyle=i===0?'#58e0d3':'#54a8ff';ctx.fill();ctx.strokeStyle='#dff7fb';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#071015';ctx.font='800 10px Segoe UI';ctx.textAlign='center';ctx.fillText(s.nodes[i].slice(0,4),p.x,p.y+3)});
+      if(w>190){ctx.textAlign='left';ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.fillText('solid = observed training edge',x+14,y+h-44);ctx.fillText('dashed = hidden biology you hope to recover',x+14,y+h-24);}
+    }
+    function drawLatent(x,y,w,h,s,points){
+      const cx=x+w/2,cy=y+h*.56,scale=Math.min(w,h)*.26;
+      line(x+30,cy,x+w-30,cy,'#1f3f50',1);line(cx,y+55,cx,y+h-45,'#1f3f50',1);
+      points.map(p=>project(p,w,h,cx,cy,scale)).forEach((p,i)=>{
+        ctx.beginPath();ctx.ellipse(p.x,p.y,p.r*1.7,p.r*.88,0,0,Math.PI*2);ctx.fillStyle='rgba(84,168,255,.10)';ctx.fill();ctx.strokeStyle='rgba(84,168,255,.45)';ctx.stroke();
+        ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);ctx.fillStyle=i===0?colors.cyan:colors.latent;ctx.fill();
+        ctx.fillStyle='#dff7fb';ctx.font='11px Segoe UI';ctx.textAlign='center';ctx.fillText(s.nodes[i],p.x,p.y-14);
+      });
+      if(w>190){ctx.textAlign='left';ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.fillText('circle size = latent uncertainty',x+14,y+h-28);}
+    }
+    function drawMatrix(x,y,w,h,s,pairs,thr){
+      const n=s.nodes.length,size=Math.min(w-54,h-116),mx=x+(w-size)/2,my=y+58,cell=size/n;
+      roundedRect(mx-8,my-8,size+16,size+16,14,'#07131a','#244a5d');
+      for(let i=0;i<n;i++)for(let j=0;j<n;j++){
+        const pair=pairs.find(p=>(p.i===i&&p.j===j)||(p.i===j&&p.j===i));
+        const prob=i===j?0:(pair?pair.prob:0);
+        const alpha=.18+prob*.82;
+        ctx.fillStyle=i===j?'#102636':(pair&&pair.known?`rgba(110,231,168,${alpha})`:pair&&pair.predicted?`rgba(232,184,87,${alpha})`:`rgba(84,168,255,${alpha*.62})`);
+        ctx.fillRect(mx+i*cell,my+j*cell,cell-1,cell-1);
+      }
+      ctx.strokeStyle='#244a5d';ctx.strokeRect(mx,my,size,size);
+      if(w>190){ctx.fillStyle='#9fb9c6';ctx.font='11px Segoe UI';ctx.textAlign='left';ctx.fillText('threshold '+thr.toFixed(2),x+14,y+h-44);ctx.fillText('yellow cells are candidate reconstructed edges',x+14,y+h-24);}
+    }
+    function updatePanel(){
+      const p=params(),s=state.metrics,sc=scenarios[p.scenario];
+      out.kl.textContent=Math.round(p.kl*100);out.thr.textContent=p.thr.toFixed(2);out.fn.textContent=Math.round(p.fn*100);
+      out.pred.textContent=s.pred;out.recall.textContent=Math.round(s.recall*100)+'%';out.unc.textContent=Math.round(s.unc*100)+'%';out.risk.textContent=Math.round(s.risk*100)+'%';
+      out.subtitle.textContent=sc.title+' - '+sc.why;
+      const top=state.pairs.slice(0,6);
+      out.bars.innerHTML=top.map(pair=>`<div class="bar-row"><b>${pair.label}</b><span class="track"><span class="fill" style="width:${Math.round(pair.prob*100)}%;background:${pair.known?'linear-gradient(90deg,var(--green),var(--cyan))':pair.hidden?'linear-gradient(90deg,var(--gold),var(--cyan))':'linear-gradient(90deg,var(--pink),var(--gold))'}"></span></span><em>${pair.prob.toFixed(2)}</em></div>`).join('');
+      const modelText=p.model==='vgae'?'VGAE adds a distribution over each latent node. That helps represent uncertainty, but too much KL pressure can blur rare biological links.':p.model==='denoise'?'Denoising GAE asks the encoder to recover structure after corruption. This is useful when assays are sparse, but it can also learn the bias of the corruption process.':'Deterministic GAE uses one coordinate per node. It is easy to inspect, but it can be overconfident about uncertain biology.';
+      const decoderText=p.decoder==='inner'?'The inner-product decoder favors nodes that point in the same latent direction.':'The selected decoder changes what compatibility means before a pair becomes an edge probability.';
+      out.insight.textContent=modelText+' '+decoderText+' Treat high-scoring unknown links as hypotheses until validated by held-out evidence, perturbation, or independent assay support.';
+    }
+    function render(){draw();updatePanel()}
+    Object.values(controls).forEach(el=>el.addEventListener('input',render));
+    window.addEventListener('resize',()=>{fit();render()});
+    fit();render();
+  </script>
+</body>
+</html>

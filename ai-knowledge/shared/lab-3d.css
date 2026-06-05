@@ -1,0 +1,386 @@
+:root {
+  color-scheme: dark;
+  --lab-bg: #071015;
+  --lab-panel: rgba(9, 20, 27, 0.92);
+  --lab-panel-strong: rgba(13, 29, 39, 0.96);
+  --lab-text: #e7f0f4;
+  --lab-muted: #8fa3ad;
+  --lab-line: rgba(142, 172, 187, 0.24);
+  --lab-cyan: #4dd7ff;
+  --lab-blue: #3b82f6;
+  --lab-green: #34d399;
+  --lab-amber: #fbbf24;
+  --lab-rose: #fb7185;
+  --lab-violet: #a78bfa;
+  --lab-shadow: 0 18px 54px rgba(0, 0, 0, 0.42);
+  --lab-focus: 0 0 0 3px rgba(77, 215, 255, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(77, 215, 255, 0.12), transparent 28%),
+    radial-gradient(circle at 80% 80%, rgba(167, 139, 250, 0.11), transparent 30%),
+    linear-gradient(135deg, #071015, #0b1118 54%, #071015);
+  color: var(--lab-text);
+  font-size: 14px;
+}
+
+.lab-3d-shell {
+  width: 100%;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 334px;
+  gap: 12px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--lab-line);
+  border-radius: 8px;
+  background: rgba(5, 12, 18, 0.72);
+  box-shadow: var(--lab-shadow);
+}
+
+.lab-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+
+.lab-viewport:active {
+  cursor: grabbing;
+}
+
+.lab-viewport canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.scene-overlay {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.scene-badge,
+.formula-chip {
+  border: 1px solid var(--lab-line);
+  border-radius: 7px;
+  background: rgba(7, 16, 21, 0.72);
+  color: var(--lab-text);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+}
+
+.scene-badge {
+  min-width: 145px;
+  padding: 9px 10px;
+}
+
+.scene-badge span,
+.formula-chip span {
+  display: block;
+  color: var(--lab-muted);
+  font-size: 11px;
+  line-height: 1.15;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.scene-badge strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 18px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.formula-chip {
+  max-width: min(56%, 520px);
+  padding: 9px 11px;
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.lab-3d-panel {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 10px;
+  border: 1px solid var(--lab-line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--lab-panel);
+  box-shadow: var(--lab-shadow);
+}
+
+.lab-3d-panel h1 {
+  margin: 0;
+  color: var(--lab-text);
+  font-size: 18px;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.lab-3d-panel p {
+  margin: 5px 0 0;
+  color: var(--lab-muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.control-grid {
+  min-height: 0;
+  display: grid;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.control-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  gap: 9px;
+  align-items: center;
+}
+
+.control-row label,
+.select-row label {
+  color: var(--lab-muted);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.control-row output {
+  color: var(--lab-text);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.control-row input[type="range"] {
+  grid-column: 1 / -1;
+  width: 100%;
+  accent-color: var(--lab-cyan);
+}
+
+.select-row {
+  display: grid;
+  gap: 5px;
+}
+
+select,
+button {
+  width: 100%;
+  min-height: 32px;
+  border: 1px solid var(--lab-line);
+  border-radius: 6px;
+  color: var(--lab-text);
+  background: linear-gradient(180deg, rgba(18, 35, 47, 0.96), rgba(11, 23, 31, 0.96));
+  font: inherit;
+  font-size: 12px;
+}
+
+button {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+button.primary {
+  border-color: rgba(77, 215, 255, 0.62);
+  background: linear-gradient(180deg, rgba(24, 105, 144, 0.96), rgba(15, 68, 98, 0.96));
+}
+
+select:focus-visible,
+button:focus-visible,
+input[type="range"]:focus-visible {
+  outline: none;
+  box-shadow: var(--lab-focus);
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.metric-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.metric {
+  min-width: 0;
+  border: 1px solid var(--lab-line);
+  border-radius: 7px;
+  padding: 7px 8px;
+  background: var(--lab-panel-strong);
+}
+
+.metric span {
+  display: block;
+  color: var(--lab-muted);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.metric strong {
+  display: block;
+  margin-top: 2px;
+  color: var(--lab-text);
+  font-size: 15px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.state-box {
+  min-height: 70px;
+  max-height: 84px;
+  overflow: hidden;
+  border: 1px solid var(--lab-line);
+  border-radius: 7px;
+  padding: 9px 10px;
+  background: rgba(3, 9, 13, 0.7);
+  color: var(--lab-text);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.compact-note {
+  color: var(--lab-muted);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+@media (max-width: 980px) {
+  .lab-3d-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) 320px;
+  }
+
+  .lab-3d-panel {
+    grid-template-columns: minmax(0, 0.62fr) minmax(0, 1fr) minmax(0, 0.86fr);
+    grid-template-rows: 1fr;
+    align-items: stretch;
+    padding: 9px;
+    gap: 8px;
+    overflow-wrap: anywhere;
+  }
+
+  .lab-3d-panel > * {
+    min-width: 0;
+  }
+
+  .lab-3d-panel,
+  .lab-3d-panel * {
+    max-width: 100%;
+  }
+
+  .lab-3d-panel p,
+  .compact-note,
+  .state-box,
+  .metric span,
+  .metric strong,
+  .control-row label,
+  .select-row label,
+  .control-row output {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .metric strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .metric-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .control-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 6px;
+  }
+
+  .control-grid > .select-row,
+  .control-grid > .control-row,
+  .control-grid > .button-row {
+    min-width: 0;
+  }
+
+  .control-grid > .button-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  select,
+  button {
+    min-height: 28px;
+    font-size: 11px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .state-box {
+    max-height: none;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 760px) {
+  .lab-3d-shell {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .lab-3d-panel {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .metric-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .scene-overlay {
+    left: 8px;
+    right: 8px;
+    top: 8px;
+  }
+
+  .formula-chip {
+    display: none;
+  }
+}

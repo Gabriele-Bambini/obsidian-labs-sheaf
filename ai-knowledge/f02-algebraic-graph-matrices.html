@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>F02 Algebraic Graph Matrices</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=f02-graph-matrices-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="graph" data-lab-id="f02" data-keywords="algebraic graph theory adjacency degree incidence matrix walks rank trace">
+    <section class="visual-stack" aria-label="Interactive 3D algebraic graph matrix encoder visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="F02 algebraic graph matrices 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>F02</strong></div>
+          <div class="formula-chip"><span>Matrix sketch</span>A, D, B, L, and A² are not data formats: each is an operator that exposes neighbor sums, degree scaling, oriented differences, energy, and walks.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected matrix</span><strong>Graph matrix encoder is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.72fr) minmax(0,.58fr) minmax(0,.62fr) repeat(5,minmax(0,.72fr)) repeat(3,minmax(0,.56fr));">
+        <select id="graphSelect" data-control="graphSelect" aria-label="Graph topology">
+          <option value="Path">Path</option>
+          <option value="Cycle">Cycle</option>
+          <option value="Star">Star</option>
+          <option value="TriangleTail">Triangle + tail</option>
+        </select>
+        <select id="matrixSelect" data-control="matrixSelect" aria-label="Matrix">
+          <option value="A">A</option>
+          <option value="D">D</option>
+          <option value="B">B</option>
+          <option value="L">L</option>
+          <option value="A2">A²</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="Matrix interpretation">
+          <option value="entries">Entries</option>
+          <option value="operator">Operator</option>
+          <option value="walks">Walks</option>
+        </select>
+        <div class="command-control">
+          <label for="weightSlider">Weight <output data-output="weightSlider">1.00</output></label>
+          <input id="weightSlider" data-param="weightSlider" type="range" min="0.4" max="2" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="signalSlider">Signal <output data-output="signalSlider">0.70</output></label>
+          <input id="signalSlider" data-param="signalSlider" type="range" min="0.1" max="1.4" step="0.01" value="0.7">
+        </div>
+        <div class="command-control">
+          <label for="orientationSlider">Orient <output data-output="orientationSlider">0.50</output></label>
+          <input id="orientationSlider" data-param="orientationSlider" type="range" min="0" max="1" step="0.01" value="0.5">
+        </div>
+        <div class="command-control">
+          <label for="matrixLift">Lift <output data-output="matrixLift">0.55</output></label>
+          <input id="matrixLift" data-param="matrixLift" type="range" min="0.1" max="1" step="0.01" value="0.55">
+        </div>
+        <div class="command-control">
+          <label for="walkDepth">Walk <output data-output="walkDepth">2</output></label>
+          <input id="walkDepth" data-param="walkDepth" type="range" min="1" max="4" step="1" value="2">
+        </div>
+        <button id="toggleEdge" class="primary" data-action="pulse" type="button">Toggle</button>
+        <button id="reverseEdge" data-action="step" type="button">Reverse</button>
+        <button id="resetF02" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block F 3D lab</p>
+        <h1>F02 Algebraic Graph Matrices</h1>
+        <p class="subtitle">Rotate the graph, matrix entry wall, adjacency walk products, degree columns, oriented incidence signs, Laplacian identity, edge-toggle perturbation, and relabel-invariant diagnostics.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Edges"><span>Edges</span><strong id="edgeCountLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Rank B"><span>rank B</span><strong id="rankBLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Trace A2"><span>tr A²</span><strong id="traceA2Label">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Beta1"><span>beta1</span><strong id="betaLabel">0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading graph matrix geometry.</p>
+        <p id="stateBox" class="state-box"><span id="stateText">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: matrix selection changes the entry wall, reversing an edge flips one incidence column, and toggling an edge rewrites A, D, B, L, and A² together.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=f02-graph-matrices-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=f02-graph-matrices-v2"></script>
+  <script>
+    window.__f02LabSnapshot = window.__f02LabSnapshot || function () { return null; };
+    createF02AlgebraicGraphMatricesLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

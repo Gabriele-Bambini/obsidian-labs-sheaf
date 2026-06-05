@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G03 Graph Attention Coefficients</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g03-attention-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="attention" data-lab-id="g03" data-keywords="attention softmax masked graph attention coefficients multi-head distractor">
+    <section class="visual-stack" aria-label="Interactive 3D graph attention visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G03 graph attention coefficients 3D visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G03</strong></div>
+          <div class="formula-chip"><span id="formulaText">alpha_ij = softmax_j(e_ij over N(i))</span>A GAT scores only allowed neighbors, then normalizes those scores inside the masked neighborhood.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected attention head</span><strong>Attention coefficients are loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.58fr)) repeat(5,minmax(0,.58fr)) repeat(4,minmax(0,.48fr));">
+        <select id="attentionHead" data-control="attentionHead" aria-label="Attention head">
+          <option value="feature">Feature head</option>
+          <option value="self">Self-preserving head</option>
+          <option value="bridge">Bridge head</option>
+        </select>
+        <select id="focusNode" data-control="focusNode" aria-label="Focus node">
+          <option value="0">Focus A</option>
+          <option value="4">Focus E</option>
+          <option value="7">Focus H</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="Attention view">
+          <option value="coefficients">Coefficients</option>
+          <option value="matrix">Masked matrix</option>
+          <option value="heads">Heads</option>
+          <option value="explain">Explain</option>
+        </select>
+        <div class="command-control">
+          <label for="temperature">Temp <output data-output="temperature">1.00</output></label>
+          <input id="temperature" data-param="temperature" type="range" min="0.25" max="3.5" step="0.01" value="1.00">
+        </div>
+        <div class="command-control">
+          <label for="distractorStrength">Distract <output data-output="distractorStrength">0.30</output></label>
+          <input id="distractorStrength" data-param="distractorStrength" type="range" min="0" max="1.2" step="0.01" value="0.30">
+        </div>
+        <div class="command-control">
+          <label for="edgeMask">Mask <output data-output="edgeMask">0.78</output></label>
+          <input id="edgeMask" data-param="edgeMask" type="range" min="0" max="1" step="0.01" value="0.78">
+        </div>
+        <div class="command-control">
+          <label for="headBlend">Heads <output data-output="headBlend">0.46</output></label>
+          <input id="headBlend" data-param="headBlend" type="range" min="0" max="1" step="0.01" value="0.46">
+        </div>
+        <div class="command-control">
+          <label for="selfWeight">Self <output data-output="selfWeight">0.40</output></label>
+          <input id="selfWeight" data-param="selfWeight" type="range" min="0" max="1.2" step="0.01" value="0.40">
+        </div>
+        <button id="computeAttention" class="primary" data-action="pulse" type="button">Compute alpha</button>
+        <button id="injectDistractor" data-action="step" type="button">Add distractor</button>
+        <button id="multiHead" data-action="step" type="button">Split heads</button>
+        <button id="resetG03" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G03 Graph Attention Networks</h1>
+        <p class="subtitle">Rotate the focus node, masked neighborhood, local softmax coefficients, distractor edge, sparse attention matrix, and multi-head coefficient bars.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Attention entropy"><span>Entropy</span><strong id="entropyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Max coefficient"><span>Max alpha</span><strong id="maxCoefficientLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Alpha sum"><span>Alpha sum</span><strong id="alphaSumLabel">1.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Masked degree"><span>Masked deg</span><strong id="maskedDegreeLabel">0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading masked attention diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: temperature sharpens or flattens softmax, mask strength keeps non-neighbors out, distractor adds a spurious edge, and multi-head mode shows different coefficient patterns.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g03-attention-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=g03-attention-v3"></script>
+  <script>
+    window.__g03LabSnapshot = window.__g03LabSnapshot || function () { return null; };
+    createG03GraphAttentionLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

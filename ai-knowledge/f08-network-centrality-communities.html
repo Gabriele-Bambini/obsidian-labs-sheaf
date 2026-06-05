@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>F08 Network Science</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=f08-network-science-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="graph" data-lab-id="f08" data-keywords="network science centrality community small-world robustness null model">
+    <section class="visual-stack" aria-label="Interactive 3D network science diagnostics visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="F08 network science 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>F08</strong></div>
+          <div class="formula-chip"><span id="formulaText">Degree counts immediate exposure.</span>Centrality is not one truth: each metric assumes a different process moving through the network.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected diagnostic</span><strong>Network ranking is loading.</strong></div>
+        <div class="concept-rail" data-visual-key="f08 physical network-science legend" style="grid-template-columns:repeat(5,minmax(0,1fr));">
+          <span>Centrality towers: process choice</span>
+          <span>Bridge traffic: shortest paths</span>
+          <span>Triangle counter: clustering</span>
+          <span>Small-world ruler: average path</span>
+          <span>Null baseline: degree-aware surprise</span>
+        </div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.54fr)) repeat(5,minmax(0,.58fr)) repeat(5,minmax(0,.44fr));">
+        <select id="scenario" data-control="scenario" aria-label="Network scenario">
+          <option value="broker">Broker communities</option>
+          <option value="smallWorld">Small-world</option>
+          <option value="scaleFree">Hub network</option>
+        </select>
+        <select id="metric" data-control="metric" aria-label="Centrality metric">
+          <option value="degree">Degree</option>
+          <option value="closeness">Closeness</option>
+          <option value="betweenness">Betweenness</option>
+          <option value="eigenvector">Eigenvector</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="Network science view">
+          <option value="ranking">Ranking</option>
+          <option value="communities">Communities</option>
+          <option value="robustness">Robustness</option>
+          <option value="null">Null model</option>
+        </select>
+        <div class="command-control">
+          <label for="rewireAmount">Shortcut <output data-output="rewireAmount">0.18</output></label>
+          <input id="rewireAmount" data-param="rewireAmount" type="range" min="0" max="0.72" step="0.01" value="0.18">
+        </div>
+        <div class="command-control">
+          <label for="attackDepth">Attack <output data-output="attackDepth">1</output></label>
+          <input id="attackDepth" data-param="attackDepth" type="range" min="1" max="4" step="1" value="1">
+        </div>
+        <div class="command-control">
+          <label for="communityLeak">Leak <output data-output="communityLeak">0.20</output></label>
+          <input id="communityLeak" data-param="communityLeak" type="range" min="0" max="0.65" step="0.01" value="0.20">
+        </div>
+        <div class="command-control">
+          <label for="cascadeThreshold">Cascade <output data-output="cascadeThreshold">0.35</output></label>
+          <input id="cascadeThreshold" data-param="cascadeThreshold" type="range" min="0.1" max="0.9" step="0.01" value="0.35">
+        </div>
+        <div class="command-control">
+          <label for="nullStrength">Null <output data-output="nullStrength">0.50</output></label>
+          <input id="nullStrength" data-param="nullStrength" type="range" min="0" max="1" step="0.01" value="0.50">
+        </div>
+        <button id="recompute" class="primary" data-action="pulse" type="button">Rank centrality</button>
+        <button id="attackTop" data-action="step" type="button">Remove top</button>
+        <button id="runCascade" data-action="step" type="button">Run cascade</button>
+        <button id="addShortcut" data-action="pulse" type="button">Add shortcut</button>
+        <button id="reset" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block F 3D lab</p>
+        <h1>F08 Network Science</h1>
+        <p class="subtitle">Rotate centrality towers, bridge shortest paths, community basins, small-world shortcuts, targeted node removal, cascade fragmentation, and degree-aware null-model bars.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Top score"><span>Top score</span><strong id="topScoreLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Average path"><span>Avg path</span><strong id="pathLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Clustering"><span>Cluster</span><strong id="clusterLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Giant component"><span>Giant</span><strong id="giantLabel">0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading network science diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: metric changes the top node, scenario changes the process, attacks remove ranked nodes, shortcuts shrink distances, and null view separates degree effects from real structure.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=f08-network-science-v1"></script>
+  <script src="shared/ml-lab-core.js?math3d=f08-network-science-v1"></script>
+  <script>
+    window.__f08LabSnapshot = window.__f08LabSnapshot || function () { return null; };
+    createF08NetworkScienceLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

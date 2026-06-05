@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>B08 - Graph Foundation Transfer Lab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#071015;--line:#25485b;--text:#edf9fb;--muted:#a8c1cb;--cyan:#58e0d3;--blue:#54a8ff;--gold:#e8b857;--pink:#ff6d8b;--green:#6ee7a8;--red:#ff817d}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.42 Inter,Segoe UI,system-ui,Arial,sans-serif}
+    .shell{height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:12px;padding:12px;background:radial-gradient(circle at 18% 10%,rgba(88,224,211,.14),transparent 30%),radial-gradient(circle at 78% 55%,rgba(232,184,87,.10),transparent 28%),linear-gradient(135deg,#050b10,#0b1720 64%,#05090d)}
+    .stage,.panel{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(11,27,37,.97),rgba(6,15,21,.98));box-shadow:0 18px 52px rgba(0,0,0,.34);min-width:0;min-height:0}
+    .stage{display:grid;grid-template-rows:minmax(0,1fr) auto;overflow:hidden;position:relative}.canvas-wrap{position:relative;min-height:0}canvas{display:block;width:100%;height:100%;min-height:340px;touch-action:none}
+    .overlay{position:absolute;left:14px;right:14px;top:14px;display:flex;gap:10px;justify-content:space-between;pointer-events:none}.badge,.formula{border:1px solid rgba(143,216,242,.25);background:rgba(7,16,21,.78);backdrop-filter:blur(8px);border-radius:12px;padding:9px 11px}.badge span,.formula span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.badge strong{font-size:18px}.formula{max-width:820px;color:#cfe5ec}.formula code{color:var(--cyan);font-weight:800}
+    .controls{display:grid;grid-template-columns:1fr .9fr .8fr .8fr .8fr .8fr;gap:10px;padding:10px;border-top:1px solid var(--line);background:#091720}.control{min-width:0;overflow:hidden}.control label{display:flex;justify-content:space-between;margin-bottom:4px;color:var(--muted);font-size:12px}.control output{color:var(--text);font-weight:800}select,input{width:100%;min-width:0;border:1px solid #315b70;border-radius:10px;background:#102838;color:var(--text);font:inherit}select{height:38px;padding:0 10px}input[type=range]{height:38px;accent-color:var(--cyan)}
+    .panel{display:flex;flex-direction:column;gap:12px;padding:14px;overflow:auto}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--cyan)!important}.panel h1{font-size:22px;line-height:1.1;margin:0}.panel p{margin:0;color:var(--muted)}
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:10px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;margin-top:4px;font-size:19px}
+    .bars{display:grid;gap:7px}.bar-row{display:grid;grid-template-columns:128px minmax(0,1fr) 56px;gap:8px;align-items:center}.track{height:13px;border:1px solid #203c4d;background:#08131a;border-radius:999px;overflow:hidden}.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),var(--blue));width:0}.bar-row b{font-size:12px}.bar-row em{font-style:normal;text-align:right;color:var(--muted);font-size:12px}
+    .card{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:12px}.card h2{font-size:15px;margin:0 0 6px}.legend{display:flex;flex-wrap:wrap;gap:7px}.legend span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:var(--muted)}.dot{width:9px;height:9px;border-radius:99px;display:inline-block}
+    @media(max-width:920px){html,body{height:100%;overflow:hidden;max-width:100vw}.shell{width:100vw;height:100vh;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,55vh) minmax(0,1fr);gap:8px;padding:8px;overflow:hidden}.stage,.panel{width:100%;max-width:100%;overflow:hidden}.canvas-wrap{min-height:0}canvas{min-height:230px}.overlay{display:none}.controls{grid-template-columns:repeat(3,minmax(0,1fr));max-height:166px;overflow:hidden;padding:8px;gap:7px}.control label{display:block;font-size:11px;line-height:1.15}.control output{float:right;font-size:11px}select,input[type=range]{height:30px}select{font-size:12px;padding:0 6px;text-overflow:ellipsis}.panel{min-height:0;padding:10px;gap:9px;overflow:auto}.panel h1{font-size:17px;line-height:1.14;overflow-wrap:break-word}.metric-grid{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:8px}.metric strong{font-size:17px}.legend{display:none}.card:nth-of-type(2){display:none}}
+    @media(max-width:480px){.shell{grid-template-rows:minmax(0,55vh) minmax(0,1fr)}.controls{grid-template-columns:repeat(2,minmax(0,1fr));max-height:190px}.metric-grid{grid-template-columns:1fr}.panel header p:not(.eyebrow){display:none}.bars .bar-row:nth-child(n+6){display:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="stage" aria-label="Interactive graph foundation model transfer visualization">
+      <div class="canvas-wrap">
+        <canvas id="scene" aria-label="Graph foundation model transfer canvas"></canvas>
+        <div class="overlay">
+          <div class="badge"><span>Chapter lab</span><strong>B08</strong></div>
+          <div class="formula"><span>Transfer objective</span><code>pretrain theta on G_source; adapt phi on G_target; audit gain minus leakage and shift</code></div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control"><label>Pretrain corpus</label><select id="corpus"><option value="singlecell" selected>single-cell gene graph</option><option value="molecule">molecular graphs</option><option value="kg">biomedical knowledge graph</option><option value="mixed">mixed graph corpus</option></select></div>
+        <div class="control"><label>Objective</label><select id="objective"><option value="masked" selected>masked reconstruction</option><option value="contrastive">contrastive views</option><option value="link">link prediction</option><option value="multi">multi-task</option></select></div>
+        <div class="control"><label>Adaptation</label><select id="adapt"><option value="linear">linear probe</option><option value="adapter" selected>adapter</option><option value="finetune">full fine-tune</option><option value="prompt">graph prompt</option></select></div>
+        <div class="control"><label>Target task</label><select id="target"><option value="grn" selected>GRN inference</option><option value="perturb">perturbation response</option><option value="drug">drug repurposing</option><option value="celltype">cell annotation</option></select></div>
+        <div class="control"><label>Labels <output id="labelOut">20</output></label><input id="labels" type="range" min="2" max="100" value="20"></div>
+        <div class="control"><label>Shift <output id="shiftOut">35</output></label><input id="shift" type="range" min="0" max="100" value="35"></div>
+      </div>
+    </section>
+    <aside class="panel">
+      <header><p class="eyebrow">Graph foundation transfer lab</p><h1>Does pretraining transfer biological structure, or only bias?</h1><p id="subtitle">Switch corpus, objective, adaptation, target task, label budget, and domain shift.</p></header>
+      <div class="metric-grid">
+        <div class="metric"><span>Transfer gain</span><strong id="gainMetric">0%</strong></div>
+        <div class="metric"><span>Biology alignment</span><strong id="alignMetric">0%</strong></div>
+        <div class="metric"><span>Negative transfer risk</span><strong id="riskMetric">0%</strong></div>
+        <div class="metric"><span>Leakage pressure</span><strong id="leakMetric">0%</strong></div>
+      </div>
+      <div class="card"><h2>Downstream task profile</h2><div id="bars" class="bars"></div></div>
+      <div class="card"><h2>Interpretation</h2><p id="insight">A foundation model is useful only if source pretraining improves the target task under leakage-safe evaluation.</p></div>
+      <div class="legend"><span><i class="dot" style="background:var(--green)"></i> useful transfer</span><span><i class="dot" style="background:var(--gold)"></i> label efficiency</span><span><i class="dot" style="background:var(--pink)"></i> negative transfer</span><span><i class="dot" style="background:var(--blue)"></i> source knowledge</span></div>
+    </aside>
+  </main>
+  <script>
+    const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
+    const controls={corpus:document.getElementById('corpus'),objective:document.getElementById('objective'),adapt:document.getElementById('adapt'),target:document.getElementById('target'),labels:document.getElementById('labels'),shift:document.getElementById('shift')};
+    const out={labels:document.getElementById('labelOut'),shift:document.getElementById('shiftOut'),gain:document.getElementById('gainMetric'),align:document.getElementById('alignMetric'),risk:document.getElementById('riskMetric'),leak:document.getElementById('leakMetric'),bars:document.getElementById('bars'),insight:document.getElementById('insight'),subtitle:document.getElementById('subtitle')};
+    const colors={green:'#6ee7a8',gold:'#e8b857',pink:'#ff6d8b',blue:'#54a8ff',cyan:'#58e0d3',muted:'#213b4b'};
+    const match={singlecell:{grn:.92,perturb:.96,drug:.34,celltype:.9},molecule:{grn:.28,perturb:.36,drug:.88,celltype:.22},kg:{grn:.58,perturb:.5,drug:.94,celltype:.44},mixed:{grn:.72,perturb:.72,drug:.78,celltype:.68}};
+    const objectiveFit={masked:{grn:.86,perturb:.82,drug:.64,celltype:.82},contrastive:{grn:.66,perturb:.62,drug:.74,celltype:.78},link:{grn:.88,perturb:.54,drug:.9,celltype:.48},multi:{grn:.78,perturb:.84,drug:.82,celltype:.76}};
+    const adaptFit={linear:.58,adapter:.78,finetune:.88,prompt:.72};
+    const leakBase={singlecell:.42,molecule:.16,kg:.58,mixed:.5};
+    let state={};
+    function params(){return {corpus:controls.corpus.value,objective:controls.objective.value,adapt:controls.adapt.value,target:controls.target.value,labels:Number(controls.labels.value)/100,shift:Number(controls.shift.value)/100}}
+    function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
+    function compute(){
+      const p=params();
+      const domain=match[p.corpus][p.target], obj=objectiveFit[p.objective][p.target], adapt=adaptFit[p.adapt];
+      const labelBoost=1-Math.exp(-3.2*p.labels);
+      const shiftPenalty=.18+.82*p.shift*(1-domain);
+      let gain=clamp((domain*.48+obj*.24+adapt*.2+labelBoost*.18)-shiftPenalty*.54,0,1);
+      if(p.adapt==='linear')gain*=.82;if(p.adapt==='finetune'&&p.labels<.16)gain*=.82;if(p.objective==='multi')gain+=.05;
+      const align=clamp(domain*.58+obj*.25+(p.corpus==='mixed'?.08:0)-p.shift*.22,0,1);
+      const risk=clamp((1-domain)*.55+p.shift*.38+(p.adapt==='finetune'&&p.labels<.2?.18:0)-(p.adapt==='adapter'?.1:0),0,1);
+      const leak=clamp(leakBase[p.corpus]+(p.objective==='link'?.2:0)+(p.target==='grn'?.12:0)-p.shift*.08,0,1);
+      state={metrics:{gain,align,risk,leak,domain,obj,adapt,labelBoost,shiftPenalty},p};
+      return state;
+    }
+    function fit(){const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));const r=canvas.getBoundingClientRect();canvas.width=Math.max(320,Math.floor(r.width*dpr));canvas.height=Math.max(240,Math.floor(r.height*dpr));ctx.setTransform(dpr,0,0,dpr,0,0)}
+    function roundedRect(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}}
+    function line(x1,y1,x2,y2,c,w=2,dash=[]){ctx.save();ctx.setLineDash(dash);ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore()}
+    function draw(){
+      const s=compute(),p=s.p,m=s.metrics,w=canvas.clientWidth,h=canvas.clientHeight;
+      ctx.clearRect(0,0,w,h);
+      const pad=w<720?14:24,gap=w<720?10:18,top=w<720?16:64,colW=(w-pad*2-gap*2)/3,panelH=h-top-24;
+      const labels=colW<180?['source','encoder','target']:['pretraining sources','foundation encoder','target transfer audit'];
+      labels.forEach((t,k)=>{const x=pad+k*(colW+gap);roundedRect(x,top,colW,panelH,18,'rgba(7,20,28,.88)','#244a5d');ctx.fillStyle='#dff7fb';ctx.font='700 15px Segoe UI';ctx.fillText(t,x+14,top+28)});
+      drawSource(pad,top,colW,panelH,p);
+      drawEncoder(pad+colW+gap,top,colW,panelH,m,p);
+      drawTarget(pad+2*(colW+gap),top,colW,panelH,m,p);
+      window.__B08_LAB_READY__=true;window.__B08LabReady=true;window.__B08_LAST_METRICS__=m;window.__B08LabSnapshot=m;
+    }
+    function drawSource(x,y,w,h,p){
+      const names={singlecell:['gene','cell','TF','peak','path'],molecule:['atom','bond','ring','frag','prop'],kg:['drug','disease','gene','side','path'],mixed:['mol','gene','cell','drug','ppi']}[p.corpus];
+      const cx=x+w/2,cy=y+h*.55,rad=Math.min(w,h)*.26;
+      const pts=names.map((_,i)=>({x:cx+Math.cos(-Math.PI/2+i*2*Math.PI/names.length)*rad,y:cy+Math.sin(-Math.PI/2+i*2*Math.PI/names.length)*rad}));
+      pts.forEach((a,i)=>{const b=pts[(i+1)%pts.length];line(a.x,a.y,b.x,b.y,i%2?colors.gold:colors.blue,2.6)});
+      pts.forEach((pt,i)=>{ctx.beginPath();ctx.arc(pt.x,pt.y,13,0,Math.PI*2);ctx.fillStyle=[colors.blue,colors.cyan,colors.gold,colors.pink,colors.green][i];ctx.fill();ctx.strokeStyle='#dff7fb';ctx.stroke();ctx.fillStyle='#061018';ctx.font='800 9px Segoe UI';ctx.textAlign='center';ctx.fillText(names[i].slice(0,4),pt.x,pt.y+3)});
+      if(w>190){ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.textAlign='left';ctx.fillText('source corpus defines what can transfer',x+14,y+h-28);}
+    }
+    function drawEncoder(x,y,w,h,m,p){
+      const cx=x+w/2,cy=y+h*.5;
+      roundedRect(cx-w*.25,cy-h*.18,w*.5,h*.36,24,'#07131a','#294f62');
+      ctx.fillStyle=colors.cyan;ctx.font='800 23px Segoe UI';ctx.textAlign='center';ctx.fillText('GFM',cx,cy-4);
+      ctx.fillStyle='#a9c7d3';ctx.font='12px Segoe UI';
+      if(w>190){ctx.fillText(p.objective, cx, cy+28);ctx.fillText(p.adapt, cx, cy+50);} else {ctx.fillText(p.adapt, cx, y+h-32);}
+      const dots=9;for(let i=0;i<dots;i++){const a=i/dots*Math.PI*2;const r=w*.22+h*.04;ctx.beginPath();ctx.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r*.58,5+m.domain*5,0,Math.PI*2);ctx.fillStyle=i%3===0?colors.green:i%3===1?colors.gold:colors.blue;ctx.fill()}
+      if(w>190){ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.fillText('shared representation + adaptation head',cx, y+h-28);}
+    }
+    function drawTarget(x,y,w,h,m,p){
+      const base=y+h*.76,maxH=h*.42,cx=x+w/2;
+      const vals=[['gain',m.gain,colors.green],['align',m.align,colors.gold],['risk',m.risk,colors.pink],['leak',m.leak,colors.blue]];
+      vals.forEach((v,i)=>{const bw=w*.15,gap=w*.055,bx=cx-(vals.length*bw+(vals.length-1)*gap)/2+i*(bw+gap),bh=maxH*v[1];roundedRect(bx,base-bh,bw,bh,8,v[2],'rgba(255,255,255,.2)');ctx.fillStyle='#dff7fb';ctx.font=w<190?'700 9px Segoe UI':'700 11px Segoe UI';ctx.textAlign='center';ctx.fillText(w<190?v[0][0].toUpperCase():v[0],bx+bw/2,base+16);ctx.fillText(Math.round(v[1]*100)+'%',bx+bw/2,base-bh-8)});
+      ctx.strokeStyle='#244a5d';ctx.beginPath();ctx.moveTo(x+22,base);ctx.lineTo(x+w-22,base);ctx.stroke();
+      if(w>190){ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.textAlign='left';ctx.fillText('target task: '+p.target+'; shift and labels decide safety',x+14,y+h-28);}
+    }
+    function updatePanel(){
+      const s=state,p=s.p,m=s.metrics;
+      out.labels.textContent=Math.round(p.labels*100);out.shift.textContent=Math.round(p.shift*100);
+      out.gain.textContent=Math.round(m.gain*100)+'%';out.align.textContent=Math.round(m.align*100)+'%';out.risk.textContent=Math.round(m.risk*100)+'%';out.leak.textContent=Math.round(m.leak*100)+'%';
+      const corpusNames={singlecell:'single-cell gene graph',molecule:'molecular graphs',kg:'biomedical knowledge graph',mixed:'mixed graph corpus'};
+      const targetNames={grn:'GRN inference',perturb:'perturbation response',drug:'drug repurposing',celltype:'cell annotation'};
+      out.subtitle.textContent=`${corpusNames[p.corpus]} -> ${targetNames[p.target]} with ${Math.round(p.labels*100)}% labels and ${Math.round(p.shift*100)}% shift.`;
+      const rows=[['domain match',m.domain],['objective fit',m.obj],['adaptation capacity',m.adapt],['label help',m.labelBoost],['shift penalty',m.shiftPenalty],['leakage pressure',m.leak]];
+      out.bars.innerHTML=rows.map(r=>`<div class="bar-row"><b>${r[0]}</b><span class="track"><span class="fill" style="width:${Math.round(r[1]*100)}%;background:${r[0].includes('penalty')||r[0].includes('leak')?'linear-gradient(90deg,var(--pink),var(--gold))':'linear-gradient(90deg,var(--green),var(--cyan))'}"></span></span><em>${Math.round(r[1]*100)}%</em></div>`).join('');
+      const adaptText=p.adapt==='linear'?'Linear probing tests whether the frozen representation already contains the target signal.':p.adapt==='adapter'?'Adapters are a pragmatic middle ground: they specialize the model without overwriting all pretrained structure.':p.adapt==='finetune'?'Full fine-tuning can be strongest with enough labels, but it can overfit or forget under scarce labels.':'Graph prompts steer the pretrained model with small task-specific signals, useful when labels are scarce but assumptions must be explicit.';
+      out.insight.textContent=adaptText+' Treat transfer gain as real only under leakage-safe splits, source-target separation, and independent biological validation.';
+    }
+    function render(){draw();updatePanel()}
+    Object.values(controls).forEach(el=>el.addEventListener('input',render));
+    window.addEventListener('resize',()=>{fit();render()});
+    fit();render();
+  </script>
+</body>
+</html>

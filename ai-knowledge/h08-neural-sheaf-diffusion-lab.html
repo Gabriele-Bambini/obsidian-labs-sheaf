@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H08 Neural Sheaf Diffusion</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=h05-intuitive-v11-h08-concrete-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="sheaf" data-lab-id="h08" data-keywords="neural sheaf diffusion learned restrictions sheaf ODE heterophily oversmoothing kernel">
+    <section class="visual-stack">
+      <div class="stage">
+        <div class="lab-viewport">
+          <canvas id="canvas" aria-label="H08 concrete neural sheaf diffusion ODE visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>H08</strong></div>
+          <div class="formula-chip"><span>Model</span><strong id="formulaText">dx/dt = -Delta_F(theta) x</strong></div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected object</span><strong>plain vs learned sheaf diffusion</strong></div>
+      </div>
+      <div class="command-bar controls">
+        <select id="scenario" aria-label="Graph scenario">
+          <option value="alternating">Alternating labels</option>
+          <option value="heterophily">Heterophily graph</option>
+          <option value="mixed">Mixed homophily</option>
+        </select>
+        <select id="operator" aria-label="Diffusion operator">
+          <option value="graph">Plain diffusion</option>
+          <option value="sheaf">Learned sheaf diffusion</option>
+        </select>
+        <select id="view" aria-label="NSD view">
+          <option value="comparison">Graph vs sheaf</option>
+          <option value="ode">Sheaf ODE</option>
+          <option value="kernel">Learned kernel</option>
+          <option value="energy">Energy response</option>
+        </select>
+        <div class="command-control">
+          <label for="odeSteps">Diffusion layers <output data-output="odeSteps">4</output></label>
+          <input id="odeSteps" type="range" min="1" max="10" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="kernelSharpness">Kernel sharpness <output data-output="kernelSharpness">1.00</output></label>
+          <input id="kernelSharpness" type="range" min="0.4" max="1.8" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="featureNoise">Feature corruption <output data-output="featureNoise">0.24</output></label>
+          <input id="featureNoise" type="range" min="0" max="0.8" step="0.02" value="0.24">
+        </div>
+        <div class="command-control">
+          <label for="relationChannels">Relation channels <output data-output="relationChannels">4</output></label>
+          <input id="relationChannels" type="range" min="1" max="6" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="skipConnection">Skip connection <output data-output="skipConnection">0.48</output></label>
+          <input id="skipConnection" type="range" min="0" max="1" step="0.02" value="0.48">
+        </div>
+        <button id="learnRestrictions" class="primary" data-action="step" type="button">Learn restrictions</button>
+        <button id="stepOde" data-action="step" type="button">Step ODE</button>
+        <button id="projectKernel" data-action="pulse" type="button">Project kernel</button>
+        <button id="compareGraph" data-action="step" type="button">Compare graph</button>
+        <button id="resetH08" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block H 3D lab</p>
+        <h1>H08 Neural Sheaf Diffusion</h1>
+        <p class="subtitle">Plain diffusion collapse lane vs learned sheaf diffusion lane: restriction gates create an evolving sheaf Laplacian, then the sheaf ODE moves toward a learned kernel/global section.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Sheaf energy drop"><span>Sheaf energy drop</span><strong id="dropLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Label agreement"><span>Map agreement</span><strong id="agreementLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Relation coverage"><span>Kernel dim</span><strong id="kernelLabel">1</strong></div>
+        <div class="metric" data-role="metric" data-metric="Stability reserve"><span>Over-smoothing</span><strong id="smoothLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading neural sheaf diffusion diagnostics.</p>
+        <p id="stateBox" class="state-box">Waiting for the first render.</p>
+      </div>
+      <p class="hint">Top lane shows raw graph diffusion collapsing heterophilic features. Bottom lane shows learned restriction gates and a sheaf ODE preserving compatible role structure.</p>
+    </aside>
+  </main>
+  <!-- {"visual":{"kind":"neural-diffusion","graphStyle":"hybrid"},"profile":{"preferredMetric":"Sheaf energy drop"},"graph":{"nodes":["plain diffusion collapse lane","learned sheaf diffusion lane","learned restriction gate","sheaf ODE trajectory","learned kernel surface"],"edges":["graph smoothing collapse","learned restrictions","global section projection"]}} -->
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=h05-intuitive-v11-h08-concrete-v2"></script>
+  <script src="shared/sheaf-dynamics-labs.js?math3d=h05-intuitive-v11-h08-concrete-v2"></script>
+  <script>
+    window.__h08LabReady = false;
+    window.__h08LabSnapshot = window.__h08LabSnapshot || function () { return null; };
+    createH08NeuralSheafDiffusionConcreteLab();
+  </script>
+</body>
+</html>

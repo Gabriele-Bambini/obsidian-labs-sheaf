@@ -1,0 +1,11 @@
+const fs = require('fs');
+const html = fs.readFileSync('a05-graph-laplacians-from-intuition-to-spectral-operators-lab.html', 'utf8');
+if (!html.includes('A05 - Graph Laplacian Energy Lab')) throw new Error('missing A05 title');
+if (!html.includes('window.__A05LabReady')) throw new Error('missing ready flag');
+if (!html.includes('window.__A05LabSnapshot')) throw new Error('missing snapshot flag');
+if (!html.includes('L = D - A')) throw new Error('missing Laplacian formula');
+if (!html.includes('Apply smoothing step')) throw new Error('missing smoothing control');
+if (!html.includes('Unnormalized L')) throw new Error('missing Laplacian mode');
+if (!html.includes('@media(max-width')) throw new Error('missing mobile CSS');
+if (/https?:\/\/cdn/i.test(html)) throw new Error('CDN dependency found');
+console.log('ok A05 Laplacian energy lab');

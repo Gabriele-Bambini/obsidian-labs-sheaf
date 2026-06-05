@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>F09 Hypergraph Incidence</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=f09-hypergraph-incidence-v1">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="hypergraph" data-lab-id="f09" data-keywords="hypergraph incidence matrix star expansion clique expansion higher-order message passing">
+    <section class="visual-stack" aria-label="Interactive 3D hypergraph incidence visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="F09 hypergraph incidence 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>F09</strong></div>
+          <div class="formula-chip"><span id="formulaText">X_E = D_e^-1 H^T X_V</span>Hyperedges are group events: incidence keeps the group identity that clique expansion can erase.</div>
+        </div>
+        <div class="concept-rail" aria-hidden="true">
+          <span data-visual-key="incidence-board">Incidence board H</span>
+          <span data-visual-key="hyperedge-sheets">Hyperedge sheets</span>
+          <span data-visual-key="star-lift">Star lift</span>
+          <span data-visual-key="clique-shadow">Clique shadow</span>
+          <span data-visual-key="broadcast">Broadcast conveyors</span>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected hyperedge</span><strong>Incidence flow is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.58fr)) repeat(5,minmax(0,.58fr)) repeat(4,minmax(0,.48fr));">
+        <select id="scenario" data-control="scenario" aria-label="Hypergraph scenario">
+          <option value="authors">Coauthor papers</option>
+          <option value="basket">Basket sessions</option>
+          <option value="reaction">Reaction roles</option>
+        </select>
+        <select id="viewSelect" data-control="viewSelect" aria-label="Hypergraph view">
+          <option value="incidence">Incidence</option>
+          <option value="star">Star</option>
+          <option value="clique">Clique</option>
+          <option value="matrix">Matrix</option>
+        </select>
+        <select id="normalization" data-control="normalization" aria-label="Normalization">
+          <option value="mean">Mean</option>
+          <option value="size">Size-normalized</option>
+          <option value="sum">Sum</option>
+        </select>
+        <div class="command-control">
+          <label for="groupWeight">Group w <output data-output="groupWeight">0.78</output></label>
+          <input id="groupWeight" data-param="groupWeight" type="range" min="0.2" max="1.6" step="0.01" value="0.78">
+        </div>
+        <div class="command-control">
+          <label for="overlapMix">Overlap <output data-output="overlapMix">0.42</output></label>
+          <input id="overlapMix" data-param="overlapMix" type="range" min="0" max="1" step="0.01" value="0.42">
+        </div>
+        <div class="command-control">
+          <label for="largePenalty">Large edge <output data-output="largePenalty">0.54</output></label>
+          <input id="largePenalty" data-param="largePenalty" type="range" min="0" max="1" step="0.01" value="0.54">
+        </div>
+        <div class="command-control">
+          <label for="messageDepth">Passes <output data-output="messageDepth">2</output></label>
+          <input id="messageDepth" data-param="messageDepth" type="range" min="1" max="5" step="1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="perturbStrength">Perturb <output data-output="perturbStrength">0.35</output></label>
+          <input id="perturbStrength" data-param="perturbStrength" type="range" min="0" max="1" step="0.01" value="0.35">
+        </div>
+        <button id="passMessages" class="primary" data-action="pulse" type="button">Send H^T</button>
+        <button id="toggleExpansion" data-action="step" type="button">Star/Clique</button>
+        <button id="runPasses" data-action="step" type="button">Diffuse L_H</button>
+        <button id="perturb" data-action="reset" type="button">Perturb v</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block F 3D lab</p>
+        <h1>F09 Hypergraph Incidence</h1>
+        <p class="subtitle">Rotate nodes, translucent hyperedge sheets, incidence matrix columns, star-expansion group nodes, clique projection edges, and two-step hypergraph message passing.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Incidences"><span>Incidences</span><strong id="incidenceLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Clique edges"><span>Clique edges</span><strong id="cliqueLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Max size"><span>Max size</span><strong id="sizeLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Smoothness"><span>Smoothness</span><strong id="smoothLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading hypergraph incidence diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: scenario changes group semantics, normalization changes hyperedge summaries, expansion toggles star versus clique, and perturbation shows how a node affects every group it belongs to.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=f09-hypergraph-incidence-v1"></script>
+  <script src="shared/ml-lab-core.js?math3d=f09-hypergraph-incidence-v1"></script>
+  <script>
+    window.__f09LabSnapshot = window.__f09LabSnapshot || function () { return null; };
+    createF09HypergraphIncidenceLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en" data-obsidian-mobile-ready="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>B12 - Hypergraph Incidence Biology Lab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#071015;--line:#25485b;--text:#edf9fb;--muted:#a8c1cb;--cyan:#58e0d3;--blue:#54a8ff;--gold:#e8b857;--pink:#ff6d8b;--green:#6ee7a8;--violet:#b49cff}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.42 Inter,Segoe UI,system-ui,Arial,sans-serif}
+    .shell{height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:12px;padding:12px;background:radial-gradient(circle at 18% 10%,rgba(88,224,211,.14),transparent 30%),radial-gradient(circle at 82% 42%,rgba(180,156,255,.12),transparent 28%),linear-gradient(135deg,#050b10,#0b1720 64%,#05090d)}
+    .stage,.panel{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(11,27,37,.97),rgba(6,15,21,.98));box-shadow:0 18px 52px rgba(0,0,0,.34);min-width:0;min-height:0}
+    .stage{display:grid;grid-template-rows:minmax(0,1fr) auto;overflow:hidden;position:relative}.canvas-wrap{position:relative;min-height:0}canvas{display:block;width:100%;height:100%;min-height:340px;touch-action:none}
+    .overlay{position:absolute;left:14px;right:14px;top:14px;display:flex;gap:10px;justify-content:space-between;pointer-events:none}.badge,.formula{border:1px solid rgba(143,216,242,.25);background:rgba(7,16,21,.78);backdrop-filter:blur(8px);border-radius:12px;padding:9px 11px}.badge span,.formula span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.badge strong{font-size:18px}.formula{max-width:850px;color:#cfe5ec}.formula code{color:var(--cyan);font-weight:800}
+    .controls{display:grid;grid-template-columns:1.15fr .9fr .7fr .7fr .7fr auto;gap:10px;padding:10px;border-top:1px solid var(--line);background:#091720}.control{min-width:0;overflow:hidden}.control label{display:flex;justify-content:space-between;margin-bottom:4px;color:var(--muted);font-size:12px}.control output{color:var(--text);font-weight:800}select,input,button{width:100%;min-width:0;border:1px solid #315b70;border-radius:10px;background:#102838;color:var(--text);font:inherit}select,button{height:38px;padding:0 10px}button{font-weight:800;cursor:pointer}input[type=range]{height:38px;accent-color:var(--cyan)}
+    .panel{display:flex;flex-direction:column;gap:12px;padding:14px;overflow:auto}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--cyan)!important}.panel h1{font-size:22px;line-height:1.1;margin:0}.panel p{margin:0;color:var(--muted)}
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:10px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;margin-top:4px;font-size:19px}
+    .card{border:1px solid var(--line);border-radius:12px;background:#0a1720;padding:12px}.card h2{font-size:15px;margin:0 0 6px}.legend{display:flex;flex-wrap:wrap;gap:7px}.legend span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:var(--muted)}.dot{width:9px;height:9px;border-radius:99px;display:inline-block}
+    @media(max-width:920px){html,body{height:auto;min-height:100%;overflow:auto;max-width:100vw}.shell{width:100vw;min-height:100vh;height:auto;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;gap:8px;padding:8px;overflow:visible}.stage,.panel{width:100%;max-width:100%}.stage{min-height:430px}.canvas-wrap{min-height:258px}canvas{min-height:258px}.overlay{display:none}.controls{grid-template-columns:repeat(2,minmax(0,1fr));padding:8px;gap:7px}.control label{display:block;font-size:11px;line-height:1.15}.control output{float:right;font-size:11px}select,input[type=range],button{height:30px}select,button{font-size:12px;padding:0 6px;text-overflow:ellipsis}.panel{padding:10px;gap:9px;overflow:visible}.panel h1{font-size:17px;line-height:1.14;overflow-wrap:break-word}.panel p{font-size:12px}.metric-grid{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:8px}.metric strong{font-size:17px}.legend{display:none}.card:nth-of-type(2){display:none}}
+    @media(max-width:480px){.metric-grid{grid-template-columns:1fr}.panel header p:not(.eyebrow){display:block}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="stage" aria-label="Interactive hypergraph neural network visualization">
+      <div class="canvas-wrap">
+        <canvas id="scene" aria-label="Hypergraph incidence matrix and biological hyperedge canvas"></canvas>
+        <div class="overlay">
+          <div class="badge"><span>Chapter lab</span><strong>B12</strong></div>
+          <div class="formula"><span>Hypergraph convolution</span><code>X' = sigma(Dv^-1/2 H W De^-1 H^T Dv^-1/2 X Theta)</code></div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control"><label>Biology schema</label><select id="schema"><option value="pathway" selected>pathway gene set</option><option value="tf">combinatorial TF regulon</option><option value="complex">protein complex</option><option value="niche">cell-cell niche</option><option value="multiome">multi-omics module</option></select></div>
+        <div class="control"><label>View</label><select id="view"><option value="incidence" selected>incidence matrix</option><option value="clique">pairwise clique</option><option value="star">node-hyperedge-node</option><option value="allset">AllSet message flow</option></select></div>
+        <div class="control"><label>Size <output id="sizeOut">5</output></label><input id="size" type="range" min="3" max="8" value="5"></div>
+        <div class="control"><label>Confidence <output id="confOut">72</output></label><input id="conf" type="range" min="0" max="100" value="72"></div>
+        <div class="control"><label>Noise <output id="noiseOut">18</output></label><input id="noise" type="range" min="0" max="100" value="18"></div>
+        <button id="pulse" type="button">Pulse</button>
+      </div>
+    </section>
+    <aside class="panel">
+      <header><p class="eyebrow">Hypergraph incidence biology lab</p><h1>When is a biological relation more than a pairwise edge?</h1><p id="subtitle">Compare clique expansion with incidence-based message passing for pathways, regulons, complexes, niches, and multi-omics modules.</p><p class="mobile-note">Use size, confidence, and noise to test when a biological group stays meaningful and when it becomes a misleading cloud of pairwise claims.</p></header>
+      <div class="metric-grid">
+        <div class="metric"><span>pairwise edges if expanded</span><strong id="edgeMetric">0</strong></div>
+        <div class="metric"><span>Group fidelity</span><strong id="fidelityMetric">0%</strong></div>
+        <div class="metric"><span>Biology trust</span><strong id="trustMetric">0%</strong></div>
+        <div class="metric"><span>Overclaim risk</span><strong id="riskMetric">0%</strong></div>
+      </div>
+      <div class="card"><h2>What the hyperedge means</h2><p id="meaning">A pathway gene set is one membership relation, not proof that every gene pair physically interacts.</p></div>
+      <div class="card"><h2>Formula lens</h2><p id="formula">H[v,e] records membership. A layer aggregates nodes into hyperedge states and sends the hyperedge state back to member nodes.</p></div>
+      <div class="legend"><span><i class="dot" style="background:var(--blue)"></i> node</span><span><i class="dot" style="background:var(--cyan)"></i> hyperedge</span><span><i class="dot" style="background:var(--gold)"></i> incidence</span><span><i class="dot" style="background:var(--pink)"></i> pairwise overclaim</span></div>
+    </aside>
+  </main>
+  <script>
+    const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
+    const controls={schema:document.getElementById('schema'),view:document.getElementById('view'),size:document.getElementById('size'),conf:document.getElementById('conf'),noise:document.getElementById('noise'),pulse:document.getElementById('pulse')};
+    const out={size:document.getElementById('sizeOut'),conf:document.getElementById('confOut'),noise:document.getElementById('noiseOut'),edges:document.getElementById('edgeMetric'),fidelity:document.getElementById('fidelityMetric'),trust:document.getElementById('trustMetric'),risk:document.getElementById('riskMetric'),meaning:document.getElementById('meaning'),formula:document.getElementById('formula'),subtitle:document.getElementById('subtitle')};
+    const colors={node:'#54a8ff',hyper:'#58e0d3',inc:'#e8b857',risk:'#ff6d8b',green:'#6ee7a8',violet:'#b49cff',grid:'#244a5d'};
+    const schemas={
+      pathway:{label:'pathway gene set',nodes:['TF','G1','G2','G3','state','enzyme','marker','drug'],meaning:'A pathway hyperedge says these genes participate in one functional module. It does not say every pair is a direct mechanism.'},
+      tf:{label:'combinatorial TF regulon',nodes:['TF1','TF2','enh','G1','G2','motif','ATAC','cell'],meaning:'A combinatorial regulon can require multiple TFs and evidence sources at once. A hyperedge can keep that group claim intact.'},
+      complex:{label:'protein complex',nodes:['P1','P2','P3','P4','site','drug','assay','phen'],meaning:'A protein complex is a many-body relation. Pairwise PPI edges can miss the fact that the complex acts as a unit.'},
+      niche:{label:'cell-cell niche',nodes:['fibro','mac','endo','Tcell','lig','rec','ECM','state'],meaning:'A tissue niche can involve several cell types and ligand-receptor programs simultaneously, not one isolated pair.'},
+      multiome:{label:'multi-omics module',nodes:['RNA','ATAC','prot','peak','gene','motif','cell','label'],meaning:'A multi-omics hyperedge can join modalities measured on the same cell or module without forcing pairwise fusion first.'}
+    };
+    let phase=0;
+    function params(){return {schema:controls.schema.value,view:controls.view.value,k:Number(controls.size.value),conf:Number(controls.conf.value)/100,noise:Number(controls.noise.value)/100}}
+    function compute(){
+      const p=params(),schema=schemas[p.schema],edges=p.k*(p.k-1)/2;
+      const viewBoost={incidence:.86,star:.82,allset:.92,clique:.46}[p.view];
+      const fidelity=Math.max(.05,Math.min(1,viewBoost*(.72+.28*p.conf)-p.noise*.28));
+      const trust=Math.max(.04,Math.min(1,(.55+.45*p.conf)*fidelity-p.noise*.18));
+      const risk=Math.max(0,Math.min(1,(p.view==='clique'?0.64:0.22)+p.noise*.5+(p.k-4)*.055-p.conf*.28));
+      const members=schema.nodes.slice(0,p.k);
+      const metrics={edges,fidelity,trust,risk};
+      return {p,schema,members,metrics};
+    }
+    function fit(){const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));const r=canvas.getBoundingClientRect();canvas.width=Math.max(320,Math.floor(r.width*dpr));canvas.height=Math.max(240,Math.floor(r.height*dpr));ctx.setTransform(dpr,0,0,dpr,0,0)}
+    function rr(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}}
+    function line(x1,y1,x2,y2,c,w=2){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+    function node(x,y,label,color=colors.node,r=18){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='#eaf7fb';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#061018';ctx.font='800 10px Segoe UI';ctx.textAlign='center';ctx.fillText(label,x,y+3)}
+    function layoutMembers(cx,cy,r,members){return members.map((label,i)=>{const a=-Math.PI/2+i*Math.PI*2/members.length+phase*.02;return {label,x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r}})}
+    function draw(){
+      const s=compute(),w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);
+      if(w<560){drawMobile(12,12,w-24,h-24,s);publish(s);return}
+      const pad=24,gap=18,top=64,colW=(w-pad*2-gap*2)/3,panelH=h-top-28;
+      ['pairwise expansion','incidence matrix H','hyperedge message passing'].forEach((t,k)=>{const x=pad+k*(colW+gap);rr(x,top,colW,panelH,18,'rgba(7,20,28,.88)','#244a5d');ctx.fillStyle='#dff7fb';ctx.font='700 15px Segoe UI';ctx.textAlign='left';ctx.fillText(t,x+14,top+28)});
+      drawPairwise(pad,top,colW,panelH,s);drawIncidence(pad+colW+gap,top,colW,panelH,s);drawHyperedge(pad+2*(colW+gap),top,colW,panelH,s);
+      publish(s);
+    }
+    function publish(s){window.__B12_LAB_READY__=true;window.__B12LabReady=true;window.__B12_LAST_METRICS__=s.metrics;window.__B12LabSnapshot=s.metrics}
+    function drawPairwise(x,y,w,h,s){
+      const pts=layoutMembers(x+w/2,y+h*.52,Math.min(w,h)*.24,s.members);
+      for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){line(pts[i].x,pts[i].y,pts[j].x,pts[j].y,s.p.view==='clique'?colors.risk:'rgba(255,109,139,.22)',s.p.view==='clique'?2.2:1.2)}
+      pts.forEach(p=>node(p.x,p.y,p.label,colors.node));
+      ctx.fillStyle=colors.risk;ctx.font='800 22px Segoe UI';ctx.textAlign='center';ctx.fillText(s.metrics.edges+' pairwise edges',x+w/2,y+h-52);ctx.fillStyle='#9fb9c6';ctx.font='12px Segoe UI';ctx.fillText('clique expansion changes the claim',x+w/2,y+h-28)
+    }
+    function drawIncidence(x,y,w,h,s){
+      const rows=s.schema.nodes.slice(0,8),cols=['e1','e2','e3'];const gx=x+44,gy=y+62,cw=Math.min(42,(w-90)/cols.length),rh=Math.min(30,(h-112)/rows.length);
+      ctx.fillStyle='#9fb9c6';ctx.font='800 11px Segoe UI';ctx.textAlign='center';cols.forEach((c,j)=>ctx.fillText(c,gx+70+j*cw+cw/2,gy-12));
+      rows.forEach((r,i)=>{ctx.fillStyle='#9fb9c6';ctx.textAlign='right';ctx.fillText(r,gx+58,gy+i*rh+rh*.66);cols.forEach((c,j)=>{const on=j===0&&i<s.members.length || j===1&&(i+2)%3===0 || j===2&&(i===0||i===rows.length-1);rr(gx+70+j*cw,gy+i*rh,cw-4,rh-4,6,on?'rgba(88,224,211,.9)':'rgba(10,25,34,.9)','#203c4d');if(on){ctx.fillStyle='#061018';ctx.textAlign='center';ctx.font='800 11px Segoe UI';ctx.fillText('1',gx+70+j*cw+cw/2,gy+i*rh+rh*.66)}})});
+      ctx.fillStyle='#dff7fb';ctx.font='800 13px Segoe UI';ctx.textAlign='center';ctx.fillText('incidence matrix: H[v,e]',x+w/2,y+h-28)
+    }
+    function drawHyperedge(x,y,w,h,s){
+      const cx=x+w/2,cy=y+h*.52,r=Math.min(w,h)*.27;const pts=layoutMembers(cx,cy,r,s.members);
+      ctx.beginPath();ctx.ellipse(cx,cy,r*1.05,r*.72,0,0,Math.PI*2);ctx.fillStyle='rgba(88,224,211,.16)';ctx.fill();ctx.strokeStyle=colors.hyper;ctx.lineWidth=3;ctx.stroke();
+      ctx.fillStyle=colors.hyper;ctx.font='800 14px Segoe UI';ctx.textAlign='center';ctx.fillText(s.schema.label,cx,cy+4);
+      pts.forEach((p,i)=>{line(p.x,p.y,cx,cy,colors.inc,2);const q=(Math.sin(phase*.06+i)+1)/2;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(p.x+(cx-p.x)*q,p.y+(cy-p.y)*q,3,0,7);ctx.fill();node(p.x,p.y,p.label,[colors.node,colors.green,colors.gold,colors.violet][i%4],15)});
+      ctx.fillStyle='#dff7fb';ctx.font='800 13px Segoe UI';ctx.fillText(s.p.view==='allset'?'learn two multiset functions':'node -> hyperedge -> node',cx,y+h-28)
+    }
+    function drawMobile(x,y,w,h,s){
+      rr(x,y,w,h,16,'rgba(7,20,28,.92)','#244a5d');
+      ctx.fillStyle=colors.hyper;ctx.font='800 11px Segoe UI';ctx.textAlign='left';ctx.fillText('B12 HYPERGRAPH GNN',x+14,y+22);
+      ctx.fillStyle='#dff7fb';ctx.font='800 14px Segoe UI';ctx.fillText('one group relation, not many fake pairs',x+14,y+43);
+      const cx=x+w*.5,cy=y+124,r=Math.min(58,w*.21);const pts=layoutMembers(cx,cy,r,s.members);
+      ctx.beginPath();ctx.ellipse(cx,cy,r*1.08,r*.7,0,0,7);ctx.fillStyle='rgba(88,224,211,.16)';ctx.fill();ctx.strokeStyle=colors.hyper;ctx.lineWidth=3;ctx.stroke();
+      pts.forEach((p,i)=>{line(p.x,p.y,cx,cy,colors.inc,2);node(p.x,p.y,p.label,[colors.node,colors.green,colors.gold,colors.violet][i%4],12)});
+      ctx.fillStyle=colors.hyper;ctx.font='800 11px Segoe UI';ctx.textAlign='center';ctx.fillText('hyperedge',cx,cy+4);
+      const by=y+Math.min(h-76,212);drawMiniBar(x+18,by,w-36,12,s.metrics.fidelity,colors.hyper,'group fidelity');drawMiniBar(x+18,by+31,w-36,12,1-s.metrics.risk,colors.green,'anti-overclaim');drawMiniBar(x+18,by+62,w-36,12,s.p.conf,colors.blue,'evidence confidence');
+      ctx.fillStyle=colors.risk;ctx.font='800 13px Segoe UI';ctx.textAlign='right';ctx.fillText(s.metrics.edges+' clique edges',x+w-18,by-18);
+    }
+    function drawMiniBar(x,y,w,h,value,color,label){rr(x,y,w,h,h/2,'#08131a','#203c4d');rr(x,y,w*value,h,h/2,color);ctx.fillStyle='#9fb9c6';ctx.font='10px Segoe UI';ctx.textAlign='left';ctx.fillText(label,x,y-4);ctx.textAlign='right';ctx.fillText(Math.round(value*100)+'%',x+w,y-4)}
+    function updatePanel(){
+      const s=compute(),m=s.metrics,p=s.p;out.size.textContent=p.k;out.conf.textContent=Math.round(p.conf*100);out.noise.textContent=Math.round(p.noise*100);out.edges.textContent=m.edges;out.fidelity.textContent=Math.round(m.fidelity*100)+'%';out.trust.textContent=Math.round(m.trust*100)+'%';out.risk.textContent=Math.round(m.risk*100)+'%';out.subtitle.textContent=s.schema.meaning;out.meaning.textContent=s.schema.meaning;
+      out.formula.textContent=p.view==='clique'?'Clique expansion replaces one group relation with many pairwise edges. That can help computation but can overclaim biology.':p.view==='allset'?'AllSet views hypergraph layers as two learned multiset functions: nodes to hyperedges, then hyperedges to nodes.':'The incidence matrix H keeps membership explicit: H[v,e]=1 when node v belongs to hyperedge e.';
+    }
+    function render(){phase+=1;draw();updatePanel()}
+    Object.values(controls).forEach(el=>el.addEventListener('input',render));controls.pulse.addEventListener('click',()=>{phase+=18;render()});window.addEventListener('resize',()=>{fit();render()});fit();render();
+  </script>
+</body>
+</html>

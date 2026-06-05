@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A02 Feature and Evidence Lab</title>
+<style>
+  :root{--bg:#071015;--panel:#0d1a22;--line:#274759;--text:#f5fbff;--muted:#a9c0ca;--cyan:#64f1e1;--gold:#ffd166;--rose:#ff6699;--blue:#80b8ff;--green:#98f58f}
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(circle at 42% 28%,#102735 0,#071015 55%,#03070a 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Arial,sans-serif}
+  .app{min-height:100vh;display:grid;grid-template-columns:minmax(620px,1fr) 360px;gap:14px;padding:14px}
+  .stage,.side{border:1px solid var(--line);background:rgba(7,16,21,.86);box-shadow:0 16px 60px rgba(0,0,0,.35);border-radius:14px;overflow:hidden}
+  .stage{position:relative;min-height:720px}
+  canvas{width:100%;height:100%;display:block}
+  .hud{position:absolute;left:18px;top:18px;display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;pointer-events:none}
+  .badge{border:1px solid #294d5e;background:rgba(10,25,34,.92);padding:12px 14px;border-radius:10px;min-width:188px}
+  .badge b{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);margin-bottom:5px}
+  .badge span{font-weight:850;font-size:19px}
+  .formula{min-width:510px}
+  .formula code{font:800 18px/1.35 Consolas,Menlo,monospace;white-space:normal;color:#f3fbff}
+  .legend{position:absolute;left:18px;right:18px;bottom:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .legend div{border:1px solid #244656;background:rgba(8,20,28,.9);padding:9px 11px;font-weight:800;font-size:13px}
+  .legend .gold{color:var(--gold)}.legend .cyan{color:var(--cyan)}.legend .rose{color:var(--rose)}.legend .blue{color:var(--blue)}
+  .side{padding:14px;display:flex;flex-direction:column;gap:12px}
+  h1{font-size:28px;line-height:1.05;margin:4px 0 4px}
+  .eyebrow{color:var(--cyan);font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+  p{color:#c8d8df;margin:0;font-size:14px;line-height:1.45}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  button,select{width:100%;border:1px solid #2b4858;background:#14212b;color:#fff;border-radius:0;padding:11px 10px;font-weight:850;font-size:14px}
+  button:active{transform:translateY(1px)}
+  .slider{border:1px solid #203c4b;background:#101d26;padding:10px;border-radius:0}
+  .slider label{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#b7cbd4;font-weight:850;margin-bottom:6px}
+  input[type=range]{width:100%;accent-color:var(--cyan)}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .metric{border:1px solid #2a4553;background:#0d1a22;padding:10px}
+  .metric b{display:block;color:#a9c0ca;font-size:11px;text-transform:uppercase;margin-bottom:6px}
+  .metric span{font-weight:950;font-size:23px}
+  .ledger{border:1px solid #2a4553;background:#0d1a22;padding:12px;min-height:240px}
+  .row{display:grid;grid-template-columns:112px 1fr 42px;gap:8px;align-items:center;margin:9px 0}
+  .row b{font-size:13px}.bar{height:10px;background:#162c38;border-radius:99px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--gold))}
+  .explain{border:1px solid #2a4553;background:#0d1a22;padding:12px;line-height:1.45;font-size:14px}
+  @media (max-width:900px){.app{grid-template-columns:1fr;padding:8px}.stage{min-height:620px}.hud{position:static;padding:10px}.formula{min-width:0}.legend{position:static;padding:10px;grid-template-columns:1fr 1fr}canvas{height:520px}.controls,.metrics{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="app">
+  <section class="stage">
+    <canvas id="c" width="1050" height="760"></canvas>
+    <div class="hud">
+      <div class="badge"><b>A02 lab</b><span>features -> evidence -> message</span></div>
+      <div class="badge formula"><b>GNN data object</b><code>Data(x=X, edge_index=E, edge_attr=Z, y, masks)</code></div>
+    </div>
+    <div class="legend">
+      <div class="gold">gold: regulator / source</div>
+      <div class="cyan">cyan: gene / target</div>
+      <div class="rose">rose: state / context</div>
+      <div class="blue">blue: assay channel</div>
+    </div>
+  </section>
+  <aside class="side">
+    <div>
+      <div class="eyebrow">Generated specifically for A02</div>
+      <h1>What counts as graph evidence?</h1>
+      <p>Move the controls and watch the selected TF-target claim change. The same edge can be strong, weak, missing, or misleading depending on evidence channels and feature quality.</p>
+    </div>
+    <div class="controls">
+      <select id="mode">
+        <option value="graph">Graph + tensors</option>
+        <option value="ledger">Evidence ledger</option>
+        <option value="message">Message score</option>
+        <option value="missing">Missingness stress test</option>
+      </select>
+      <button id="cycle">Select edge</button>
+      <button id="pulse">Pulse message</button>
+      <button id="reset">Reset</button>
+    </div>
+    <div class="slider"><label>co-expression weight <span id="coVal"></span></label><input id="co" type="range" min="0" max="1" step=".01" value=".24"></div>
+    <div class="slider"><label>motif weight <span id="motifVal"></span></label><input id="motif" type="range" min="0" max="1" step=".01" value=".30"></div>
+    <div class="slider"><label>chromatin weight <span id="atacVal"></span></label><input id="atac" type="range" min="0" max="1" step=".01" value=".20"></div>
+    <div class="slider"><label>perturbation weight <span id="pertVal"></span></label><input id="pert" type="range" min="0" max="1" step=".01" value=".18"></div>
+    <div class="slider"><label>missingness <span id="missVal"></span></label><input id="miss" type="range" min="0" max=".75" step=".01" value=".10"></div>
+    <div class="slider"><label>edge threshold <span id="thrVal"></span></label><input id="thr" type="range" min=".05" max=".95" step=".01" value=".52"></div>
+    <div class="metrics">
+      <div class="metric"><b>confidence</b><span id="conf">0.00</span></div>
+      <div class="metric"><b>message gain</b><span id="gain">0.00</span></div>
+      <div class="metric"><b>trusted edges</b><span id="trusted">0/0</span></div>
+      <div class="metric"><b>false certainty</b><span id="risk">0.00</span></div>
+    </div>
+    <div class="ledger" id="ledger"></div>
+    <div class="explain" id="explain"></div>
+  </aside>
+</main>
+<script>
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+const $=id=>document.getElementById(id);
+const nodes=[
+  {id:'TF_A',x:255,y:380,role:'regulator',color:'#ffd166',feat:[0.92,1,0.15]},
+  {id:'Gene_B',x:565,y:250,role:'target',color:'#64f1e1',feat:[0.55,0,0.18]},
+  {id:'Gene_C',x:625,y:470,role:'target',color:'#64f1e1',feat:[0.32,0,0.34]},
+  {id:'Cell_D',x:410,y:610,role:'context',color:'#ff6699',feat:[0.76,0,0.88]},
+  {id:'Assay_E',x:790,y:330,role:'assay',color:'#80b8ff',feat:[0.61,0,0.55]}
+];
+const edges=[
+  {s:0,t:1,name:'TF_A -> Gene_B',sign:'activation',e:[.82,1,.62,.28,.70]},
+  {s:0,t:2,name:'TF_A -> Gene_C',sign:'possible repression',e:[.64,.25,.46,.16,.22]},
+  {s:3,t:2,name:'Cell_D -> Gene_C context',sign:'state association',e:[.45,.05,.72,.12,.20]},
+  {s:4,t:1,name:'Assay_E -> Gene_B support',sign:'measurement',e:[.28,.70,.84,.08,.35]},
+  {s:1,t:2,name:'Gene_B -> Gene_C co-state',sign:'co-expression',e:[.73,.00,.21,.04,.10]}
+];
+let selected=0,pulse=0,t=0;
+function weights(){let w=[+$('co').value,+$('motif').value,+$('atac').value,+$('pert').value,.08];let sum=w.reduce((a,b)=>a+b,0)||1;return w.map(v=>v/sum)}
+function confidence(edge){let w=weights(),miss=+$('miss').value;let raw=edge.e.reduce((a,v,i)=>a+v*w[i],0);let evidencePresent=edge.e.filter(v=>v>miss).length/edge.e.length;return Math.max(0,Math.min(1,raw*(.65+.35*evidencePresent)*(1-.35*miss)))}
+function drawArrow(a,b,color,width,active,conf){let dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len;let start={x:a.x+ux*54,y:a.y+uy*54},end={x:b.x-ux*50,y:b.y-uy*50};ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.globalAlpha=active?1:.36;ctx.shadowBlur=active?18:0;ctx.shadowColor=color;ctx.beginPath();ctx.moveTo(start.x,start.y);ctx.quadraticCurveTo((start.x+end.x)/2-uy*36,(start.y+end.y)/2+ux*36,end.x,end.y);ctx.stroke();let ang=Math.atan2(end.y-start.y,end.x-start.x);ctx.translate(end.x,end.y);ctx.rotate(ang);ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-14,-7);ctx.lineTo(-14,7);ctx.closePath();ctx.fill();ctx.restore();if(active&&pulse>0){let p=(Math.sin(pulse*Math.PI));let x=start.x+(end.x-start.x)*p,y=start.y+(end.y-start.y)*p;ctx.save();ctx.fillStyle='#ffffff';ctx.shadowBlur=22;ctx.shadowColor=color;ctx.beginPath();ctx.arc(x,y,9+7*conf,0,Math.PI*2);ctx.fill();ctx.restore();}}
+function drawNode(n,active){ctx.save();ctx.shadowBlur=active?34:18;ctx.shadowColor=n.color;let g=ctx.createRadialGradient(n.x-12,n.y-16,4,n.x,n.y,58);g.addColorStop(0,'#fff');g.addColorStop(.25,n.color);g.addColorStop(1,'#0b1820');ctx.fillStyle=g;ctx.strokeStyle=active?'#fff':n.color;ctx.lineWidth=active?4:2;ctx.beginPath();ctx.arc(n.x,n.y,44,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='#eef9ff';ctx.font='800 16px Inter,Arial';ctx.textAlign='center';ctx.fillText(n.id,n.x,n.y-58);ctx.font='700 12px Inter,Arial';ctx.fillStyle='#a9c0ca';ctx.fillText(n.role,n.x,n.y+65);ctx.restore();}
+function drawMatrix(x,y){ctx.save();ctx.fillStyle='rgba(8,20,28,.92)';ctx.strokeStyle='#274759';ctx.lineWidth=1.5;ctx.fillRect(x,y,320,260);ctx.strokeRect(x,y,320,260);ctx.fillStyle='#64f1e1';ctx.font='900 15px Inter,Arial';ctx.fillText('X node features',x+18,y+30);ctx.fillText('Z edge evidence',x+18,y+148);ctx.font='700 12px Consolas,monospace';ctx.fillStyle='#d8edf4';nodes.slice(0,4).forEach((n,i)=>{ctx.fillText(`${n.id.padEnd(7)} [${n.feat.map(v=>v.toFixed(2)).join(', ')}]`,x+18,y+58+i*20)});edges.slice(0,4).forEach((e,i)=>{ctx.fillText(`e${i+1}: [${e.e.map(v=>v.toFixed(2)).join(', ')}]`,x+18,y+176+i*20)});ctx.restore();}
+function updateSide(){['co','motif','atac','pert','miss','thr'].forEach(id=>$(id+'Val').textContent=(+$ (id).value).toFixed(2));let e=edges[selected],c=confidence(e),thr=+$('thr').value;let trusted=edges.filter(edge=>confidence(edge)>=thr).length;$('conf').textContent=c.toFixed(2);$('gain').textContent=(c*(nodes[e.s].feat[0]+.2)).toFixed(2);$('trusted').textContent=`${trusted}/${edges.length}`;$('risk').textContent=(Math.max(0,+$('miss').value*1.25+(c>.65&&e.e[3]<.18?.18:0))).toFixed(2);let labels=['co-expression','motif','chromatin','perturbation','curation'];$('ledger').innerHTML=`<b style="color:#64f1e1">${e.name}</b><p style="margin:6px 0 10px;color:#c8d8df">claim: ${e.sign}</p>`+labels.map((l,i)=>`<div class="row"><b>${l}</b><div class="bar"><div class="fill" style="width:${Math.round(e.e[i]*100)}%"></div></div><span>${e.e[i].toFixed(2)}</span></div>`).join('')+`<p style="color:#a9c0ca;font-size:13px;margin-top:10px">edge_attr stores these channels. The model can learn from them, but the scientist must still decide what each channel means.</p>`;let mode=$('mode').value;let copy={graph:'Graph mode shows tensors beside the network. If you cannot map a visual object to x, edge_index, edge_attr, y, or masks, it is not yet implementation-ready.',ledger:'Evidence ledger mode asks where the edge came from. Co-expression, motif, accessibility, perturbation, and curation support different biological claims.',message:'Message score mode makes the GNN step concrete: the source node state is multiplied by edge confidence before it is aggregated into the target.',missing:'Missingness stress test shows why absence of evidence is not evidence of absence. Raising missingness should lower confidence, not silently create false negatives.'};$('explain').textContent=copy[mode];}
+function draw(){t+=.016;if(pulse>0)pulse=Math.max(0,pulse-.010);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#061017';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.strokeStyle='rgba(100,241,225,.06)';for(let x=0;x<canvas.width;x+=55){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke()}for(let y=0;y<canvas.height;y+=55){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke()}let thr=+$('thr').value;edges.forEach((e,i)=>{let c=confidence(e),active=i===selected,color=c>=thr?'#64f1e1':'#5d7380';if(e.sign.includes('repression'))color='#ff6699';if(e.sign.includes('context'))color='#ffd166';drawArrow(nodes[e.s],nodes[e.t],color,2+8*c,active,c)});nodes.forEach((n,i)=>drawNode(n,edges[selected].s===i||edges[selected].t===i));if($('mode').value!=='graph')drawMatrix(38,250);let e=edges[selected],c=confidence(e),target=nodes[e.t];ctx.save();ctx.fillStyle='rgba(13,26,34,.95)';ctx.strokeStyle='#274759';ctx.fillRect(360,80,500,84);ctx.strokeRect(360,80,500,84);ctx.fillStyle='#f5fbff';ctx.font='800 18px Consolas,monospace';ctx.fillText(`m = phi(h_${nodes[e.s].id}, h_${target.id}, edge_attr, evidence)`,382,114);ctx.fillStyle=c>=thr?'#64f1e1':'#ff6699';ctx.fillText(`selected confidence = ${c.toFixed(2)}   threshold = ${thr.toFixed(2)}`,382,144);ctx.restore();updateSide();requestAnimationFrame(draw)}
+['co','motif','atac','pert','miss','thr','mode'].forEach(id=>$(id).addEventListener('input',updateSide));
+$('cycle').onclick=()=>{selected=(selected+1)%edges.length;updateSide()};
+$('pulse').onclick=()=>{pulse=1};
+$('reset').onclick=()=>{Object.entries({co:.24,motif:.30,atac:.20,pert:.18,miss:.10,thr:.52}).forEach(([k,v])=>$(k).value=v);selected=0;updateSide()};
+draw();
+</script>
+</body>
+</html>

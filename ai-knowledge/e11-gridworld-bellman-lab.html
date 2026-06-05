@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E11 Gridworld Bellman</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=e11-bellman-specific-v3">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e11" data-keywords="reinforcement learning gridworld Bellman backups value iteration greedy policy discount residual">
+    <section class="visual-stack" aria-label="Interactive 3D gridworld Bellman-backup visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E11 gridworld Bellman backups 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E11</strong></div>
+          <div class="formula-chip"><span>Bellman sketch</span>Each state backs up reward plus gamma times next value; wavefronts, residuals, Q spokes, and policy arrows show the fixed point forming.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected state</span><strong>Gridworld Bellman geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.72fr) minmax(0,.72fr) repeat(5,minmax(0,.78fr)) repeat(4,minmax(0,.58fr));">
+        <select id="worldPreset" data-control="worldPreset" aria-label="Gridworld preset">
+          <option value="classic">Classic</option>
+          <option value="cliff">Cliff</option>
+          <option value="maze">Maze</option>
+        </select>
+        <select id="backupMode" aria-label="Backup mode">
+          <option value="policy">Policy eval</option>
+          <option value="optimal">Optimality</option>
+          <option value="sample">TD sample</option>
+        </select>
+        <div class="command-control">
+          <label for="discount">Gamma <output data-output="discount">0.90</output></label>
+          <input id="discount" data-param="discount" type="range" min="0.35" max="0.99" step="0.01" value="0.9">
+        </div>
+        <div class="command-control">
+          <label for="stepCost">Step <output data-output="stepCost">-0.03</output></label>
+          <input id="stepCost" data-param="stepCost" type="range" min="-0.12" max="0.02" step="0.01" value="-0.03">
+        </div>
+        <div class="command-control">
+          <label for="slip">Slip <output data-output="slip">0.08</output></label>
+          <input id="slip" data-param="slip" type="range" min="0" max="0.4" step="0.01" value="0.08">
+        </div>
+        <div class="command-control">
+          <label for="iterationsPerSweep">Sweep <output data-output="iterationsPerSweep">3</output></label>
+          <input id="iterationsPerSweep" data-param="iterationsPerSweep" type="range" min="1" max="8" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="rewardScale">Reward <output data-output="rewardScale">1.00</output></label>
+          <input id="rewardScale" data-param="rewardScale" type="range" min="0.4" max="1.6" step="0.05" value="1">
+        </div>
+        <button id="backup" class="primary" data-action="step" type="button">Apply Bellman backup</button>
+        <button id="sweepBellman" data-action="pulse" type="button">Propagate values</button>
+        <button id="policyGreedy" data-action="pulse" type="button">Extract greedy policy</button>
+        <button id="resetBellman" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E11 Gridworld Bellman</h1>
+        <p class="subtitle">Rotate the 5x5 MDP, terminal beacons, wall barriers, Bellman equation blocks, value bars, wavefront, greedy arrows, slip fan, residuals, and Q spokes.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Iteration"><span>Iter</span><strong id="iterationLabel">0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Max delta"><span>Delta</span><strong id="deltaLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Value spread"><span>Spread</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Policy flips"><span>Flips</span><strong>0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading Bellman backup geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: gamma changes horizon rings, step cost changes penalties, slip widens transition fans, and backups push value through the gridworld.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=e11-bellman-specific-v3"></script>
+  <script src="shared/ml-lab-core.js?math3d=e11-bellman-specific-v3"></script>
+  <script>
+    window.__e11LabSnapshot = window.__e11LabSnapshot || function () { return null; };
+    // __e11LabReady = true is set by createE11GridworldBellmanLab after the first render setup.
+    createE11GridworldBellmanLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

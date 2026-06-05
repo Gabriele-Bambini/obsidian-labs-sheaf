@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E01 MLP Decision Regions</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=d10-e01-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e01" data-keywords="neural network MLP perceptron XOR activation decision regions">
+    <section class="visual-stack" aria-label="Interactive 3D MLP decision-region visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E01 MLP Decision Regions 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E01</strong></div>
+          <div class="formula-chip"><span>MLP sketch</span>One neuron draws one boundary; hidden nonlinear units fold the input plane into reusable decision regions.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected model</span><strong>MLP geometry is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.78fr) minmax(0,.74fr) repeat(5,minmax(0,.9fr)) repeat(5,minmax(0,.54fr));">
+        <select id="modelMode" data-control="mode" aria-label="Model mode">
+          <option value="single">Single</option>
+          <option value="xor">XOR</option>
+          <option value="circle">Circle</option>
+          <option value="deep">Depth demo</option>
+        </select>
+        <select id="activation" aria-label="Activation">
+          <option value="relu">ReLU</option>
+          <option value="sigmoid">Sigmoid</option>
+          <option value="tanh">Tanh</option>
+          <option value="linear">Linear</option>
+        </select>
+        <div class="command-control">
+          <label for="hiddenWidth">Hidden <output data-output="hiddenWidth">4</output></label>
+          <input id="hiddenWidth" data-param="hiddenWidth" type="range" min="1" max="10" step="1" value="4">
+        </div>
+        <div class="command-control">
+          <label for="depth">Depth <output data-output="depth">2</output></label>
+          <input id="depth" data-param="depth" type="range" min="1" max="5" step="1" value="2">
+        </div>
+        <div class="command-control">
+          <label for="signalGain">Gain <output data-output="signalGain">1.00</output></label>
+          <input id="signalGain" data-param="signalGain" type="range" min="0.4" max="2.2" step="0.02" value="1">
+        </div>
+        <div class="command-control">
+          <label for="dataNoise">Noise <output data-output="dataNoise">0.12</output></label>
+          <input id="dataNoise" data-param="dataNoise" type="range" min="0" max="0.55" step="0.01" value="0.12">
+        </div>
+        <div class="command-control">
+          <label for="learningRate">LR <output data-output="learningRate">0.12</output></label>
+          <input id="learningRate" data-param="learningRate" type="range" min="0.02" max="0.35" step="0.01" value="0.12">
+        </div>
+        <button id="pulseForward" class="primary" data-action="pulse" type="button">Forward</button>
+        <button id="trainStep" data-action="step" type="button">Train step</button>
+        <button id="runTraining" data-action="step" type="button">Run 5</button>
+        <button id="cycle" data-action="pulse" type="button">Width cycle</button>
+        <button id="resetNetwork" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E01 MLP Decision Regions</h1>
+        <p class="subtitle">Rotate the input plane, hidden half-space gates, activation folds, and layer signal columns to see why MLPs escape linear boundaries.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Accuracy"><span>Accuracy</span><strong id="accuracy">0%</strong></div>
+        <div class="metric" data-role="metric" data-metric="Loss"><span>Loss</span><strong>0.000</strong></div>
+        <div class="metric" data-role="metric" data-metric="Regions"><span>Regions</span><strong>0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Params"><span>Params</span><strong>0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading MLP decision geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <div aria-hidden="true" style="display:none;">
+        <select id="architecture" aria-hidden="true" aria-label="Legacy architecture">
+          <option value="two">Two</option>
+          <option value="four">Four</option>
+          <option value="eight">Eight</option>
+        </select>
+        <select id="dataset" aria-hidden="true" aria-label="Legacy dataset">
+          <option value="xor">XOR</option>
+          <option value="circle">Circle</option>
+          <option value="linear">Linear</option>
+        </select>
+        <span id="hiddenCount">4</span>
+      </div>
+      <p class="hint">Controls are live: hidden width adds gates, depth adds composition, activation changes folds, and training raises the probability surface over positive examples.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=d10-e01-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=d10-e01-canonical-clarity-v2"></script>
+  <script>
+    window.__e01LabSnapshot = window.__e01LabSnapshot || function () { return null; };
+    window.__e01LabReady = window.__e01LabReady || false;
+    // __e01LabReady = true is set by createE01MlpDecisionRegionsLab after the first render setup.
+    createE01MlpDecisionRegionsLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

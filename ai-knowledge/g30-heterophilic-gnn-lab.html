@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G30 Heterophilic Graph Neural Networks</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=g30-hetero-v4">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="heterophily" data-lab-id="g30" data-keywords="heterophily compatibility high-pass signed two-hop residual relation noise">
+    <section class="visual-stack" aria-label="Interactive 3D heterophilic GNN compatibility visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="G30 heterophily compatibility high-pass two-hop 3D lab"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>G30</strong></div>
+          <div class="formula-chip"><span id="formulaText">compatibility maps translate neighbors</span>A different-label neighbor can be useful when the edge tells you how to interpret it.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected regime</span><strong>Heterophily compatibility system is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:repeat(3,minmax(0,.52fr)) repeat(5,minmax(0,.48fr)) repeat(5,minmax(0,.4fr));">
+        <select id="graphRegime" data-control="mode" aria-label="Graph regime">
+          <option value="bipartite">Bipartite</option>
+          <option value="mixed">Mixed</option>
+          <option value="homophilic">Homophilic</option>
+          <option value="noisy">Noisy</option>
+        </select>
+        <select id="messageRule" data-control="messageRule" aria-label="Message rule">
+          <option value="gcn">GCN mean</option>
+          <option value="signed">Signed</option>
+          <option value="twohop">Two-hop</option>
+          <option value="highpass">High-pass</option>
+          <option value="sheaf">Sheaf map</option>
+        </select>
+        <select id="baselineMode" data-control="baselineMode" aria-label="Baseline">
+          <option value="mlp">MLP anchor</option>
+          <option value="gcn">GCN only</option>
+          <option value="compat">Compat</option>
+        </select>
+        <div class="command-control">
+          <label for="homophilyRatio">Homo <output data-output="homophilyRatio">0.16</output></label>
+          <input id="homophilyRatio" data-param="homophilyRatio" type="range" min="0" max="0.9" step="0.01" value="0.16">
+        </div>
+        <div class="command-control">
+          <label for="compatibilityStrength">Compat <output data-output="compatibilityStrength">0.62</output></label>
+          <input id="compatibilityStrength" data-param="compatibilityStrength" type="range" min="0" max="1" step="0.01" value="0.62">
+        </div>
+        <div class="command-control">
+          <label for="highPassGain">High <output data-output="highPassGain">0.72</output></label>
+          <input id="highPassGain" data-param="highPassGain" type="range" min="0" max="1.35" step="0.01" value="0.72">
+        </div>
+        <div class="command-control">
+          <label for="relationNoise">Noise <output data-output="relationNoise">0.14</output></label>
+          <input id="relationNoise" data-param="relationNoise" type="range" min="0" max="1" step="0.01" value="0.14">
+        </div>
+        <div class="command-control">
+          <label for="selfWeight">Self <output data-output="selfWeight">0.42</output></label>
+          <input id="selfWeight" data-param="selfWeight" type="range" min="0" max="1" step="0.01" value="0.42">
+        </div>
+        <button id="smoothOnce" class="primary" data-action="step" type="button">GCN mean</button>
+        <button id="applyCompatibility" data-action="pulse" type="button">Compat</button>
+        <button id="showTwoHop" data-action="step" type="button">A2 hop</button>
+        <button id="shuffleSigns" data-action="step" type="button">Shuffle</button>
+        <button id="resetG30" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block G 3D lab</p>
+        <h1>G30 Heterophilic Graph Neural Networks</h1>
+        <p class="subtitle">Rotate a role-complementarity graph, compare raw GCN smoothing with signed compatibility, reveal two-hop support, and damage edge maps with relation noise.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Neighbor help"><span>Help</span><strong id="neighborHelpLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Homophily ratio"><span>Homophily</span><strong id="homophilyLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Compatibility"><span>Compat</span><strong id="compatLabel">0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Separation"><span>Separation</span><strong id="separationLabel">0.00</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading heterophily diagnostics.</p>
+        <p id="stateBox" class="state-box"><span id="state">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: homophily changes edge mix, compatibility flips neighbor evidence, high-pass preserves alternating signal, two-hop recovers same-role paths, and sign noise breaks typed maps.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=g30-hetero-v4"></script>
+  <script src="shared/ml-lab-core.js?math3d=g30-hetero-v4"></script>
+  <script>
+    window.__g30LabSnapshot = window.__g30LabSnapshot || function () { return null; };
+    createG30HeterophilyCompatibilityLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>

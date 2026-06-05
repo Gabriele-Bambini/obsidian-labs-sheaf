@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E06 LLM Token Prediction</title>
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=e06-e07-canonical-clarity-v2">
+</head>
+<body>
+  <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="neural" data-lab-id="e06" data-keywords="LLM token prediction logits softmax decoding top-k top-p context KV cache">
+    <section class="visual-stack" aria-label="Interactive 3D LLM token prediction visualization">
+      <div class="stage">
+        <div class="lab-viewport" title="Drag to orbit / rotate. Use the wheel to zoom.">
+          <canvas id="canvas" aria-label="E06 LLM token prediction 3D interactive visualization"></canvas>
+        </div>
+        <div class="scene-overlay">
+          <div class="scene-badge"><span>Live concept</span><strong>E06</strong></div>
+          <div class="formula-chip"><span>LLM sketch</span>A decoder produces logits for the next token; decoding chooses one token, appends it, and reuses cached keys and values.</div>
+        </div>
+        <div class="selected-chip" data-role="selected"><span>Selected token</span><strong>Next-token distribution is loading.</strong></div>
+      </div>
+      <div class="command-bar controls" aria-label="Horizontal command bar under the 3D visualization" style="grid-template-columns:minmax(0,.72fr) minmax(0,.7fr) repeat(6,minmax(0,.82fr)) repeat(3,minmax(0,.56fr));">
+        <select id="promptScenario" data-control="promptScenario" aria-label="Prompt scenario">
+          <option value="causal">Causal</option>
+          <option value="math">Math</option>
+          <option value="code">Code</option>
+          <option value="chat">Chat</option>
+        </select>
+        <select id="decodingMode" aria-label="Decoding mode">
+          <option value="greedy">Greedy</option>
+          <option value="topk">Top-k</option>
+          <option value="topp">Top-p</option>
+          <option value="sample">Sample</option>
+        </select>
+        <div class="command-control">
+          <label for="temperature">Temp <output data-output="temperature">1.00</output></label>
+          <input id="temperature" data-param="temperature" type="range" min="0.25" max="2.2" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="topK">Top-k <output data-output="topK">3</output></label>
+          <input id="topK" data-param="topK" type="range" min="1" max="5" step="1" value="3">
+        </div>
+        <div class="command-control">
+          <label for="topP">Top-p <output data-output="topP">0.90</output></label>
+          <input id="topP" data-param="topP" type="range" min="0.35" max="1" step="0.05" value="0.9">
+        </div>
+        <div class="command-control">
+          <label for="contextWindow">Context <output data-output="contextWindow">9</output></label>
+          <input id="contextWindow" data-param="contextWindow" type="range" min="4" max="12" step="1" value="9">
+        </div>
+        <div class="command-control">
+          <label for="modelScale">Scale <output data-output="modelScale">1.00</output></label>
+          <input id="modelScale" data-param="modelScale" type="range" min="0.6" max="1.8" step="0.05" value="1">
+        </div>
+        <div class="command-control">
+          <label for="retrievalStrength">Ground <output data-output="retrievalStrength">0.35</output></label>
+          <input id="retrievalStrength" data-param="retrievalStrength" type="range" min="0" max="1" step="0.05" value="0.35">
+        </div>
+        <button id="generateToken" class="primary" data-action="step" type="button">Append next token</button>
+        <button id="resampleToken" data-action="pulse" type="button">Resample policy</button>
+        <button id="resetGeneration" data-action="reset" type="button">Reset</button>
+      </div>
+    </section>
+    <aside class="side-panel lab-3d-panel">
+      <header>
+        <p class="eyebrow">Block E 3D lab</p>
+        <h1>E06 LLM Token Prediction</h1>
+        <p class="subtitle">Rotate the autoregressive pipeline: context tokens, tokenizer plates, embeddings, decoder stack, causal mask, logits, decoding gate, feedback loop, and KV cache.</p>
+      </header>
+      <div class="metric-grid">
+        <div class="metric" data-role="metric" data-metric="Top prob"><span>Top prob</span><strong>0.00</strong></div>
+        <div class="metric" data-role="metric" data-metric="Candidates"><span>Cands</span><strong>0</strong></div>
+        <div class="metric" data-role="metric" data-metric="Context"><span>Context</span><strong>0</strong></div>
+        <div class="metric" data-role="metric" data-metric="KV slots"><span>KV</span><strong>0</strong></div>
+      </div>
+      <div class="insight-card">
+        <h2>What to watch</h2>
+        <p data-role="insight">Loading next-token generation geometry.</p>
+        <p id="state" class="state-box"><span id="stateBox">Waiting for the first render.</span></p>
+      </div>
+      <p class="hint">Controls are live: temperature reshapes probabilities, top-k/top-p filters candidates, context limits cache size, and Generate feeds the chosen token back into the prompt.</p>
+    </aside>
+  </main>
+  <script src="shared/three.min.js"></script>
+  <script src="shared/gnn-lab-core.js?math3d=e06-e07-canonical-clarity-v2"></script>
+  <script src="shared/ml-lab-core.js?math3d=e06-e07-canonical-clarity-v2"></script>
+  <script>
+    window.__e06LabSnapshot = window.__e06LabSnapshot || function () { return null; };
+    // __e06LabReady = true is set by createE06LlmTokenPredictionLab after the first render setup.
+    createE06LlmTokenPredictionLab();
+    // createGnnLab(legacy static contract marker)
+  </script>
+</body>
+</html>
