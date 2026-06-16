@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A13 Differential Equations</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a13-a14-canonical-clarity-v3">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a13" data-keywords="differential equations ODE vector field trajectory Euler Runge Kutta equilibrium stiffness boundary value problem">
@@ -85,7 +85,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=a13-a14-canonical-clarity-v3"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"a13","kind":"algebra","title":"A13 Differential Equations","modes":[{"value":"flow","label":"ODE flow"},{"value":"solver","label":"Euler vs RK"},{"value":"equilibrium","label":"Equilibrium"},{"value":"stiff","label":"Stiff system"},{"value":"boundary","label":"Boundary value"}],"parameters":[{"key":"step","label":"step size","min":0.05,"max":0.9,"step":0.01,"value":0.28},{"key":"stiffness","label":"stiffness","min":0.2,"max":8,"step":0.05,"value":1.2},{"key":"damping","label":"damping","min":0,"max":1.4,"step":0.02,"value":0.45},{"key":"initial","label":"initial state","min":-1.5,"max":1.5,"step":0.05,"value":0.8},{"key":"solver","label":"solver correction","min":0,"max":1,"step":0.02,"value":0.65}],"metrics":["Step error","Stability margin","Equilibrium gap","Stiffness ratio"],"visual":{"kind":"differential-equations-flow-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Step error","formula":"x'(t)=f(t,x), local derivative -> numerical step -> trajectory","insight":"A13 shows equations as flow: an initial condition selects one solution curve, solver steps approximate local derivatives, equilibrium stability shapes the path, and stiffness forces smaller steps."}});
     window.__a13LabSnapshot = () => window.__gLabSnapshot();

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>C04 Stochastic Optimization</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=c04-stochastic-optimization-premium-v3">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="optimization" data-lab-id="c04" data-keywords="stochastic optimization SGD minibatch momentum Adam variance reduction learning rate">
@@ -85,7 +85,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=c04-c05-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"c04","kind":"optimization","title":"C04 Stochastic Optimization","modes":[{"value":"sgd","label":"SGD"},{"value":"minibatch","label":"Minibatch"},{"value":"momentum","label":"Momentum"},{"value":"adam","label":"Adam"},{"value":"reduction","label":"Variance reduction"}],"parameters":[{"key":"curvature","label":"Condition number kappa","min":-1.5,"max":2.5,"step":0.01,"value":0.9},{"key":"step","label":"Learning rate alpha","min":0.02,"max":1,"step":0.01,"value":0.28},{"key":"noise","label":"Gradient noise sigma","min":0,"max":1,"step":0.01,"value":0.16},{"key":"budget","label":"Batch size b","min":1,"max":14,"step":1,"value":6},{"key":"regularization","label":"Momentum beta / Adam scale","min":0,"max":1,"step":0.01,"value":0.45}],"metrics":["Gradient variance","Update norm","Angle error","Batch coverage"],"visual":{"kind":"stochastic-optimization-lab","graphStyle":"hidden","quality":"c03-c04-premium-v1"},"profile":{"preferredMetric":"Gradient variance","formula":"g_k is an unbiased noisy estimate of grad F(x_k)","insight":"C04 separates stochastic optimization signals: individual gradients are noisy, minibatches average noise, momentum accumulates direction, adaptive methods rescale coordinates, and SVRG corrects estimator variance."}});
     window.__c04LabSnapshot = () => window.__gLabSnapshot();

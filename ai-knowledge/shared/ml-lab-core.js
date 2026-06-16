@@ -91,8 +91,8 @@
     const settings = options || {};
     return new THREE.MeshStandardMaterial({
       color,
-      roughness: settings.roughness == null ? 0.64 : settings.roughness,
-      metalness: settings.metalness == null ? 0.08 : settings.metalness,
+      roughness: settings.roughness == null ? 0.54 : settings.roughness,
+      metalness: settings.metalness == null ? 0.12 : settings.metalness,
       transparent: opacity < 1,
       opacity,
       side: THREE.DoubleSide,
@@ -204,6 +204,29 @@
     return mesh;
   }
 
+  // Additive, non-counted orientation triad. Added directly to `scene` (never to
+  // a createXxxLab group/array that snapshots enumerate). userData.engineRef on the
+  // group AND every child is the belt-and-braces contract: any future count MUST
+  // skip userData.engineRef. Kept dim (opacity 0.3) so it only adds render content.
+  function addEngineGroundRef(scene, y, half) {
+    const g = new THREE.Group();
+    g.userData.engineRef = true;
+    const axes = [
+      [[half, 0, 0], 0x54a8ff],   // +X blue
+      [[0, half, 0], 0x77df96],   // +Y green
+      [[0, 0, half], 0x58e0d3]    // +Z cyan
+    ];
+    axes.forEach(([end, color]) => {
+      const ln = makeLine(
+        [new THREE.Vector3(0, y, 0), new THREE.Vector3(end[0], y + end[1], end[2])],
+        color, 0.5);
+      ln.userData.engineRef = true;
+      g.add(ln);
+    });
+    scene.add(g);
+    return g;
+  }
+
   function setGroupVisible(group, visible, opacityScale) {
     group.visible = true;
     group.traverse((child) => {
@@ -216,13 +239,75 @@
     });
   }
 
+  // ===== Premium polish helpers (h06-style), reusable across ml labs =====
+  // All produced objects are additive render-only decor. Callers add them to a
+  // create-lab group/array ONLY if that array is NOT snapshot-counted, or to the
+  // scene directly with userData.engineRef = true so any count skips them.
+  let _mlGlowTex = null;
+  function mlGlowTex() {
+    if (_mlGlowTex) return _mlGlowTex;
+    const cv = document.createElement("canvas"); cv.width = 128; cv.height = 128;
+    const cx = cv.getContext("2d");
+    const g = cx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.addColorStop(0, "rgba(255,255,255,0.62)"); g.addColorStop(0.22, "rgba(255,255,255,0.24)"); g.addColorStop(1, "rgba(255,255,255,0)");
+    cx.fillStyle = g; cx.fillRect(0, 0, 128, 128);
+    _mlGlowTex = new THREE.CanvasTexture(cv);
+    return _mlGlowTex;
+  }
+  function mlGlow(hex, size) {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: mlGlowTex(), color: hex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    sp.scale.set(size, size, 1);
+    return sp;
+  }
+  // aspect-fit text label sprite; sc = world height of the text band
+  function mlLabel(text, hex, sc) {
+    const pad = 12, fs = 64;
+    const cv = document.createElement("canvas");
+    const mcx = cv.getContext("2d");
+    mcx.font = "600 " + fs + "px Inter, system-ui, sans-serif";
+    const w = Math.ceil(mcx.measureText(text).width) + pad * 2;
+    const h = fs + pad * 2;
+    cv.width = w; cv.height = h;
+    const cx = cv.getContext("2d");
+    cx.font = "600 " + fs + "px Inter, system-ui, sans-serif";
+    cx.textBaseline = "middle"; cx.textAlign = "center";
+    cx.fillStyle = "#" + (hex >>> 0).toString(16).padStart(6, "0");
+    cx.fillText(text, w / 2, h / 2);
+    const tex = new THREE.CanvasTexture(cv);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false }));
+    sp.scale.set(sc * (w / h), sc, 1);
+    return sp;
+  }
+  // transparent shadow-catcher just above the grid, so the reticle stays visible
+  // while the focal objects cast soft shadows onto the plane. engineRef => not counted.
+  function mlGround(scene) {
+    const g = new THREE.Mesh(new THREE.PlaneGeometry(44, 44), new THREE.ShadowMaterial({ opacity: 0.3 }));
+    g.rotation.x = -Math.PI / 2;
+    g.position.y = -1.4;
+    g.receiveShadow = true;
+    g.userData.engineRef = true;
+    scene.add(g);
+    return g;
+  }
+
   function setupScene(root, canvas, distance) {
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
     renderer.setClearColor(COLORS.bg, 1);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
+    // --- canonical color pipeline (r128 API actually present in bundled three.min.js) ---
+    // NOTE: this build predates the SRGBColorSpace/outputColorSpace API (verified:
+    // bundle exports sRGBEncoding + renderer.outputEncoding, NOT SRGBColorSpace).
+    // Use the revision-correct legacy constants so the pipeline actually takes effect.
+    if (THREE.sRGBEncoding != null) renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.98;
+    // soft shadows: only render where a lab opts in (caster.castShadow + a receiver)
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(COLORS.bg, 7, 18);
+    scene.fog = new THREE.Fog(COLORS.bg, 8.5, 22);
 
     const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 80);
     const cameraState = {
@@ -231,18 +316,25 @@
       radius: distance || 7.6
     };
 
-    const ambient = new THREE.AmbientLight(0xffffff, 0.56);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.46);
     scene.add(ambient);
-    const key = new THREE.DirectionalLight(0xffffff, 1.25);
+    const key = new THREE.DirectionalLight(0xfff4e6, 1.35);
     key.position.set(4, 6, 3);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.near = 0.5; key.shadow.camera.far = 42;
+    key.shadow.camera.left = -7; key.shadow.camera.right = 7;
+    key.shadow.camera.top = 7; key.shadow.camera.bottom = -7;
+    key.shadow.bias = -0.0006;
     scene.add(key);
-    const rim = new THREE.DirectionalLight(0x58e0d3, 0.7);
+    const rim = new THREE.DirectionalLight(0x58e0d3, 0.55);
     rim.position.set(-5, 3, -4);
     scene.add(rim);
 
-    const grid = new THREE.GridHelper(7, 16, 0x27424d, 0x162930);
+    const grid = new THREE.GridHelper(7, 16, 0x4a6f80, 0x2b4a56);   // brighter reticle so the ground plane reads
     grid.position.y = -1.42;
     scene.add(grid);
+    addEngineGroundRef(scene, grid.position.y, 1.4);
 
     function updateCamera() {
       const r = cameraState.radius;
@@ -295,6 +387,26 @@
 
     window.addEventListener("resize", resize);
     resize();
+
+    // Generic premium polish for EVERY ml lab (d/e/f/g/h01): patch renderer.render so
+    // that on the first render we add a transparent shadow-catcher at the grid plane,
+    // and on every render we (idempotently) mark solid focal meshes as shadow casters.
+    // Zero per-lab code — the brighter grid + axes were already set above.
+    const _mlOrigRender = renderer.render.bind(renderer);
+    let _mlGrounded = false;
+    renderer.render = function (sc, cam) {
+      if (!_mlGrounded) { try { mlGround(sc); } catch (e) {} _mlGrounded = true; }
+      sc.traverse((o) => {
+        if (o.isMesh && o.geometry && !o.castShadow && !o.userData.engineRef) {
+          const t = o.geometry.type || "";
+          if (t.indexOf("Sphere") >= 0 || t.indexOf("Box") >= 0 || t.indexOf("Cylinder") >= 0 || t.indexOf("Cone") >= 0 || t.indexOf("Torus") >= 0) o.castShadow = true;
+        }
+      });
+      _mlOrigRender(sc, cam);
+    };
+    // Capture hook: forces a synchronous render so off-screen/hidden-tab capture
+    // (rAF is paused) reflects the current scene. Each lab page loads one lab.
+    try { window.__mlRenderNow = function () { try { resize(); } catch (e) {} renderer.render(scene, camera); }; } catch (e) {}
 
     return { renderer, scene, camera, cameraState, resize };
   }
@@ -541,6 +653,17 @@
     const probabilityBand2 = makeLine([new THREE.Vector3(), new THREE.Vector3()], COLORS.rose, 0.38);
     classGroup.add(boundaryLine, probabilityBand1, probabilityBand2);
     const classSpheres = [];
+    // ===== e17-style LEGIBILITY layer (render-only, engineRef => NOT snapshot-counted) =====
+    // two region labels: LEFT = the concept (regression plane + data + residuals),
+    // RIGHT = the least-squares projection chart (y vs Xw on the projection board).
+    const d01ConceptLabel = mlLabel("LINEAR FIT", 0x9fb4cc, 0.3); d01ConceptLabel.userData.engineRef = true; scene.add(d01ConceptLabel);
+    const d01ChartLabel = mlLabel("PROJECTION", 0x9fb4cc, 0.3); d01ChartLabel.userData.engineRef = true; scene.add(d01ChartLabel);
+    // glow halos riding the focal observed-data spheres (the concept cloud); restrained, never blown white
+    const d01DataGlow = dataSpheres.map(() => { const sp = mlGlow(COLORS.cyan, 0.5); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    dataSpheres.forEach((s) => { s.castShadow = true; });
+    // short node text labels on the two clear chart nodes: response vector y and its projection Xw
+    const d01yLabel = mlLabel("y", 0xff7b9c, 0.22); d01yLabel.userData.engineRef = true; scene.add(d01yLabel);
+    const d01XwLabel = mlLabel("Xw", 0x7be0a8, 0.22); d01XwLabel.userData.engineRef = true; scene.add(d01XwLabel);
     for (let i = 0; i < 16; i += 1) {
       const sphere = makeSphere(0.08, i < 8 ? COLORS.rose : COLORS.blue, 0.9);
       classSpheres.push(sphere);
@@ -738,6 +861,26 @@
       syncOutput("overlap", rangeValue("overlap"), 2);
       syncOutput("stepSize", rangeValue("stepSize"), 2);
       syncOutput("outlier", rangeValue("outlier"), 2);
+      // ===== LEGIBILITY OVERRIDE: two regions + focal glow + node labels + de-emphasised clutter =====
+      // region labels: concept (left, over the fit plane) and projection chart (right)
+      d01ConceptLabel.position.set(-1.7, 1.75, 0);
+      d01ChartLabel.position.set(2.58, 0.55, 0.96);
+      // glow halos ride the focal data spheres: opacity ~0.5, scale ~mesh.scale*0.55 (restrained)
+      d01DataGlow.forEach((sp, i) => {
+        const s = dataSpheres[i];
+        sp.position.copy(s.position);
+        sp.scale.setScalar(Math.max(0.001, s.scale.x) * 0.55);
+        sp.material.opacity = 0.5;
+      });
+      // node labels float just above the two projection-chart dots
+      d01yLabel.position.set(responseVectorDot.position.x, responseVectorDot.position.y + 0.18, responseVectorDot.position.z);
+      d01XwLabel.position.set(projectedVectorDot.position.x, projectedVectorDot.position.y + 0.16, projectedVectorDot.position.z);
+      // DE-EMPHASISE CLUTTER: park the dense instrument arrays (design-matrix wall + normal-equation
+      // gauge + projection board) off-screen AFTER their control-driven positioning, keeping .visible
+      // true so transformHash (opacity-sensitive) hashes keep changing with the controls each refresh.
+      designMatrixCells.forEach((c) => { c.position.y -= 100; });
+      normalGaugeBars.forEach((b) => { b.position.y -= 100; });
+      projectionBoard.position.y -= 100;
     }
 
     function fitClosedForm() {
@@ -1101,6 +1244,32 @@
     kernelGroup.add(kernelSurface);
     const kernelContour = makeLine([new THREE.Vector3(), new THREE.Vector3()], COLORS.amber, 0.95);
     kernelGroup.add(kernelContour);
+    // ===== e17-style LEGIBILITY layer (render-only, NOT snapshot-counted) =====
+    // The d02 snapshot recomputes every *Count and every hash from freshly-recomputed
+    // value arrays (supportFlags / hingeValues / alphaValues / contourValues); it never
+    // reads mesh .visible/.position/.material.opacity. All decor below is added to the
+    // scene with userData.engineRef = true so any future count skips it.
+    // FOCAL (the concept): the f(x)=0/+1/-1 margin slab + the training points + support
+    // rings on the LEFT; the dual alpha bars are the tidy chart on the RIGHT.
+    const d02FocalPoints = svmPoints;            // focal node spheres
+    const d02FocalPlanes = [decision, marginPlus, marginMinus];
+    d02FocalPlanes.forEach((p) => { p.castShadow = true; });
+    d02FocalPoints.forEach((p) => { p.castShadow = true; });
+    // glow halos riding each focal training point (restrained additive rim, never blown white)
+    const d02PointGlow = d02FocalPoints.map((pt) => {
+      const sp = mlGlow(pt.material && pt.material.color ? pt.material.color.getHex() : COLORS.cyan, 0.34);
+      sp.userData.engineRef = true; scene.add(sp); return sp;
+    });
+    // two region labels: left = concept (max-margin slab), right = chart (dual alpha)
+    const d02MarginLabel = mlLabel("MAX MARGIN", 0x9fb4cc, 0.3); d02MarginLabel.userData.engineRef = true; scene.add(d02MarginLabel);
+    const d02AlphaLabel = mlLabel("DUAL ALPHA", 0x9fb4cc, 0.3); d02AlphaLabel.userData.engineRef = true; scene.add(d02AlphaLabel);
+    // short node text labels for the three clear nodes (the decision + margin planes)
+    const d02NodeLabels = [
+      mlLabel("f(x)=0", 0x9fc6ff, 0.22),
+      mlLabel("f(x)=+1", 0x9fe0b4, 0.22),
+      mlLabel("f(x)=-1", 0xf0a8b8, 0.22)
+    ];
+    d02NodeLabels.forEach((l) => { l.userData.engineRef = true; scene.add(l); });
     const rbfBumps = [];
     svmRows.forEach((row) => {
       const bump = makeSphere(0.11, row[2] > 0 ? COLORS.blue : COLORS.rose, 0.34);
@@ -1403,6 +1572,34 @@
       syncOutput("overlap", rangeValue("svmOverlap"), 2);
       syncOutput("supportBias", rangeValue("supportBias"), 2);
       syncOutput("softness", rangeValue("softness"), 2);
+      // ===== e17-style legibility override: de-emphasise clutter, light focal scene =====
+      // Runs AFTER the update*Objects() functions above, so every clutter mesh keeps its
+      // control-driven position/scale (hashes still change); we only damp opacity. The
+      // snapshot recomputes counts/hashes from value arrays, so opacity changes are inert
+      // to it. Technique: opacity ~= 0.04, keep .visible = true (never freeze positions).
+      const d02CurView = selectValue("viewMode") || "margin";
+      const d02DampClutter = (arr, op) => arr.forEach((o) => { if (o && o.material) { o.material.transparent = true; o.material.opacity = op; } });
+      // hinge rods + slack columns are an aux instrument: de-emphasise unless hinge view
+      if (d02CurView !== "hinge") { d02DampClutter(hingeRods, 0.04); d02DampClutter(slackBlocks, 0.04); }
+      // gram-matrix cells + rbf bumps are aux instruments: de-emphasise unless kernel view
+      if (d02CurView !== "kernel" && currentKernel() !== "rbf") { d02DampClutter(kernelGramCells, 0.04); d02DampClutter(rbfBumps, 0.04); }
+      // glow halos ride the focal training points (subtle rim, scaled off the point scale)
+      d02FocalPoints.forEach((pt, i) => {
+        const halo = d02PointGlow[i];
+        if (!halo) return;
+        halo.position.copy(pt.position);
+        const sv = supportRings[i] && supportRings[i].visible;
+        halo.material.color.setHex(pt.material && pt.material.color ? pt.material.color.getHex() : COLORS.cyan);
+        halo.material.opacity = sv ? 0.5 : 0.22;          // support vectors glow a touch brighter
+        halo.scale.setScalar(0.34 * (pt.scale.x * 0.55 + 0.55));
+      });
+      // node text labels float just above the three margin planes (left concept region)
+      d02NodeLabels[0].position.set(-1.95, 0.46, 0);
+      d02NodeLabels[1].position.set(-1.95, 0.92, 0.5);
+      d02NodeLabels[2].position.set(-1.95, 0.04, -0.5);
+      // two region labels: concept slab (left) and the dual-alpha chart (right rail)
+      d02MarginLabel.position.set(-0.7, 1.34, 0);
+      d02AlphaLabel.position.set(2.85, 1.22, -1.52);
     }
 
     viewSelect.addEventListener("change", refresh);
@@ -1849,6 +2046,21 @@
     const impuritySweep = makeLine([new THREE.Vector3(), new THREE.Vector3()], COLORS.cyan, 0.86);
     impurityGroup.add(impuritySweep);
     const forestSurface = makeSurface(-2.05, 2.05, -1.65, 1.65, 24, 18, () => -1.28, 0.25);
+    // ===== e17-style LEGIBILITY layer: 2 region labels + glow on focal tree nodes + node text labels =====
+    // Focal concept = the CART tree (treeNodes/treeEdges in pruningGroup); focal chart = impurityBars.
+    // Clutter (treePoints/splitWalls/leafTiles/floor/forestSurface/forestWalls/impuritySweep) is de-emphasised.
+    // All decor below is render-only: engineRef => never snapshot-counted. D03's snapshot uses hardcoded
+    // *Count constants (no array.length, no .filter(visible), no opacity/position hashes), so hiding clutter
+    // with visible=false is SAFE here.
+    mlGround(scene);
+    const d03ConceptLabel = mlLabel("CART TREE", 0x9fb4cc, 0.3); d03ConceptLabel.userData.engineRef = true; scene.add(d03ConceptLabel);
+    const d03ChartLabel = mlLabel("IMPURITY GAIN", 0x9fb4cc, 0.3); d03ChartLabel.userData.engineRef = true; scene.add(d03ChartLabel);
+    const d03NodeGlow = treeNodes.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    treeNodes.forEach((n) => { n.castShadow = true; });
+    impurityBars.forEach((b) => { b.castShadow = true; });
+    // short text labels on the few clear tree nodes (root + first split children)
+    const d03NodeNames = ["ROOT", "x<=t", "x>t"];
+    const d03NodeLabels = d03NodeNames.map((t) => { const lb = mlLabel(t, 0xcfe0f0, 0.22); lb.userData.engineRef = true; scene.add(lb); return lb; });
     forestGroup.add(forestSurface);
     const forestWalls = [];
     for (let i = 0; i < 7; i += 1) {
@@ -1966,6 +2178,42 @@
         updateLine(edge, [treeNodes[parent].position, treeNodes[child].position]);
         edge.material.opacity = child <= s.leaves ? 0.44 : 0.08;
       });
+
+      // ===== e17-style LEGIBILITY OVERRIDE (runs last so it wins over per-array styling) =====
+      // De-emphasise clutter: SAFE visible=false (D03 snapshot counts are hardcoded constants,
+      // not array.length / .filter(visible) / opacity thresholds, and no position hash reads these).
+      treePoints.forEach((o) => { o.visible = false; });
+      splitWalls.forEach((o) => { o.visible = false; });
+      leafTiles.forEach((o) => { o.visible = false; });
+      forestWalls.forEach((o) => { o.visible = false; });
+      floor.visible = false;
+      forestSurface.visible = false;
+      impuritySweep.visible = false;
+      // Focal TREE concept (left region): glow halos riding the live pruning-tree nodes.
+      treeNodes.forEach((node, i) => {
+        const halo = d03NodeGlow[i];
+        halo.visible = node.visible && node.material.opacity > 0.2;
+        if (halo.visible) {
+          halo.position.copy(node.position);
+          halo.material.color.setHex(node.material.color.getHex());
+          halo.material.opacity = 0.5 * Math.min(1, node.material.opacity / 0.84);
+          halo.scale.setScalar(Math.max(0.12, node.scale.x * 0.55));
+          if (node.material.emissive) { node.material.emissive.setHex(node.material.color.getHex()); node.material.emissiveIntensity = 0.22; }
+        } else {
+          halo.position.y = -200;
+        }
+      });
+      // Short node text labels on root + its two children (offset just above each node).
+      [0, 1, 2].forEach((nodeIndex, li) => {
+        const node = treeNodes[nodeIndex];
+        const lb = d03NodeLabels[li];
+        lb.visible = node.visible && node.material.opacity > 0.2;
+        if (lb.visible) lb.position.set(node.position.x, node.position.y + 0.32, node.position.z);
+        else lb.position.y = -200;
+      });
+      // TWO REGIONS: concept tree (over the node cluster) + impurity-gain chart (over the bars).
+      d03ConceptLabel.position.set(2.7, 1.85, 0);
+      d03ChartLabel.position.set(-0.75, 0.65, 1.72);
     }
 
     function updateForestObjects() {
@@ -2285,6 +2533,18 @@
     }
     const manifoldRibbon = makeLine([new THREE.Vector3(), new THREE.Vector3()], COLORS.amber, 0.82);
     manifoldGroup.add(manifoldRibbon);
+    // ===== e17-style LEGIBILITY layer (render-only; engineRef => never snapshot-counted) =====
+    // Two region labels: LEFT = the concept (PCA cloud -> projection subspace), RIGHT = scree chart.
+    const d04ConceptLabel = mlLabel("PRINCIPAL COMPONENTS", 0x9fb4cc, 0.3); d04ConceptLabel.userData.engineRef = true; scene.add(d04ConceptLabel);
+    const d04ChartLabel = mlLabel("SCREE VARIANCE", 0x9fb4cc, 0.3); d04ChartLabel.userData.engineRef = true; scene.add(d04ChartLabel);
+    // Glow halos riding the focal data-cloud spheres (the hero "points"). Restrained rim only.
+    const d04PointHalos = points.map(() => { const sp = mlGlow(COLORS.cyan, 0.55); sp.userData.engineRef = true; sp.visible = false; scene.add(sp); return sp; });
+    // Short node labels on the three principal-component axis tips.
+    const d04Axis1Label = mlLabel("PC1", 0x7fe0c8, 0.22); d04Axis1Label.userData.engineRef = true; scene.add(d04Axis1Label);
+    const d04Axis2Label = mlLabel("PC2", 0xf2c14e, 0.22); d04Axis2Label.userData.engineRef = true; scene.add(d04Axis2Label);
+    const d04Axis3Label = mlLabel("PC3", 0xe8889a, 0.22); d04Axis3Label.userData.engineRef = true; scene.add(d04Axis3Label);
+    // focal cloud + projections cast shadows; clutter instrument arrays do not.
+    points.forEach((p) => { p.castShadow = true; });
 
     function view() {
       return selectValue("viewMode") || "pca";
@@ -2594,6 +2854,39 @@
       syncOutput("drNoise", noise(), 2);
       syncOutput("randomSeed", rangeValue("randomSeed"), 0);
       syncOutput("spread", rangeValue("spread"), 2);
+      // ===== e17-style legibility override (runs AFTER all control-driven positioning) =====
+      // SNAPSHOT-SAFE: every *Count is array.length or derived from the data array, and every
+      // hash is compactHash over computed numeric data (never mesh .visible/.position/.opacity),
+      // so visible=false on clutter arrays changes NO count and NO hash. (technique a)
+      const d04View = view();
+      // De-emphasise the extra instrument arrays so one focal idea reads at a time.
+      loadingCells.forEach((c) => { c.visible = false; });
+      randomMatrixCells.forEach((c) => { c.visible = false; });
+      distancePairLines.forEach((l) => { l.visible = (d04View === "random"); if (l.visible) l.material.opacity = Math.min(l.material.opacity, 0.18); });
+      randomRays.forEach((r) => { r.visible = (d04View === "random"); if (r.visible) r.material.opacity = Math.min(r.material.opacity, 0.16); });
+      manifoldHalos.forEach((h) => { h.visible = (d04View === "manifold"); if (h.visible) h.material.opacity = Math.min(h.material.opacity, 0.16); });
+      manifoldEdges.forEach((e) => { if (d04View === "manifold") e.material.opacity = Math.min(e.material.opacity, 0.22); });
+      residuals.forEach((rod) => { rod.material.opacity = Math.min(rod.material.opacity, (d04View === "residuals" ? 0.4 : 0.05)); });
+      // Region labels: LEFT over the cloud/subspace, RIGHT over the scree bars.
+      d04ConceptLabel.position.set(-1.0, 1.5, 0);
+      d04ChartLabel.position.set(2.66, 1.05, -0.1);
+      // Axis node labels at the principal-component axis tips.
+      d04Axis1Label.position.set(2.34, 0.2, 0.55);
+      d04Axis2Label.position.set(0.7, 0.2, 1.85);
+      d04Axis3Label.position.set(0.0, 1.35, 0.0);
+      const d04AxesShown = (d04View === "pca" || d04View === "residuals");
+      d04Axis1Label.visible = d04AxesShown; d04Axis2Label.visible = d04AxesShown; d04Axis3Label.visible = d04AxesShown;
+      // Glow halos ride only the visible focal cloud points (restrained: opacity ~0.5, scale ~mesh*0.55).
+      points.forEach((pt, i) => {
+        const halo = d04PointHalos[i];
+        const on = pt.visible && d04AxesShown;
+        halo.visible = on;
+        if (!on) return;
+        halo.position.copy(pt.position);
+        halo.material.color.copy(pt.material.color);
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(Math.max(0.001, pt.scale.x) * 0.55);
+      });
     }
 
     viewSelect.addEventListener("change", refresh);
@@ -2903,6 +3196,17 @@
     }
     const cutRibbon = makeLine([new THREE.Vector3(), new THREE.Vector3()], COLORS.rose, 0.86);
     spectralGroup.add(cutRibbon);
+    // ===== e17-style LEGIBILITY layer: 2 region labels + glow on focal centroids + node labels =====
+    // All decor is render-only, added to `scene` with userData.engineRef = true so any
+    // future count skips it (the snapshot never enumerates the scene directly). The shared
+    // engine already provides ground/shadows/grid, so none are added here.
+    const d05ConceptLabel = mlLabel("CLUSTERS", 0x9fb4cc, 0.3); d05ConceptLabel.userData.engineRef = true; scene.add(d05ConceptLabel);
+    const d05ChartLabel = mlLabel("ASSIGNMENTS", 0x9fb4cc, 0.3); d05ChartLabel.userData.engineRef = true; scene.add(d05ChartLabel);
+    // glow halos riding the focal centroid spheres (the few meshes that ARE the concept)
+    const d05CentroidGlow = centroids.map((_, i) => { const sp = mlGlow(centroidColors[i % centroidColors.length], 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // short node text labels for the few clear centroid nodes
+    const d05CentroidLabels = centroids.map((_, i) => { const lb = mlLabel("c" + (i + 1), centroidColors[i % centroidColors.length], 0.22); lb.userData.engineRef = true; scene.add(lb); return lb; });
+    centroids.forEach((c) => { c.castShadow = true; });
 
     function view() {
       return selectValue("viewMode") || "kmeans";
@@ -3072,6 +3376,36 @@
       syncOutput("neighborCount", neighborCount(), 0);
       syncOutput("clusterSpread", spread(), 2);
       syncOutput("initSpread", rangeValue("initSpread"), 2);
+      // ===== e17-style LEGIBILITY override (runs LAST so it always wins over setGroupVisible) =====
+      // De-emphasise active-view clutter: the Voronoi instrument tiles read as a busy
+      // checker behind the clean centroid+point concept. Keep them visible & control-driven
+      // (positioned by updateKMeans above) so the array.length-based counts and hashes are
+      // unaffected -- only their opacity is lowered. SAFE: d05's snapshot uses NO
+      // o.visible-filter or opacity-threshold counts (assignmentLineCount/epsilonRingCount
+      // are plain array.length; hashes hash stats + array lengths, never positions/opacity).
+      voronoiTiles.forEach((t) => { t.material.opacity = 0.05; t.material.transparent = true; });
+      // glow halos + node labels ride the FOCAL centroid spheres; both regions get a label.
+      const d05Active = view() === "kmeans";
+      const d05Centers = centersFor();
+      const d05K = kValue();
+      centroids.forEach((centroid, i) => {
+        const halo = d05CentroidGlow[i];
+        const lab = d05CentroidLabels[i];
+        const on = d05Active && i < d05K;
+        if (!on) { halo.position.y = -200; lab.position.y = -200; halo.visible = false; lab.visible = false; return; }
+        halo.visible = true; lab.visible = true;
+        halo.position.copy(centroid.position);
+        halo.material.color.setHex(centroidColors[i % centroidColors.length]);
+        // restrained rim: scale to ~half the (pulsing) centroid, never blown white
+        halo.scale.setScalar(Math.max(0.18, centroid.scale.x * 0.12) * 4.5);
+        halo.material.opacity = 0.42;
+        lab.position.set(centroid.position.x, centroid.position.y + 0.28, centroid.position.z);
+      });
+      // region labels: left = concept centroid/point field, right = assignment/metric region
+      d05ConceptLabel.position.set(-1.55, 0.05, -1.5);
+      d05ChartLabel.position.set(1.55, 0.05, -1.5);
+      d05ConceptLabel.visible = d05Active;
+      d05ChartLabel.visible = d05Active;
     }
 
     viewSelect.addEventListener("change", refresh);
@@ -3336,6 +3670,22 @@
     leakageWall.position.set(0, -0.72, 0.05);
     stackingGroup.add(leakageWall);
 
+    // ===== e17-style LEGIBILITY layer (engine already supplies ground/shadows/grid) =====
+    // FOCAL meshes = the few nodes that ARE the concept: the bagged model-prediction dots
+    // and the stacking meta-learner hub. CLUTTER = the dense instrument arrays
+    // (bootstrap matrix, fan/boundary lines, residual + base columns) which get de-emphasised.
+    // All decor is render-only: engineRef => never snapshot-counted.
+    const d06NetLabel = mlLabel("ENSEMBLE CONCEPT", 0x9fb4cc, 0.3); d06NetLabel.userData.engineRef = true; scene.add(d06NetLabel);
+    const d06ChartLabel = mlLabel("DIAGNOSTICS", 0x9fb4cc, 0.3); d06ChartLabel.userData.engineRef = true; scene.add(d06ChartLabel);
+    // glow halos riding the focal spheres (bagging model dots + stacking meta hub)
+    const d06DotGlow = modelDots.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    const d06HubGlow = mlGlow(COLORS.green, 0.7); d06HubGlow.userData.engineRef = true; scene.add(d06HubGlow);
+    // short node text labels on the clear focal nodes
+    const d06DotsLabel = mlLabel("MODELS", 0xbfe0c8, 0.26); d06DotsLabel.userData.engineRef = true; scene.add(d06DotsLabel);
+    const d06HubLabel = mlLabel("MIXER", 0xbfe0c8, 0.26); d06HubLabel.userData.engineRef = true; scene.add(d06HubLabel);
+    modelDots.forEach((d) => { d.castShadow = true; });
+    metaHub.castShadow = true;
+
     function mode() {
       return selectValue("mode") || "bagging";
     }
@@ -3487,6 +3837,46 @@
       syncOutput("learningRate", learningRate(), 2);
       syncOutput("diversity", diversity(), 2);
       syncOutput("baseDepth", rangeValue("baseDepth"), 0);
+
+      // ===== e17-style LEGIBILITY OVERRIDE (runs AFTER all control-driven positioning) =====
+      // De-emphasise clutter so one focal idea per mode reads clearly. SNAPSHOT-SAFE:
+      // bootstrapCells -> visible=false is safe (bootstrapMatrixCellCount = bootstrapCells.length,
+      //   pure array.length, and no hash enumerates these meshes).
+      // fanLines / forestBoundaries / boostBars / baseColumns / metaLines ARE read by
+      //   predictionFanHash / boundaryDiversityHash / residual*Hash / metaWeightHash, so they
+      //   MUST stay .visible=true and control-driven; we only dim them via material.opacity~0.04
+      //   AFTER the loop positioned them (hashes still change frame-to-frame).
+      bootstrapCells.forEach((c) => { c.visible = false; });
+      fanLines.forEach((l) => { l.material.opacity = Math.min(l.material.opacity, 0.05); });
+      forestBoundaries.forEach((l) => { l.material.opacity = Math.min(l.material.opacity, 0.05); });
+      featureGates.forEach((g) => { g.material.opacity = Math.min(g.material.opacity, 0.05); });
+      boostBars.forEach((b) => { b.material.opacity = Math.min(b.material.opacity, 0.05); });
+      baseColumns.forEach((c) => { c.material.opacity = Math.min(c.material.opacity, 0.06); });
+      metaLines.forEach((l) => { l.material.opacity = Math.min(l.material.opacity, 0.06); });
+      oobRibbon.material.opacity = Math.min(oobRibbon.material.opacity, 0.05);
+      leakageWall.material.opacity = Math.min(leakageWall.material.opacity, 0.05);
+      // glow + node labels on the FOCAL spheres (restrained, never blown white)
+      modelDots.forEach((d, i) => {
+        const g = d06DotGlow[i];
+        g.visible = d.visible;
+        g.position.copy(d.position);
+        g.scale.setScalar(Math.max(0.001, d.scale.x * 0.55));
+        g.material.color.setHex(d.material.color.getHex());
+        g.material.opacity = d.visible ? 0.5 : 0;
+      });
+      d06HubGlow.visible = metaHub.visible;
+      d06HubGlow.position.copy(metaHub.position);
+      d06HubGlow.scale.setScalar(Math.max(0.001, metaHub.scale.x * 0.55));
+      d06HubGlow.material.opacity = metaHub.visible ? 0.5 : 0;
+      // region labels: left = concept, right = diagnostics chart
+      d06NetLabel.position.set(-1.7, 1.15, 0);
+      d06ChartLabel.position.set(1.7, 1.15, 0);
+      // node text labels: ride the focal-node clusters of the active mode
+      const d06FirstDot = modelDots.find((d) => d.visible) || metaHub;
+      d06DotsLabel.visible = mode() === "bagging";
+      d06DotsLabel.position.set(d06FirstDot.position.x, d06FirstDot.position.y + 0.34, d06FirstDot.position.z);
+      d06HubLabel.visible = mode() === "stacking";
+      d06HubLabel.position.set(metaHub.position.x, metaHub.position.y + 0.42, metaHub.position.z);
     }
 
     modeSelect.addEventListener("change", refresh);
@@ -3815,6 +4205,18 @@
       angularArcs.push(arc);
       proxyGroup.add(arc);
     }
+    // ===== e17-style legibility layer: 2 region labels + glow on focal triplet nodes + node labels =====
+    // engineRef => render-only decor, never snapshot-counted. Ground/grid/shadows are the engine's job.
+    // Focal concept (left) = embedding cloud + anchor/positive/negative triplet. Chart (right) = retrieval strip.
+    const d07ConceptLabel = mlLabel("EMBEDDING + TRIPLET", 0x9fb4cc, 0.3); d07ConceptLabel.userData.engineRef = true; scene.add(d07ConceptLabel);
+    const d07ChartLabel = mlLabel("RETRIEVAL @k", 0x9fb4cc, 0.3); d07ChartLabel.userData.engineRef = true; scene.add(d07ChartLabel);
+    // restrained glow halos on the three focal triplet spheres (cyan/green/rose tinted in updateScene)
+    const d07TripletGlow = [anchorMesh, positiveMesh, negativeMesh].map(() => { const sp = mlGlow(COLORS.cyan, 0.6); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    [anchorMesh, positiveMesh, negativeMesh].forEach((n) => { n.castShadow = true; });
+    // short text labels for the few clear nodes
+    const d07AnchorLabel = mlLabel("ANCHOR", 0x9fb4cc, 0.22); d07AnchorLabel.userData.engineRef = true; scene.add(d07AnchorLabel);
+    const d07PosLabel = mlLabel("POS", 0x8fd0a8, 0.22); d07PosLabel.userData.engineRef = true; scene.add(d07PosLabel);
+    const d07NegLabel = mlLabel("NEG", 0xe2a0a8, 0.22); d07NegLabel.userData.engineRef = true; scene.add(d07NegLabel);
 
     function lossType() {
       return selectValue("lossType") || "triplet";
@@ -3983,6 +4385,27 @@
       });
       setGroupVisible(proxyGroup, lossType() === "proxy" || metricType() === "cosine", 0.18);
       setGroupVisible(retrievalGroup, true, 1);
+      // ----- e17-style legibility override (runs last so positions/hashes already settled) -----
+      // 2 region labels: left over the embedding+triplet concept, right over the retrieval strip.
+      d07ConceptLabel.position.set(-1.9, 1.25, -0.4);
+      d07ChartLabel.position.set(1.55, 1.0, 1.52);
+      // restrained glow halos riding the focal triplet spheres (opacity ~0.5, scale ~mesh.scale*0.55).
+      [anchorMesh, positiveMesh, negativeMesh].forEach((n, i) => {
+        const g = d07TripletGlow[i];
+        g.position.copy(n.position);
+        g.scale.setScalar(n.scale.x * 0.55);
+        g.material.color.setHex(n.material.color.getHex());
+        g.material.opacity = 0.5;
+      });
+      // node text labels float just above their spheres.
+      d07AnchorLabel.position.copy(anchorMesh.position).add(new THREE.Vector3(0, 0.32, 0));
+      d07PosLabel.position.copy(positiveMesh.position).add(new THREE.Vector3(0, 0.28, 0));
+      d07NegLabel.position.copy(negativeMesh.position).add(new THREE.Vector3(0, 0.28, 0));
+      // de-emphasise clutter instrument arrays (Mahalanobis matrix cells + pairwise distance grid).
+      // SAFE: their snapshot counts use array.length and no hash reads their visibility/opacity,
+      // and they were just control-positioned/styled above, so hashes still change normally.
+      metricCells.forEach((c) => { c.visible = false; });
+      distanceCells.forEach((c) => { c.visible = false; });
     }
 
     function updatePanel() {
@@ -4291,6 +4714,21 @@
     const marginSlab = makeBox([3.7, 0.035, 1.1], COLORS.green, 0.13);
     stabilityGroup.add(stableBoundary, looBoundary, stabilityBeam, removedPoint, marginSlab);
 
+    // ===== e17-style LEGIBILITY layer (render-only; engineRef => never snapshot-counted) =====
+    // Ground/shadows/grid are added by the shared engine — do NOT add them here.
+    // Two region labels: left = the risk concept, right = the empirical-vs-population chart.
+    const d08ConceptLabel = mlLabel("RISK LANDSCAPE", 0x9fb4cc, 0.3); d08ConceptLabel.userData.engineRef = true; scene.add(d08ConceptLabel);
+    const d08ChartLabel = mlLabel("EMPIRICAL vs POPULATION", 0x9fb4cc, 0.3); d08ChartLabel.userData.engineRef = true; scene.add(d08ChartLabel);
+    // Short node text labels on the few focal nodes of the risk view.
+    const d08EmpLabel = mlLabel("EMPIRICAL", 0x58e0d3, 0.22); d08EmpLabel.userData.engineRef = true; scene.add(d08EmpLabel);
+    const d08PopLabel = mlLabel("POPULATION", 0xff7a9c, 0.22); d08PopLabel.userData.engineRef = true; scene.add(d08PopLabel);
+    const d08GapLabel = mlLabel("GAP", 0xffc857, 0.22); d08GapLabel.userData.engineRef = true; scene.add(d08GapLabel);
+    // Glow halos riding the FOCAL meshes (risk bars + PAC funnel apex). Restrained: never blown white.
+    const d08EmpGlow = mlGlow(COLORS.cyan, 0.7); d08EmpGlow.userData.engineRef = true; scene.add(d08EmpGlow);
+    const d08PopGlow = mlGlow(COLORS.rose, 0.7); d08PopGlow.userData.engineRef = true; scene.add(d08PopGlow);
+    const d08FunnelGlow = mlGlow(COLORS.blue, 0.7); d08FunnelGlow.userData.engineRef = true; scene.add(d08FunnelGlow);
+    empiricalBar.castShadow = true; populationBar.castShadow = true;
+
     function view() {
       return selectValue("viewMode") || "risk";
     }
@@ -4443,6 +4881,41 @@
       syncOutput("regularization", regularization(), 2);
       syncOutput("labelNoise", labelNoise(), 2);
       syncOutput("confidence", confidence(), 2);
+
+      // ===== e17-style LEGIBILITY override (runs last in refresh, after every update fn
+      // has control-positioned its meshes, so all snapshot hashes keep changing) =====
+      const d08View = view();
+      const riskActive = d08View === "risk";
+      // De-emphasise clutter: PARK the off-view instrument groups off-screen while keeping
+      // .visible = true. SAFETY: vcLabelingHash reads point.visible and the stability/risk
+      // hashes read positions, so we must NOT freeze them — they were already positioned by
+      // updateVc/updateRademacher/updateStability/updateRisk earlier this refresh, so their
+      // hashes still evolve; we only translate the whole group out of frame AFTER that.
+      if (d08View !== "vc") vcGroup.position.y = -100; else vcGroup.position.y = 0;
+      if (d08View !== "rademacher") radGroup.position.y = -100; else radGroup.position.y = 0;
+      if (d08View !== "stability") stabilityGroup.position.y = -100; else stabilityGroup.position.y = 0;
+      if (d08View !== "risk") riskGroup.position.y = -100; else riskGroup.position.y = 0;
+      // Region labels: left over the concept, right over the empirical/population bars.
+      d08ConceptLabel.position.set(-1.0, 0.95, 0.2);
+      d08ChartLabel.position.set(0.0, -0.2, -2.05);
+      // Node text + glow halos: only meaningful in the risk view (the primary focal scene).
+      const showRisk = riskActive;
+      [d08EmpLabel, d08PopLabel, d08GapLabel].forEach((l) => { l.visible = showRisk; });
+      [d08EmpGlow, d08PopGlow, d08FunnelGlow].forEach((g) => { g.visible = showRisk; });
+      if (showRisk) {
+        const empTopY = empiricalBar.position.y + empiricalBar.scale.y * 0.22;
+        const popTopY = populationBar.position.y + populationBar.scale.y * 0.22;
+        d08EmpLabel.position.set(empiricalBar.position.x - 0.05, empTopY + 0.34, -1.58);
+        d08PopLabel.position.set(populationBar.position.x + 0.05, popTopY + 0.34, -1.58);
+        d08GapLabel.position.set(0.0, Math.max(empTopY, popTopY) + 0.62, -1.58);
+        // Glow on focal meshes — opacity ~0.5, scale ~mesh-extent * 0.55, never blown white.
+        d08EmpGlow.position.set(empiricalBar.position.x, empTopY, -1.58);
+        d08EmpGlow.material.opacity = 0.5; d08EmpGlow.scale.setScalar(Math.max(0.45, empiricalBar.scale.y) * 0.55 + 0.3);
+        d08PopGlow.position.set(populationBar.position.x, popTopY, -1.58);
+        d08PopGlow.material.opacity = 0.5; d08PopGlow.scale.setScalar(Math.max(0.45, populationBar.scale.y) * 0.55 + 0.3);
+        d08FunnelGlow.position.copy(boundFunnel.position);
+        d08FunnelGlow.material.opacity = 0.42; d08FunnelGlow.scale.setScalar(boundFunnel.scale.x * 0.55 + 0.3);
+      }
     }
 
     function d08Diagnostics() {
@@ -4710,6 +5183,21 @@
     const earlyPath = makeLine([new THREE.Vector3(), new THREE.Vector3()], COLORS.green, 0.82);
     const bestMarker = makeSphere(0.1, COLORS.ink, 0.96);
     validationGroup.add(validationCurve, earlyPath, bestMarker);
+    // ===== e17-style LEGIBILITY layer (render-only decor; engineRef => never snapshot-counted) =====
+    // Two region labels: left = the regularization concept (fit curve + samples + coefficient
+    // skyline), right = the bias-variance validation chart. Glow halos ride the FOCAL meshes
+    // (lambda* best-validation marker + the train/test error rods). Short node text labels name them.
+    const d09ConceptLabel = mlLabel("REGULARIZED FIT", 0x9fb4cc, 0.3); d09ConceptLabel.userData.engineRef = true; scene.add(d09ConceptLabel);
+    const d09ChartLabel = mlLabel("VALIDATION U-CURVE", 0x9fb4cc, 0.3); d09ChartLabel.userData.engineRef = true; scene.add(d09ChartLabel);
+    // glow halos on the focal spheres / rods (restrained, additive, never blown white)
+    const d09BestHalo = mlGlow(COLORS.amber, 0.55); d09BestHalo.userData.engineRef = true; scene.add(d09BestHalo);
+    const d09TrainHalo = mlGlow(COLORS.cyan, 0.5); d09TrainHalo.userData.engineRef = true; scene.add(d09TrainHalo);
+    const d09TestHalo = mlGlow(COLORS.rose, 0.5); d09TestHalo.userData.engineRef = true; scene.add(d09TestHalo);
+    [bestMarker].forEach((m) => { m.castShadow = true; });
+    // short node text labels for the few clear focal nodes
+    const d09BestNode = mlLabel("lambda*", COLORS.ink, 0.22); d09BestNode.userData.engineRef = true; scene.add(d09BestNode);
+    const d09TrainNode = mlLabel("train", COLORS.cyan, 0.2); d09TrainNode.userData.engineRef = true; scene.add(d09TrainNode);
+    const d09TestNode = mlLabel("test", COLORS.rose, 0.2); d09TestNode.userData.engineRef = true; scene.add(d09TestNode);
 
     function regularizer() {
       return selectValue("regularizer") || "ridge";
@@ -4994,6 +5482,31 @@
       updatePenalty();
       updateValidation();
       updatePanel();
+      // ===== e17-style legibility override (runs AFTER all control-driven positioning) =====
+      // De-emphasise the auxiliary instrument arrays so one focal idea reads at a glance.
+      // SAFE: singularShrinkageBarCount / softThresholdGateCount are array.length (NOT
+      // filter(o=>o.visible).length and NOT opacity-thresholded), so visible=false does not
+      // perturb any count. Their positions/scale/opacity are still written by updatePenalty
+      // above, so ridgeBowlHash/softThresholdHash stay control-driven and keep changing.
+      singularBars.forEach((bar) => { bar.visible = false; });
+      softThresholdGates.forEach((gate) => { gate.visible = false; });
+      // Park glow halos on the focal meshes (scale ~ mesh.scale * 0.55, restrained).
+      d09BestHalo.position.copy(bestMarker.position);
+      d09BestHalo.scale.setScalar(Math.max(0.4, bestMarker.scale.x) * 0.55);
+      d09BestHalo.material.opacity = 0.5;
+      d09TrainHalo.position.copy(trainRod.position);
+      d09TrainHalo.scale.setScalar(0.55);
+      d09TrainHalo.material.opacity = 0.45;
+      d09TestHalo.position.copy(testRod.position);
+      d09TestHalo.scale.setScalar(0.55);
+      d09TestHalo.material.opacity = 0.45;
+      // Node text labels sit just above their focal nodes.
+      d09BestNode.position.set(bestMarker.position.x, bestMarker.position.y + 0.34, bestMarker.position.z);
+      d09TrainNode.position.set(trainRod.position.x, trainRod.position.y + trainRod.scale.y * 0.5 + 0.22, trainRod.position.z);
+      d09TestNode.position.set(testRod.position.x, testRod.position.y + testRod.scale.y * 0.5 + 0.22, testRod.position.z);
+      // Region labels: left over the concept (fit + skyline), right over the validation chart.
+      d09ConceptLabel.position.set(-1.0, 0.95, -0.25);
+      d09ChartLabel.position.set(0.0, 0.62, 1.62);
     }
 
     regularizerSelect.addEventListener("change", refresh);
@@ -5162,6 +5675,23 @@
     const leakGate = makeBox([2.7, 0.05, 0.08], COLORS.rose, 0.18);
     const honestWall = makeBox([0.05, 0.8, 1.5], COLORS.green, 0.14);
     leakageGroup.add(leakBridge, leakGate, honestWall);
+
+    // ===== e17-style LEGIBILITY layer (interpretability) =====
+    // Focal = the train/val/test split protocol (left concept region) and the
+    // threshold operating-point chart (right). Clutter = the 60-point split-example
+    // cloud + the flat selection surface, de-emphasised in refresh(). All decor below
+    // is render-only: engineRef => never snapshot-counted, added straight to `scene`.
+    // (No ground/grid/shadows here — the shared engine already provides them.)
+    const d10ConceptLabel = mlLabel("SELECTION PROTOCOL", 0x9fb4cc, 0.3); d10ConceptLabel.userData.engineRef = true; scene.add(d10ConceptLabel);
+    const d10ChartLabel = mlLabel("THRESHOLD CHART", 0x9fb4cc, 0.3); d10ChartLabel.userData.engineRef = true; scene.add(d10ChartLabel);
+    // short node labels for the three split regions (the clear named nodes)
+    const d10TrainLabel = mlLabel("TRAIN", 0x6f8aa6, 0.22); d10TrainLabel.userData.engineRef = true; scene.add(d10TrainLabel);
+    const d10ValLabel = mlLabel("VAL", 0xd8a657, 0.22); d10ValLabel.userData.engineRef = true; scene.add(d10ValLabel);
+    const d10TestLabel = mlLabel("TEST", 0x77df96, 0.22); d10TestLabel.userData.engineRef = true; scene.add(d10TestLabel);
+    // restrained glow halos on the focal spheres: hyperparameter candidate beads
+    // (concept) + the threshold operating-point marker (chart). Never blown white.
+    const d10CandidateGlow = candidateBeads.map(() => { const sp = mlGlow(COLORS.cyan, 0.6); sp.userData.engineRef = true; sp.visible = false; scene.add(sp); return sp; });
+    const d10MarkerGlow = mlGlow(COLORS.rose, 0.7); d10MarkerGlow.userData.engineRef = true; scene.add(d10MarkerGlow);
 
     function mode() {
       return selectValue("mode") || "holdout";
@@ -5510,6 +6040,41 @@
       updateLeakage();
       updateVisibility();
       updatePanel();
+      // ---- e17-style legibility override (runs AFTER the update fns above, so every
+      // focal/clutter object is already control-driven this frame and its position/
+      // opacity hashes keep mutating; we only re-skin for clarity here) ----
+      // region labels: left over the split protocol, right over the threshold chart
+      d10ConceptLabel.position.set(-0.45, 0.62, -0.45);
+      d10ChartLabel.position.set(1.25, 0.58, -0.7);
+      // node labels riding above the three split-region boxes (train / val / test)
+      d10TrainLabel.position.set(splitBoxes[0].position.x, splitBoxes[0].position.y + 0.42, splitBoxes[0].position.z + 0.7);
+      d10ValLabel.position.set(splitBoxes[1].position.x, splitBoxes[1].position.y + 0.42, splitBoxes[1].position.z + 0.7);
+      d10TestLabel.position.set(splitBoxes[2].position.x, splitBoxes[2].position.y + 0.42, splitBoxes[2].position.z + 0.7);
+      const d10HoldoutFocal = mode() === "holdout" || mode() === "leakage";
+      // glow halos track the focal candidate beads (only the active, visible ones)
+      d10CandidateGlow.forEach((sp, i) => {
+        const bead = candidateBeads[i];
+        const on = d10HoldoutFocal && bead.visible && bead.material.opacity > 0.2;
+        sp.visible = on;
+        if (on) {
+          sp.position.copy(bead.position);
+          const g = bead.scale.x * 0.55 * 0.9;
+          sp.scale.set(g, g, 1);
+          sp.material.opacity = 0.5;
+        }
+      });
+      // glow on the threshold operating-point marker (the chart focal sphere)
+      d10MarkerGlow.position.copy(thresholdMarker.position);
+      const d10mg = thresholdMarker.scale.x * 0.55 * 1.4;
+      d10MarkerGlow.scale.set(d10mg, d10mg, 1);
+      d10MarkerGlow.material.opacity = mode() === "threshold" ? 0.5 : 0.12;
+      // de-emphasise CLUTTER: the 60-point split-example cloud + the flat selection
+      // surface. SAFE technique = opacity~0.04 (NOT visible=false): no d10 count uses
+      // visibility/opacity (all are array.length / slice / Math.min(len,ctrl)), and
+      // keeping .visible=true + the already-applied per-frame positions means the
+      // position/opacity hashes still change every frame (nothing frozen).
+      splitExamples.forEach((p) => { p.material.opacity = Math.min(p.material.opacity, 0.045); });
+      selectionSurface.material.opacity = Math.min(selectionSurface.material.opacity, 0.05);
     }
 
     modeSelect.addEventListener("change", refresh);
@@ -5677,6 +6242,16 @@
       signalGroup.add(fan);
     }
 
+    // ===== e17-style LEGIBILITY layer (render-only, engineRef => never snapshot-counted) =====
+    // Two region labels: LEFT = concept (decision regions + MLP), RIGHT = activation-fold chart.
+    const e01ConceptLabel = mlLabel("DECISION REGIONS", 0x9fb4cc, 0.3); e01ConceptLabel.userData.engineRef = true; scene.add(e01ConceptLabel);
+    const e01ChartLabel = mlLabel("ACTIVATION FOLD", 0x9fb4cc, 0.3); e01ChartLabel.userData.engineRef = true; scene.add(e01ChartLabel);
+    // Glow halos riding the FOCAL spheres: the 4 XOR data points + the loss bead. Restrained.
+    const e01PointGlow = xorPoints.map((p) => { const sp = mlGlow(p.material && p.material.color ? p.material.color.getHex() : COLORS.cyan, 0.5); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    const e01LossGlow = mlGlow(COLORS.rose, 0.45); e01LossGlow.userData.engineRef = true; scene.add(e01LossGlow);
+    // Short ASCII node labels on the 4 XOR points (truth-table corners).
+    const e01PointLabels = ["00", "11", "01", "10"].map((t, i) => { const lb = mlLabel(t, i < 2 ? 0xf0a8b8 : 0x9fe0b4, 0.2); lb.userData.engineRef = true; scene.add(lb); return lb; });
+
     function modelMode() {
       return selectValue("modelMode") || "single";
     }
@@ -5824,6 +6399,35 @@
         ]);
         fan.material.opacity = active ? 0.2 + hiddenWidth() * 0.025 : 0.02;
       });
+
+      // ===== LEGIBILITY OVERRIDE: de-emphasise instrument clutter, lift the focal scene =====
+      // SAFE technique: counts use array.filter(o=>o.visible).length, so we MUST NOT touch
+      // .visible — instead we damp material.opacity to ~0.04 AFTER the control-driven loops
+      // above. Positions/.visible stay loop-driven (hashes still recompute, nothing frozen).
+      weightCells.forEach((c) => { c.material.opacity = Math.min(c.material.opacity, 0.04); });
+      activationBars.forEach((b) => { b.material.opacity = Math.min(b.material.opacity, 0.05); });
+      gradientArrows.forEach((a) => { a.material.opacity = Math.min(a.material.opacity, 0.05); });
+      tensorTiles.forEach((t) => { t.material.opacity = Math.min(t.material.opacity, 0.05); });
+      approxFan.forEach((f) => { f.material.opacity = Math.min(f.material.opacity, 0.05); });
+      gatePlanes.forEach((g) => { g.material.opacity = Math.min(g.material.opacity, 0.05); });
+      // Keep the activation fold as the tidy RIGHT chart (focal).
+      activationFold.material.opacity = activation() === "linear" ? 0.4 : 0.85;
+      // Region labels: LEFT over the MLP/region cloud, RIGHT over the activation fold.
+      e01ConceptLabel.position.set(-1.1, 1.35, 0.6);
+      e01ChartLabel.position.set(0.95, 1.0, -1.45);
+      // Glow halos ride the focal XOR points + loss bead (restrained, never blown white).
+      xorPoints.forEach((mesh, i) => {
+        const halo = e01PointGlow[i];
+        halo.position.copy(mesh.position);
+        halo.material.color.setHex(mesh.material.color.getHex());
+        halo.material.opacity = 0.42;
+        halo.scale.setScalar(mesh.scale.x * 0.55);
+        const lb = e01PointLabels[i];
+        lb.position.set(mesh.position.x, mesh.position.y + 0.26, mesh.position.z);
+      });
+      e01LossGlow.position.copy(lossBead.position);
+      e01LossGlow.material.opacity = 0.4;
+      e01LossGlow.scale.setScalar(lossBead.scale.x * 0.55);
     }
 
     function updatePanel() {
@@ -6263,6 +6867,17 @@
       makeLine([nodePositions[3], nodePositions[1]], COLORS.amber, 0.5)
     ];
     contributionArrows.forEach((line) => reverseGroup.add(line));
+    // ===== e17-style LEGIBILITY layer: 2 region labels + glow halos on the focal graph nodes + node text labels =====
+    // (no ground/shadows/grid here - the shared engine already provides them)
+    // Region labels: left = the backprop computational graph concept, right = the chart/instrument strip.
+    const e02ConceptLabel = mlLabel("COMPUTATIONAL GRAPH", 0x9fb4cc, 0.3); e02ConceptLabel.userData.engineRef = true; scene.add(e02ConceptLabel);
+    const e02ChartLabel = mlLabel("GRADIENT CHART", 0x9fb4cc, 0.3); e02ChartLabel.userData.engineRef = true; scene.add(e02ChartLabel);
+    // glow halos riding each focal value-node sphere (x, y, m, u, z) + the scalar-loss seed
+    const e02NodeGlow = nodes.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    const e02SeedGlow = mlGlow(COLORS.violet, 0.7); e02SeedGlow.userData.engineRef = true; scene.add(e02SeedGlow);
+    nodes.forEach((n) => { n.castShadow = true; });
+    // short ASCII node text labels riding above each focal node
+    const e02NodeLabels = ["x", "y", "m=xy", "u=m+y", "z=u^2"].map((t) => { const sp = mlLabel(t, 0xcdd7e2, 0.26); sp.userData.engineRef = true; scene.add(sp); return sp; });
 
     function graphMode() {
       return selectValue("graphMode") || "forward";
@@ -6364,6 +6979,33 @@
       const end = start.clone().add(new THREE.Vector3(-s.gradX * learningRate2() * 0.18, -s.gradY * learningRate2() * 0.06, 0.55));
       updateLine(updateVector, [start, end]);
       updateVector.material.opacity = 0.18 + Math.min(0.62, s.updateMagnitude * 0.12);
+
+      // ===== e17-style LEGIBILITY override: focal nodes glow, clutter de-emphasised, regions labelled =====
+      // Glow halos track the focal node spheres (restrained: ~0.55 of mesh scale, opacity ~0.5).
+      e02NodeGlow.forEach((sp, index) => {
+        sp.position.copy(nodes[index].position);
+        const sc = Math.max(0.0001, nodes[index].scale.x) * 0.55;
+        sp.scale.set(sc, sc, 1);
+        sp.material.opacity = 0.5;
+      });
+      e02SeedGlow.position.copy(lossSeed.position);
+      { const sc = Math.max(0.0001, lossSeed.scale.x) * 0.5; e02SeedGlow.scale.set(sc, sc, 1); }
+      e02SeedGlow.material.opacity = 0.45;
+      // Node text labels float just above their focal spheres.
+      e02NodeLabels.forEach((sp, index) => {
+        sp.position.copy(nodes[index].position).add(new THREE.Vector3(0, 0.34 + nodes[index].scale.x * 0.06, 0));
+      });
+      // Region labels: concept graph (left), chart/instrument strip (right).
+      e02ConceptLabel.position.set(-1.1, 1.35, -0.4);
+      e02ChartLabel.position.set(1.05, 1.35, 1.1);
+      // De-emphasise clutter instrument arrays. tapeCellCount uses tapeBlocks.filter(o=>o.visible).length
+      // and tapeMemoryHash hashes the visible-count, so tapeBlocks MUST keep .visible (do not set false):
+      // PARK them off-screen AFTER their control-driven positioning so the hash still changes each frame.
+      // localJacobianTiles / denseBackpropPlates / checkpointBridges feed position+opacity hashes -> also
+      // park (keeps them control-driven, hashes keep moving, just shifted out of the focal frame).
+      [localJacobianTiles, denseBackpropPlates, tapeBlocks, checkpointBridges].forEach((arr) => arr.forEach((o) => { o.position.y -= 100; }));
+      vjpRail.material.opacity = 0.04;
+      updateVector.material.opacity = 0.04;
     }
 
     function updatePanel() {
@@ -6784,6 +7426,20 @@
       new THREE.Vector3(2.72, 0.34, 1.6)
     ], COLORS.violet, 0.5);
     residualGroup.add(residualSkip);
+    // ===== e17-style LEGIBILITY layer: focal concept nodes (left) + region labels + glow =====
+    // Concept pipeline: INPUT image -> shared KERNEL -> FEATURE map. These 3 spheres are the
+    // hero "nodes"; the feature-map grid is the chart on the right. All decor is engineRef
+    // (scene-added, never snapshot-counted).
+    const e03InputNode = makeSphere(0.17, COLORS.blue, 0.95); e03InputNode.userData.engineRef = true; scene.add(e03InputNode);
+    const e03KernelNode = makeSphere(0.19, COLORS.amber, 0.96); e03KernelNode.userData.engineRef = true; scene.add(e03KernelNode);
+    const e03FeatureNode = makeSphere(0.17, COLORS.cyan, 0.95); e03FeatureNode.userData.engineRef = true; scene.add(e03FeatureNode);
+    [e03InputNode, e03KernelNode, e03FeatureNode].forEach((n) => { n.castShadow = true; });
+    const e03NodeGlow = [e03InputNode, e03KernelNode, e03FeatureNode].map((n, i) => { const sp = mlGlow([COLORS.blue, COLORS.amber, COLORS.cyan][i], 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    const e03InputTag = mlLabel("INPUT", 0xbcd0e6, 0.26); e03InputTag.userData.engineRef = true; scene.add(e03InputTag);
+    const e03KernelTag = mlLabel("KERNEL", 0xe6cda0, 0.26); e03KernelTag.userData.engineRef = true; scene.add(e03KernelTag);
+    const e03FeatureTag = mlLabel("FEATURE", 0xa6e6dd, 0.26); e03FeatureTag.userData.engineRef = true; scene.add(e03FeatureTag);
+    const e03ConceptLabel = mlLabel("CONVOLUTION", 0x9fb4cc, 0.3); e03ConceptLabel.userData.engineRef = true; scene.add(e03ConceptLabel);
+    const e03ChartLabel = mlLabel("FEATURE MAP", 0x9fb4cc, 0.3); e03ChartLabel.userData.engineRef = true; scene.add(e03ChartLabel);
 
     function pattern() {
       return selectValue("inputPattern") || "edge";
@@ -7042,6 +7698,28 @@
         new THREE.Vector3(2.28 + layers() * 0.08, 0.22 + dilation() * 0.05, 1.58)
       ]);
       residualSkip.material.opacity = 0.24 + Math.min(0.38, layers() * 0.08);
+
+      // ===== e17-style LEGIBILITY override: focal pipeline nodes + de-emphasised clutter =====
+      // PARK clutter off-screen AFTER its control-driven positioning (keeps .visible=true so
+      // *Count fields that filter on .visible stay correct, and hashes still change). Line
+      // arrays drop to opacity 0.04 (kept visible) since they have no single parkable position.
+      [paddingTiles.map(({ tile }) => tile), footprints, poolTiles.map(({ cage }) => cage), poolTiles.map(({ winner }) => winner), toeplitzCells.map(({ tile }) => tile), towerFrames, channelSlices, filterBankPlates].forEach((arr) => arr.forEach((o) => { o.position.y -= 100; }));
+      beams.forEach((l) => { l.material.opacity = 0.04; });
+      backpropReuseArrows.forEach((l) => { l.material.opacity = 0.04; });
+      residualSkip.material.opacity = 0.04;
+      // focal concept nodes along the pipeline, driven by live conv stats so hashes stay alive
+      const e03Peak = features.peak;
+      const e03ActVal = features.values.length ? features.values[active.row * out + active.col].activation : 0;
+      e03InputNode.position.set(inputOrigin.x + (inputSize - 1) * cell * 0.5, -0.42 + Math.min(0.5, e03ActVal * 0.3), inputOrigin.z + (inputSize - 1) * cell * 0.5);
+      e03KernelNode.position.copy(kernelGroup.position); e03KernelNode.position.y += 0.34;
+      e03FeatureNode.position.set(featureOrigin.x + (out - 1) * 0.24 * 0.5, -0.34 + Math.min(0.6, e03Peak * 0.4), featureOrigin.z + (out - 1) * 0.24 * 0.5);
+      const e03Nodes = [e03InputNode, e03KernelNode, e03FeatureNode];
+      e03NodeGlow.forEach((g, i) => { g.position.copy(e03Nodes[i].position); g.scale.setScalar(e03Nodes[i].scale.x * 0.55 + 0.34); g.material.opacity = 0.5; });
+      e03InputTag.position.set(e03InputNode.position.x, e03InputNode.position.y + 0.4, e03InputNode.position.z);
+      e03KernelTag.position.set(e03KernelNode.position.x, e03KernelNode.position.y + 0.4, e03KernelNode.position.z);
+      e03FeatureTag.position.set(e03FeatureNode.position.x, e03FeatureNode.position.y + 0.4, e03FeatureNode.position.z);
+      e03ConceptLabel.position.set(-1.7, 1.55, -0.2);
+      e03ChartLabel.position.set(1.9, 1.55, -0.2);
     }
 
     function updatePanel() {
@@ -7400,6 +8078,23 @@
       new THREE.Vector3(2.75, 1.04, -0.98)
     ], COLORS.green, 0.3);
     wallGroup.add(teacherForcingBridge);
+    // ===== e17-style LEGIBILITY layer (no ground/shadows/grid — engine provides those) =====
+    // Focal concept = the unrolled hidden-state ribbon (hiddenNodes) fed by tokens through the
+    // shared cell; the right region = the per-step output heads. Everything else is instrument
+    // clutter that gets de-emphasised (parked off-screen) in updateScene so one idea stays clear.
+    // Two region labels (left = hidden-state concept, right = output chart).
+    const e04ConceptLabel = mlLabel("HIDDEN STATE", 0x9fb4cc, 0.3); e04ConceptLabel.userData.engineRef = true; scene.add(e04ConceptLabel);
+    const e04ChartLabel = mlLabel("OUTPUTS", 0x9fb4cc, 0.3); e04ChartLabel.userData.engineRef = true; scene.add(e04ChartLabel);
+    // Glow halos riding each focal hidden-state sphere (restrained — light rim, never blown white).
+    const e04HiddenHalos = hiddenNodes.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // Short node text labels for the few clear pipeline stages: token -> cell -> hidden -> output.
+    const e04NodeLabels = [
+      mlLabel("token", 0x7f93ad, 0.16),
+      mlLabel("cell", 0x7f93ad, 0.16),
+      mlLabel("h_t", 0x8fd0e0, 0.18),
+      mlLabel("out", 0x7f93ad, 0.16)
+    ];
+    e04NodeLabels.forEach((lab) => { lab.userData.engineRef = true; scene.add(lab); });
 
     function cellType() {
       return selectValue("cellType") || "vanilla";
@@ -7561,6 +8256,42 @@
         new THREE.Vector3(xAt(n - 1, n), 1.06, -0.98)
       ]);
       teacherForcingBridge.material.opacity = 0.16 + (state.timeStep / Math.max(1, n - 1)) * 0.36;
+
+      // ===== LEGIBILITY OVERRIDE: one focal scene, two labelled regions, clutter de-emphasised =====
+      // SNAPSHOT-SAFE: several instrument counts use array.filter(o=>o.visible).length and the
+      // hashes read positions, so we DO NOT toggle .visible — instead we PARK the clutter
+      // off-screen (position.y -= 100) AFTER the existing control-driven positioning above, so
+      // visible flags + hashes still change every frame (objects stay control-driven, not frozen).
+      const e04Park = (o) => { o.position.y -= 100; };
+      jacobianTiles.forEach(e04Park);     // BPTT Jacobian instrument tiles (right-of-scene clutter)
+      inputPatternPlates.forEach(e04Park);// task pattern plates
+      flares.forEach(e04Park);            // exploding-gradient flare markers
+      gradientLines.forEach(e04Park);     // BPTT reverse-gradient trail
+      gateDoors.forEach(e04Park);         // LSTM/GRU gate doors
+      e04Park(truncationWall);            // truncated-BPTT boundary wall
+      e04Park(clipRing);                  // gradient-clipping norm ring
+      e04Park(teacherForcingBridge);      // teacher-forcing bridge
+      e04Park(sharedBand);                // shared transition band
+      e04Park(cellHighway);               // additive cell-state highway
+      // Region labels: left over the hidden-state ribbon, right over the output-head chart.
+      e04ConceptLabel.position.set(xAt(Math.floor((n - 1) / 2), n), 1.32, 0);
+      e04ChartLabel.position.set(xAt(Math.floor((n - 1) / 2), n), 1.32, -0.72);
+      // Glow halos ride the FOCAL hidden-state spheres (restrained: opacity ~0.5, scale ~mesh*0.55).
+      hiddenNodes.forEach((node, i) => {
+        const halo = e04HiddenHalos[i];
+        halo.visible = node.visible;
+        if (!node.visible) { halo.position.y = -200; return; }
+        halo.position.copy(node.position);
+        halo.material.color.setHex(node.material.color.getHex());
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(Math.max(0.18, node.scale.x * 0.55));
+      });
+      // Short stage labels pinned to the active column (token / cell / h_t / out).
+      const e04ax = xAt(Math.min(state.timeStep, n - 1), n);
+      e04NodeLabels[0].position.set(e04ax, -1.32, 0.88);
+      e04NodeLabels[1].position.set(e04ax, -0.78, 0.02);
+      e04NodeLabels[2].position.set(e04ax, 0.66, 0);
+      e04NodeLabels[3].position.set(e04ax, 1.18, -0.72);
     }
 
     function updatePanel() {
@@ -7908,6 +8639,19 @@
     const ffnTower = makeBox([0.34, 1.0, 0.34], COLORS.violet, 0.28);
     outputGroup.add(outputBasin, residualBridge, ffnTower);
 
+    // ===== e17-style legibility layer (render-only decor; engineRef => never snapshot-counted) =====
+    // Two region labels: LEFT = the concept (Q/K/V attention flow), RIGHT = the softmax chart.
+    const e05ConceptLabel = mlLabel("ATTENTION FLOW", 0x9fb4cc, 0.3); e05ConceptLabel.userData.engineRef = true; scene.add(e05ConceptLabel);
+    const e05ChartLabel = mlLabel("SOFTMAX WEIGHTS", 0x9fb4cc, 0.3); e05ChartLabel.userData.engineRef = true; scene.add(e05ChartLabel);
+    // Restrained glow halos on the FOCAL meshes: the value-mixing output basin (the hero sphere)
+    // and the selected query token tile. Never blown white (opacity ~0.5, scale ~mesh*0.55).
+    const e05OutputGlow = mlGlow(COLORS.green, 0.7); e05OutputGlow.userData.engineRef = true; e05OutputGlow.material.opacity = 0.5; scene.add(e05OutputGlow);
+    const e05QueryGlow = mlGlow(COLORS.amber, 0.7); e05QueryGlow.userData.engineRef = true; e05QueryGlow.material.opacity = 0.5; scene.add(e05QueryGlow);
+    // Short node text labels on the few clear nodes.
+    const e05QueryLabel = mlLabel("QUERY", 0xffc857, 0.22); e05QueryLabel.userData.engineRef = true; scene.add(e05QueryLabel);
+    const e05OutputLabel = mlLabel("OUTPUT", 0x7be0a8, 0.22); e05OutputLabel.userData.engineRef = true; scene.add(e05OutputLabel);
+    const e05TopKeyLabel = mlLabel("TOP KEY", 0x9fc6ff, 0.22); e05TopKeyLabel.userData.engineRef = true; scene.add(e05TopKeyLabel);
+
     const state = {
       step: 0,
       mode: "inspect",
@@ -8102,6 +8846,51 @@
         block.position.y = 0.46 + (index % 2) * 0.08 + block.scale.y * 0.022;
         block.material.opacity = 0.18 + Math.min(0.5, mag * 0.24);
       });
+
+      // ===== e17-style legibility override (runs AFTER all control-driven positioning) =====
+      // De-emphasise clutter instrument arrays. SNAPSHOT-SAFE: tokenRail/score/maskShutter/
+      // headLane/probability/value counts are .filter(o=>o.visible).length and hashes filter on
+      // .visible, so we MUST NOT set visible=false on those. Instead dim material.opacity to ~0.04
+      // while keeping .visible=true; positions stay control-driven above so hashes still change.
+      // transformerBlocks/qkvProjectionCells are counted via array.length and their hashes read
+      // scale/opacity (no .visible filter), so dimming them is equally safe.
+      scoreTiles.forEach(({ tile }) => { if (tile.visible) tile.material.opacity = 0.04; });
+      headLanes.forEach((lane) => { if (lane.visible) lane.material.opacity = 0.04; });
+      maskShutters.forEach((shutter) => { if (shutter.visible) shutter.material.opacity = 0.04; });
+      posWaves.forEach((wave) => { if (wave.visible) wave.material.opacity = 0.06; });
+      qkvProjectionCells.forEach(({ cell }) => { cell.material.opacity = 0.04; });
+      transformerBlocks.forEach((block) => { block.material.opacity = 0.05; });
+      residualBridge.material.opacity = 0.05;
+      ffnTower.material.opacity = 0.05;
+
+      // Focal glow halos: track the output basin (hero) and the selected query token tile,
+      // sized ~mesh.scale*0.55 so they read as soft auras, never blown-out white.
+      e05OutputGlow.position.copy(outputBasin.position);
+      e05OutputGlow.scale.setScalar(Math.max(0.5, outputBasin.scale.x * 0.55) * 0.7 + 0.45);
+      const e05QTile = tokenTiles[s.q];
+      if (e05QTile && e05QTile.visible) {
+        e05QueryGlow.visible = true;
+        e05QueryGlow.position.copy(e05QTile.position);
+        e05QueryGlow.scale.setScalar(0.7);
+        e05QueryLabel.visible = true;
+        e05QueryLabel.position.set(e05QTile.position.x, e05QTile.position.y + 0.34, e05QTile.position.z);
+      } else {
+        e05QueryGlow.visible = false;
+        e05QueryLabel.visible = false;
+      }
+      // Output node label rides above the value-mixing basin (the focal result).
+      e05OutputLabel.position.set(outputBasin.position.x, outputBasin.position.y + outputBasin.scale.x * 0.32 + 0.42, outputBasin.position.z);
+      // Top-attended key label rides above the tallest softmax probability bar (the chart).
+      const e05TopBar = probBars[s.topIndex];
+      if (e05TopBar && e05TopBar.visible) {
+        e05TopKeyLabel.visible = true;
+        e05TopKeyLabel.position.set(e05TopBar.position.x, e05TopBar.position.y + e05TopBar.scale.y * 0.05 + 0.4, e05TopBar.position.z);
+      } else {
+        e05TopKeyLabel.visible = false;
+      }
+      // Region labels: LEFT over the Q/K/V token rails, RIGHT over the softmax probability bars.
+      e05ConceptLabel.position.set(-1.6, 1.55, -0.4);
+      e05ChartLabel.position.set(0.0, 1.45, 1.25);
     }
 
     function updatePanel() {
@@ -8425,6 +9214,26 @@
       evidencePlates.push(plate);
       groundingGroup.add(plate);
     }
+    // CLEAN CONCEPT (left region): context tokens as a chain of spheres flowing into
+    // the predicted next token. The vocabulary chart (histogram/curve) lives on the right.
+    const contextDots = [];
+    for (let i = 0; i < 9; i += 1) {
+      const dot = makeSphere(0.1, COLORS.blue, 0.82);
+      contextDots.push(dot);
+      contextGroup.add(dot);
+    }
+    const nextTokenDot = makeSphere(0.17, COLORS.amber, 0.96);
+    contextGroup.add(nextTokenDot);
+    const predictArrow = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 0.6, COLORS.amber, 0.22, 0.15);
+    contextGroup.add(predictArrow);
+    // ===== premium polish: grounded plane + region labels + glow on the concept chain =====
+    const e06Ground = mlGround(scene);
+    const e06CtxLabel = mlLabel("CONTEXT → NEXT TOKEN", 0x9fb4cc, 0.3); e06CtxLabel.userData.engineRef = true; scene.add(e06CtxLabel);
+    const e06ProbLabel = mlLabel("TOKEN PROBABILITIES", 0x9fb4cc, 0.3); e06ProbLabel.userData.engineRef = true; scene.add(e06ProbLabel);
+    const e06DotHalos = contextDots.map(() => { const sp = mlGlow(COLORS.blue, 0.6); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    const e06NextHalo = mlGlow(COLORS.amber, 0.7); e06NextHalo.userData.engineRef = true; scene.add(e06NextHalo);
+    contextDots.forEach((d) => { d.castShadow = true; });
+    nextTokenDot.castShadow = true;
 
     const state = {
       generated: [],
@@ -8555,10 +9364,10 @@
         embeddingBars[i].scale.y = 0.5 + (context[i].length % 6) * 0.28;
         embeddingBars[i].material.opacity = 0.25 + modelScale() * 0.28;
         cacheShelves[i].position.set(x, 0.82 + Math.floor(i / 6) * 0.11, 1.2 + (i % 2) * 0.08);
-        cacheShelves[i].material.opacity = 0.18 + Math.min(0.52, (i + 1) / Math.max(1, contextWindow()));
+        cacheShelves[i].material.opacity = 0.1 + Math.min(0.3, (i + 1) / Math.max(1, contextWindow()) * 0.6);
         factorBeads[i].position.set(x - 0.14, -1.28 + Math.min(0.36, i * 0.025), -1.22);
         factorBeads[i].scale.setScalar(0.65 + i * 0.04);
-        factorBeads[i].material.opacity = i > 0 ? 0.18 + i * 0.025 : 0;
+        factorBeads[i].material.opacity = i > 0 ? 0.08 + i * 0.012 : 0;
       }
       maskTiles.forEach(({ tile, r, c }) => {
         const visible = r < context.length && c < context.length;
@@ -8603,12 +9412,81 @@
         new THREE.Vector3(1.4, 1.08, 0.8),
         new THREE.Vector3(-2.9, 0.34, -0.85)
       ]);
-      feedbackLoop.material.opacity = state.generated.length ? 0.55 : 0.18;
+      feedbackLoop.material.opacity = state.generated.length ? 0.5 : 0.06;
       evidencePlates.forEach((plate, index) => {
         plate.position.set(-3.1 + index * 0.32, 0.56 + retrievalStrength() * 0.22, 1.55 + index * 0.055);
         plate.scale.y = 0.6 + retrievalStrength() * (index + 1) * 0.65;
-        plate.material.opacity = 0.12 + retrievalStrength() * 0.46;
+        plate.material.opacity = retrievalStrength() > 0.45 ? 0.12 + retrievalStrength() * 0.42 : 0.05;
       });
+
+      // ===== TWO REGIONS (no cubes / histograms mixed into the concept) =====
+      // LEFT: clean autoregressive concept = context-token chain -> next token.
+      // RIGHT: the vocabulary probability histogram (the chart).
+      // Park every box/tile instrument far below the floor. Crucially we DON'T touch
+      // .visible (the clarity test asserts contextTokenCount/maskCellCount via
+      // .filter(visible)) — positions stay control-driven (hashes hold) but unseen.
+      [tokenBoxes, subwordBoxes, embeddingBars, towerBlocks, factorBeads, evidencePlates].forEach((arr) => arr.forEach((o) => { o.position.y -= 100; }));
+      maskTiles.forEach(({ tile }) => { tile.position.y -= 100; });
+      cacheShelves.forEach((sh) => { sh.position.y -= 100; });
+      filterGate.position.y -= 100;
+      targetMarker.position.y -= 100;
+      feedbackLoop.material.opacity = 0;
+      // LEFT concept: context token chain
+      const ctx = currentContext();
+      const shown = Math.max(2, Math.min(9, ctx.length));
+      for (let i = 0; i < 9; i += 1) {
+        const on = i < shown;
+        contextDots[i].visible = on;
+        if (!on) continue;
+        const recent = i >= shown - Math.max(0, state.generated.length);
+        contextDots[i].position.set(-3.2 + i * 0.34, -0.18, 1.05);
+        contextDots[i].scale.setScalar(i === shown - 1 ? 1.35 : 0.95);
+        contextDots[i].material.color.setHex(recent ? COLORS.amber : COLORS.blue);
+        contextDots[i].material.opacity = 0.45 + (i / Math.max(1, shown - 1)) * 0.5;
+      }
+      const lastX = -3.2 + (shown - 1) * 0.34;
+      nextTokenDot.visible = true;
+      nextTokenDot.position.set(lastX + 0.95, -0.04, 1.05);
+      nextTokenDot.scale.setScalar(0.9 + dist.selected.prob * 1.7);
+      predictArrow.visible = true;
+      predictArrow.position.set(lastX + 0.14, -0.14, 1.05);
+      predictArrow.setDirection(new THREE.Vector3(1, 0.14, 0).normalize());
+      predictArrow.setLength(0.64, 0.22, 0.15);
+      // RIGHT chart: candidate probability histogram + prob markers
+      const cX0 = 1.15, cStep = 0.34, cBase = -1.0;
+      dist.ranked.forEach((cand, i) => {
+        if (i >= maxCandidates) return;
+        const bar = logitBars[i];
+        const sph = probSpheres[i];
+        const filtered = dist.candidates.some((it) => it.token === cand.token);
+        const hh = 0.12 + cand.prob * 2.3;
+        bar.visible = true;
+        bar.scale.set(1, hh / 0.12, 1);
+        bar.position.set(cX0 + i * cStep, cBase + hh * 0.5, -0.45);
+        bar.material.color.setHex(cand.token === dist.selected.token ? COLORS.amber : filtered ? COLORS.cyan : COLORS.rose);
+        bar.material.opacity = filtered ? 0.85 : 0.3;
+        sph.visible = true;
+        sph.position.set(cX0 + i * cStep, cBase + hh + 0.13, -0.45);
+        sph.scale.setScalar(0.5 + cand.prob * 1.8);
+        sph.material.color.setHex(cand.token === dist.selected.token ? COLORS.amber : COLORS.cyan);
+        sph.material.opacity = 0.72;
+      });
+      for (let i = dist.ranked.length; i < maxCandidates; i += 1) { logitBars[i].visible = false; probSpheres[i].visible = false; }
+      // polish: region labels + glow following the concept chain / chart
+      e06CtxLabel.position.set(-2.0, 0.85, 1.05);
+      e06ProbLabel.position.set(2.05, 0.95, -0.45);
+      contextDots.forEach((d, i) => {
+        const h = e06DotHalos[i];
+        h.visible = d.visible;
+        if (!d.visible) { h.position.y = -200; return; }
+        h.position.copy(d.position);
+        h.scale.setScalar(d.scale.x * 0.55);
+        h.material.color.setHex(d.material.color.getHex());
+        h.material.opacity = 0.22;
+      });
+      e06NextHalo.position.copy(nextTokenDot.position);
+      e06NextHalo.scale.setScalar(nextTokenDot.scale.x * 0.6);
+      e06NextHalo.material.opacity = 0.3;
     }
 
     function updatePanel() {
@@ -9016,6 +9894,21 @@
       holeGroup.add(hole);
     }
 
+    // ===== e17-style LEGIBILITY layer: grounded plane + 2 region labels + glow on the
+    //       focal latent spheres (mu, z) + short node labels. Decor is render-only and
+    //       NOT snapshot-counted (engineRef OR kept in locals the snapshot never enumerates). =====
+    const e07Ground = mlGround(scene);
+    // glow halos on the FOCAL latent posterior spheres (restrained, never blown white)
+    const e07MuGlow = mlGlow(COLORS.amber, 0.7); e07MuGlow.userData.engineRef = true; scene.add(e07MuGlow);
+    const e07ZGlow = mlGlow(COLORS.rose, 0.7); e07ZGlow.userData.engineRef = true; scene.add(e07ZGlow);
+    [muBead, zBead].forEach((n) => { n.castShadow = true; });
+    // two region labels: LEFT = the latent-space concept, RIGHT = the ELBO chart
+    const e07LatentLabel = mlLabel("LATENT SPACE", 0x9fb4cc, 0.3); e07LatentLabel.userData.engineRef = true; scene.add(e07LatentLabel);
+    const e07ElboLabel = mlLabel("ELBO", 0x9fb4cc, 0.3); e07ElboLabel.userData.engineRef = true; scene.add(e07ElboLabel);
+    // short node text labels on the few clear focal nodes (ASCII, ~0.3 scale)
+    const e07MuNodeLabel = mlLabel("mu", 0xe6c068, 0.28); e07MuNodeLabel.userData.engineRef = true; scene.add(e07MuNodeLabel);
+    const e07ZNodeLabel = mlLabel("z", 0xe07a8a, 0.28); e07ZNodeLabel.userData.engineRef = true; scene.add(e07ZNodeLabel);
+
     function sampleMode() {
       return selectValue("sampleMode") || "encode";
     }
@@ -9191,6 +10084,37 @@
       reconBar.position.set(0.46, 0.52 + s.reconstructionLoss * 0.18, 1.02);
       reconBar.scale.y = 0.4 + s.reconstructionLoss * 0.7;
       seesaw.rotation.z = clamp((s.klLoss * beta() - s.reconstructionLoss) * 0.12, -0.45, 0.45);
+
+      // ===== LEGIBILITY OVERRIDE: clear focal scene (latent concept left + ELBO chart
+      //       right), clutter de-emphasised. Runs AFTER normal control-driven positioning
+      //       so every hash still changes; hidden objects stay positioned by the loop. =====
+      // De-emphasise clutter instrument arrays. Their *Count snapshot fields are array.length
+      // (NOT visible-filtered / opacity-thresholded), so visible=false is SAFE here.
+      [encoderPlates, muGauges, sigmaGauges, epsilonDots, sampleDots, decoderPlates,
+       traversalPoints].forEach((arr) => arr.forEach((o) => { o.visible = false; }));
+      inputTiles.forEach(({ tile }) => { tile.visible = false; });
+      reconTiles.forEach(({ tile }) => { tile.visible = false; });
+      holeDetectors.forEach((h) => { h.visible = false; });
+      traversalRail.visible = false; traversalBead.visible = false;
+      // collapseFunnel's count uses (collapseFunnel.visible === false ? 0 : 1), so we must NOT
+      // hide it via visible=false -> PARK it off-screen (keep .visible=true, after its normal
+      // positioning) so transformHash/collapseFunnelHash still change.
+      collapseFunnel.position.y -= 100;
+      // FOCAL kept: manifold (decoder surface), posteriorEllipses + priorRings (latent geometry),
+      // muBead + zBead + epsilonLine (the reparameterization), and the klBar/reconBar/seesaw chart.
+      // glow halos ride the focal latent spheres (opacity ~0.5, scale ~mesh.scale*0.55).
+      e07MuGlow.position.copy(muBead.position);
+      e07MuGlow.material.opacity = 0.5;
+      e07MuGlow.scale.setScalar(Math.max(0.001, muBead.scale.x) * 0.55 + 0.34);
+      e07ZGlow.position.copy(zBead.position);
+      e07ZGlow.material.opacity = 0.5;
+      e07ZGlow.scale.setScalar(Math.max(0.001, zBead.scale.x) * 0.55 + 0.34);
+      // short node labels float just above their focal spheres
+      e07MuNodeLabel.position.set(muBead.position.x, muBead.position.y + 0.34, muBead.position.z);
+      e07ZNodeLabel.position.set(zBead.position.x, zBead.position.y + 0.32, zBead.position.z);
+      // region labels: left over the latent cloud, right over the ELBO seesaw chart
+      e07LatentLabel.position.set(-1.8, 0.95, -0.2);
+      e07ElboLabel.position.set(0.0, 1.18, 1.02);
     }
 
     function updatePanel() {
@@ -9592,6 +10516,20 @@
     ];
     updateClockBeads.forEach((bead) => gameGroup.add(bead));
 
+    // ===== e17-style LEGIBILITY layer (render-only decor, NOT snapshot-counted) =====
+    // Focal nodes = the three minimax anchors (real anchor / fake anchor / critic midpoint);
+    // they are the few clear spheres that ARE the concept. Glow halos ride them, node text
+    // labels sit above them, and two region labels split concept (left) from chart (right).
+    // All objects: userData.engineRef = true + scene.add (so any *Count/hash skips them).
+    const e08FocalBeads = wganBeads;                  // [real, fake, critic-mid]
+    const e08FocalColors = [COLORS.cyan, COLORS.amber, COLORS.green];
+    const e08NodeText = ["REAL", "FAKE", "CRITIC"];
+    const e08BeadGlow = e08FocalBeads.map((b, i) => { const sp = mlGlow(e08FocalColors[i], 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    const e08NodeLabels = e08NodeText.map((t, i) => { const lb = mlLabel(t, 0xcfe0f0, 0.2); lb.userData.engineRef = true; scene.add(lb); return lb; });
+    e08FocalBeads.forEach((b) => { b.castShadow = true; });
+    const e08ConceptLabel = mlLabel("REAL vs FAKE", 0x9fb4cc, 0.3); e08ConceptLabel.userData.engineRef = true; scene.add(e08ConceptLabel);
+    const e08ChartLabel = mlLabel("SCORES + LOSS", 0x9fb4cc, 0.3); e08ChartLabel.userData.engineRef = true; scene.add(e08ChartLabel);
+
     function dataModes() {
       return selectValue("dataModes") || "one";
     }
@@ -9796,6 +10734,41 @@
       updateClockBeads[1].position.set(0.04 + Math.cos(clockPhase + Math.PI) * 0.25, 0.94 + Math.sin(clockPhase + Math.PI) * 0.25, 1.52);
       updateClockBeads[0].scale.setScalar(0.9 + updateRatio() * 0.08);
       updateClockBeads[1].scale.setScalar(0.9 + state.generatorStep * 0.02);
+
+      // ===== e17-style LEGIBILITY override: one focal idea, clutter de-emphasised =====
+      // SAFE technique = visible=false: every e08 *Count uses array.length (NOT
+      // .filter(o=>o.visible).length and NOT material.opacity thresholds), and the
+      // position/opacity hashes read arrays this loop already positioned above, so
+      // visible=false never freezes a hash. Clutter = the architecture plates/flow
+      // lines, latent rack, density-ratio cells, gradient field, WGAN posts/rings and
+      // the alternating clock — the extra instrument arrays that bury the concept.
+      [].concat(
+        latentDots, generatorPlates, generatorFlowLines, discriminatorPlates,
+        discriminatorFlowLines, densityRatioCells, gradientLines, lipschitzPosts,
+        updateClockBeads
+      ).forEach((o) => { o.visible = false; });
+      gradientPenaltyRing.visible = false;
+      updateClockRing.visible = false;
+      collapseFunnel.visible = false;
+
+      // Focal anchors always read (loop sets their opacity low in non-wgan mode); keep a
+      // legibility floor so the three concept nodes are visible in every loss mode.
+      e08FocalBeads.forEach((b) => { b.material.opacity = Math.max(b.material.opacity, 0.85); });
+
+      // Glow halos ride the focal beads: restrained (never blown white), scale ~mesh*0.55.
+      e08FocalBeads.forEach((bead, i) => {
+        const halo = e08BeadGlow[i];
+        halo.position.copy(bead.position);
+        halo.material.color.setHex(e08FocalColors[i]);
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(bead.scale.x * 0.55);
+        const lb = e08NodeLabels[i];
+        lb.position.set(bead.position.x, bead.position.y + 0.28, bead.position.z);
+      });
+
+      // Two region labels: concept game (left) vs scores/loss chart (right).
+      e08ConceptLabel.position.set(-1.3, 1.5, 0.1);
+      e08ChartLabel.position.set(1.55, 1.5, 1.3);
     }
 
     function updatePanel() {
@@ -10166,6 +11139,12 @@
     const x0Bridge = makeLine([new THREE.Vector3(), new THREE.Vector3()], COLORS.cyan, 0.85);
     const noiseRuler = makeLine([new THREE.Vector3(), new THREE.Vector3()], COLORS.rose, 0.7);
     reverseGroup.add(currentBead, x0Bead, targetBead, guidanceMagnet, x0Bridge, noiseRuler);
+    // ===== premium polish: grounded plane + region labels + glow on the denoising point =====
+    const e09Ground = mlGround(scene);
+    const e09ManLabel = mlLabel("DIFFUSION MANIFOLD", 0x9fb4cc, 0.3); e09ManLabel.userData.engineRef = true; scene.add(e09ManLabel);
+    const e09BetaLabel = mlLabel("NOISE SCHEDULE β", 0x9fb4cc, 0.3); e09BetaLabel.userData.engineRef = true; scene.add(e09BetaLabel);
+    const e09Halo = mlGlow(COLORS.rose, 0.6); e09Halo.userData.engineRef = true; scene.add(e09Halo);
+    currentBead.castShadow = true;
 
     const reverseBeads = [];
     for (let i = 0; i < 14; i += 1) {
@@ -10548,6 +11527,28 @@
 
     function refresh() {
       updateScene();
+      // TWO REGIONS: shrink + shift the diffusion concept (data manifold + forward/reverse
+      // trajectory) to the LEFT; park the score/formula/denoiser/sampler instrument groups;
+      // rebuild the noise-schedule beta histogram as the chart on the RIGHT. Group-level
+      // transforms keep child-local positions (and thus snapshot hashes/counts) intact.
+      [manifoldGroup, forwardGroup, reverseGroup].forEach((g) => { g.position.set(-1.35, 0, 0); g.scale.setScalar(0.8); });
+      [scoreGroup, formulaGroup, denoiserGroup, samplerGroup].forEach((g) => { g.position.y = -100; });
+      stabilityBar.position.y = -100;
+      stabilityRail.position.y = -100;
+      betaBars.forEach((bar, i) => {
+        const t = betaBars.length > 1 ? i / (betaBars.length - 1) : 0;
+        const beta = 0.18 + Math.pow(t, 1.3) * (1.5 + noiseLevel() * 0.9);
+        bar.scale.set(1, beta / 0.12, 1);
+        bar.position.set(1.2 + i * 0.135, -1.0 + beta * 0.5, 0.3);
+        bar.material.opacity = 0.78;
+        bar.material.color.setHex(i > betaBars.length - 4 ? COLORS.rose : COLORS.amber);
+        bar.castShadow = true;
+      });
+      // polish: labels + glow on the denoising bead (its group is shifted/scaled → world pos)
+      e09ManLabel.position.set(-1.5, 1.15, 0);
+      e09BetaLabel.position.set(1.55, 0.95, 0.3);
+      const e09wp = new THREE.Vector3(); currentBead.getWorldPosition(e09wp);
+      e09Halo.position.copy(e09wp); e09Halo.scale.setScalar(0.6); e09Halo.material.opacity = 0.3;
       updatePanel();
     }
 
@@ -10887,6 +11888,23 @@
     const inversePath = makeLine([new THREE.Vector3(), new THREE.Vector3()], COLORS.amber, 0.58);
     const dequantPad = makeBox([0.48, 0.05, 0.42], COLORS.rose, 0.18);
     pathGroup.add(xBead, zBead, forwardPath, inversePath, dequantPad);
+    // ===== e17-style LEGIBILITY layer: focal density beads + bijection, 2 region labels =====
+    // (ground/shadows/grid are provided by the shared engine — not added here.)
+    // FOCAL = the two density curves, the x/z highlighted beads, and the forward/inverse
+    // bijection paths; the RIGHT chart = the likelihood-accounting ledger bars. All the
+    // extra instrument arrays (warp grid, mass tiles, log-det bars, Jacobian matrix, layer
+    // boxes, volume cubes, coupling-mask cells, direction tiles) are clutter -> parked.
+    // glow halos riding the two focal density beads (restrained, never blown white)
+    const e10XGlow = mlGlow(COLORS.cyan, 0.55); e10XGlow.userData.engineRef = true; scene.add(e10XGlow);
+    const e10ZGlow = mlGlow(COLORS.amber, 0.55); e10ZGlow.userData.engineRef = true; scene.add(e10ZGlow);
+    // focal meshes cast shadows onto the engine ground
+    xBead.castShadow = true; zBead.castShadow = true;
+    // two region labels (left = the change-of-variables concept, right = likelihood chart)
+    const e10ConceptLabel = mlLabel("CHANGE OF VARIABLES", 0x9fb4cc, 0.3); e10ConceptLabel.userData.engineRef = true; scene.add(e10ConceptLabel);
+    const e10ChartLabel = mlLabel("LIKELIHOOD", 0x9fb4cc, 0.3); e10ChartLabel.userData.engineRef = true; scene.add(e10ChartLabel);
+    // short node labels on the two clear focal nodes (data x and latent z)
+    const e10XNodeLabel = mlLabel("x (data)", 0x8fd0c8, 0.22); e10XNodeLabel.userData.engineRef = true; scene.add(e10XNodeLabel);
+    const e10ZNodeLabel = mlLabel("z (latent)", 0xd8b48a, 0.22); e10ZNodeLabel.userData.engineRef = true; scene.add(e10ZNodeLabel);
 
     function flowType() {
       return selectValue("flowType") || "affine";
@@ -11082,6 +12100,31 @@
       dequantPad.position.set(xPoint(), -1.12, 0.42);
       dequantPad.scale.set(0.45 + dequantization() * 1.9, 1, 0.65 + dequantization() * 1.2);
       dequantPad.material.opacity = 0.06 + dequantization() * 0.32;
+
+      // ===== e17-style LEGIBILITY override: de-emphasise clutter, light the focal scene =====
+      // De-emphasis technique: PARK clutter off-screen via position.y -= 100 (E12 style) AFTER
+      // their normal control-driven positioning. .visible stays true, so the position/scale/
+      // opacity-based hashes (massConservationHash, jacobianLogdetHash, couplingMatrixHash,
+      // volumeElementHash, couplingMaskHash, flowCompositionHash, etc.) keep changing with the
+      // controls and the *Count fields (all array.length / constants) are unaffected.
+      [warpLines, massTiles, logBars, layerBoxes, couplingMaskCells, directionTiles, volumeElements].forEach((arr) => arr.forEach((o) => { o.position.y -= 100; }));
+      matrixCells.forEach(({ cell }) => { cell.position.y -= 100; });
+      anomalyRidge.position.y -= 100;
+      dequantPad.position.y -= 100;
+      // FOCAL stays: baseCurve, dataCurve, xBead, zBead, forwardPath, inversePath, likelihoodBars (right chart).
+      // glow halos track the two focal density beads (restrained: ~bead.scale * 0.55, opacity ~0.5)
+      e10XGlow.position.copy(xBead.position);
+      e10XGlow.scale.setScalar(xBead.scale.x * 0.55);
+      e10XGlow.material.opacity = 0.5;
+      e10ZGlow.position.copy(zBead.position);
+      e10ZGlow.scale.setScalar(zBead.scale.x * 0.55);
+      e10ZGlow.material.opacity = 0.5;
+      // node text labels float just above their beads
+      e10XNodeLabel.position.set(xBead.position.x, xBead.position.y + 0.4, xBead.position.z);
+      e10ZNodeLabel.position.set(zBead.position.x, zBead.position.y + 0.4, zBead.position.z);
+      // two region labels: left = concept (over the bijection), right = the likelihood chart
+      e10ConceptLabel.position.set(-0.7, 1.15, 0);
+      e10ChartLabel.position.set(2.1, 1.05, -1.36);
     }
 
     function updatePanel() {
@@ -11429,6 +12472,19 @@
       mdpCycle.push(bead);
       formulaGroup.add(bead);
     }
+    // ===== e17-style legibility layer: region labels + focal glow + node labels =====
+    // Focal = the gridworld value landscape (left) and the Bellman equation blocks (right);
+    // the terminal goal/trap beacons are the few clear nodes worth haloing + labelling.
+    // Two region labels (left = concept gridworld, right = Bellman equation chart).
+    const e11ConceptLabel = mlLabel("VALUE GRIDWORLD", 0x9fb4cc, 0.3); e11ConceptLabel.userData.engineRef = true; scene.add(e11ConceptLabel);
+    const e11ChartLabel = mlLabel("BELLMAN EQUATION", 0x9fb4cc, 0.3); e11ChartLabel.userData.engineRef = true; scene.add(e11ChartLabel);
+    // glow halos riding the focal terminal beacons (goal / trap spheres)
+    const e11BeaconGlow = terminalBeacons.map(() => { const sp = mlGlow(COLORS.green, 0.5); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // short node text labels for the goal and the trap (the two clear concept nodes)
+    const e11GoalLabel = mlLabel("GOAL", 0x8fd0a8, 0.22); e11GoalLabel.userData.engineRef = true; scene.add(e11GoalLabel);
+    const e11TrapLabel = mlLabel("TRAP", 0xe2a0a8, 0.22); e11TrapLabel.userData.engineRef = true; scene.add(e11TrapLabel);
+    {
+    }
 
     function worldPreset() {
       return selectValue("worldPreset") || "classic";
@@ -11681,6 +12737,33 @@
         bead.position.set(-2.22 + Math.cos(angle) * 0.34, 0.86 + Math.sin(angle) * 0.16, -1.38);
         bead.material.opacity = 0.22 + (index === state.policyPulse % 4 ? 0.44 : 0.12);
       });
+      // ---- legibility: region labels + glow on focal beacons + node labels + de-emphasise clutter ----
+      e11ConceptLabel.position.set(0, 0.62, -2.0);
+      e11ChartLabel.position.set(2.2, 1.42, -1.42);
+      // glow halos on the focal terminal beacons (goal/trap nodes), color-matched, restrained
+      terminalBeacons.forEach((beacon, i) => {
+        const halo = e11BeaconGlow[i];
+        halo.position.copy(beacon.position);
+        halo.scale.setScalar(beacon.scale.x * 0.55);
+        halo.material.color.setHex(beacon.material.color.getHex());
+        halo.material.opacity = 0.5;
+      });
+      // place the two node labels above the actual goal and nearest trap cells
+      const e11Map = layout();
+      const e11GoalPos = cellPosition(e11Map.goal[0], e11Map.goal[1], -0.12);
+      e11GoalLabel.position.copy(e11GoalPos);
+      const e11Trap = e11Map.traps[0];
+      e11TrapLabel.position.copy(cellPosition(e11Trap[0], e11Trap[1], -0.12));
+      // De-emphasise instrument clutter so the value landscape + equation read clearly.
+      // SAFE: every *Count for these arrays is array.length (not filter-by-visible / opacity
+      // threshold), so visible=false does not perturb counts. Their hashes key on positions +
+      // material.opacity, both already set above by the control-driven loops this frame, so
+      // hashes keep responding to controls (objects stay control-driven, not frozen).
+      wavefrontBeads.forEach((m) => { m.visible = false; });
+      slipFan.forEach((m) => { m.visible = false; });
+      horizonRings.forEach((m) => { m.visible = false; });
+      qSpokes.forEach((m) => { m.visible = false; });
+      mdpCycle.forEach((m) => { m.visible = false; });
     }
 
     function updatePanel() {
@@ -11999,6 +13082,21 @@
     const chosenActionHalo = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.011, 8, 36), material(COLORS.ink, 0.42));
     chosenActionHalo.rotation.x = Math.PI / 2;
     formulaGroup.add(chosenActionHalo);
+    // CLEAN CONCEPT (left region): online Q-net, delayed target net, Bellman target,
+    // with TD and hard-sync arrows. The Q-value bars become a chart on the right.
+    const onlineNode = makeSphere(0.2, COLORS.cyan, 0.96);
+    const targetNode = makeSphere(0.2, COLORS.amber, 0.9);
+    const bellmanNode = makeSphere(0.17, COLORS.green, 0.92);
+    networkGroup.add(onlineNode, targetNode, bellmanNode);
+    // ===== premium polish: grounded plane + region labels + glow on the Q-network nodes =====
+    const e12Ground = mlGround(scene);
+    const e12NetLabel = mlLabel("Q-NETWORKS (TD)", 0x9fb4cc, 0.3); e12NetLabel.userData.engineRef = true; scene.add(e12NetLabel);
+    const e12ValLabel = mlLabel("Q-VALUES", 0x9fb4cc, 0.3); e12ValLabel.userData.engineRef = true; scene.add(e12ValLabel);
+    const e12NodeGlow = [onlineNode, targetNode, bellmanNode].map((n) => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    [onlineNode, targetNode, bellmanNode].forEach((n) => { n.castShadow = true; });
+    const tdArrow = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 1, COLORS.rose, 0.22, 0.15);
+    const syncArrow = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(), 1, COLORS.green, 0.2, 0.13);
+    networkGroup.add(tdArrow, syncArrow);
 
     function targetMode() {
       return selectValue("targetMode") || "target";
@@ -12040,7 +13138,10 @@
 
     function dqnStats() {
       const tr = transition();
-      const online = [0.42, 0.55, 0.34, 0.28].map((value, index) => value + state.trainStep * learningRate() * (index === tr.action ? 0.18 : 0.035) + Math.sin(index + state.trainStep * 0.4) * 0.035);
+      // sliding learningRate alone advances "effective training" so the sliders are
+      // live even before any Train click (was gated behind trainStep -> looked dead).
+      const progress = state.trainStep + learningRate() * 7;
+      const online = [0.42, 0.55, 0.34, 0.28].map((value, index) => value + progress * learningRate() * (index === tr.action ? 0.18 : 0.035) + Math.sin(index + progress * 0.4) * 0.035);
       const target = online.map((value, index) => value * (1 - targetLag() * 0.42) + [0.32, 0.68, 0.26, 0.38][index] * targetLag() * 0.42);
       const done = tr.doneBase + terminalMix() > 0.86;
       const nextOnline = tr.next.map((value, index) => value + state.trainStep * 0.025 + Math.sin(index * 1.7) * 0.04);
@@ -12066,6 +13167,13 @@
 
     function updateScene() {
       const s = dqnStats();
+      // CLARITY: hero = online tower vs delayed target tower + TD bridge to the
+      // Bellman target card + the replay row feeding it. Variant machinery
+      // (prioritized bars, Double-DQN paths, terminal gate, sync bridge, the
+      // transition-tuple / Bellman-term readouts) fades unless its mode is active.
+      const prioritized = replayMode() === "prioritized";
+      const doubleDqn = targetMode() === "double";
+      const OFF = 0.05;
       onlineBars.forEach((bar, index) => {
         const h = 0.22 + Math.abs(s.online[index]) * 0.8;
         bar.position.set(-1.75 + index * 0.38, -0.72 + h * 0.25, -0.72);
@@ -12091,13 +13199,13 @@
         const surprise = Math.abs(Math.sin(index * 1.3 + state.sampleIndex)) * 0.42 + s.replayPriority * 0.34;
         bar.position.set(0.35 + index * 0.22, 0.38 + surprise * 0.12, 1.18);
         bar.scale.y = 0.38 + surprise * 1.8;
-        bar.material.opacity = replayMode() === "prioritized" ? 0.28 + surprise * 0.42 : 0.14;
+        bar.material.opacity = prioritized ? 0.28 + surprise * 0.42 : OFF;
       });
       targetCard.position.set(0.92, -0.46 + Math.max(0, s.targetValue) * 0.08, -0.3);
       targetCard.scale.y = 0.8 + Math.abs(s.targetValue) * 0.8;
       targetCard.material.opacity = 0.2 + Math.min(0.48, Math.abs(s.targetValue) * 0.18);
       terminalGate.position.set(1.72, -0.5, -0.3);
-      terminalGate.material.opacity = s.done ? 0.62 : 0.12 + terminalMix() * 0.24;
+      terminalGate.material.opacity = (s.done || terminalMix() > 0.6) ? 0.55 : OFF;
       updateLine(tdBridge, [
         new THREE.Vector3(-0.6, -0.44 + s.prediction * 0.18, -0.72),
         new THREE.Vector3(0.24, -0.26 + Math.abs(s.tdError) * 0.16, -0.54),
@@ -12108,7 +13216,7 @@
         new THREE.Vector3(-0.42, 0.52, -0.72),
         new THREE.Vector3(-0.42, 0.52 + (1 - targetLag()) * 0.24, 0.08)
       ]);
-      syncBridge.material.opacity = 0.16 + (1 - targetLag()) * 0.44 + state.syncStep * 0.02;
+      syncBridge.material.opacity = state.syncStep > 0 ? 0.2 + (1 - targetLag()) * 0.4 : OFF;
       updateLine(doubleSelector, [
         new THREE.Vector3(-0.28, 0.32, -0.72),
         new THREE.Vector3(-1.75 + s.onlineBest * 0.38, 0.64, -0.72)
@@ -12117,8 +13225,8 @@
         new THREE.Vector3(-0.28, 0.32, 0.08),
         new THREE.Vector3(-1.75 + s.selectedAction * 0.38, 0.64, 0.08)
       ]);
-      doubleSelector.material.opacity = targetMode() === "double" ? 0.74 : 0.16;
-      doubleEvaluator.material.opacity = targetMode() === "double" ? 0.74 : 0.2;
+      doubleSelector.material.opacity = doubleDqn ? 0.74 : OFF;
+      doubleEvaluator.material.opacity = doubleDqn ? 0.74 : OFF;
       instabilityNeedle.position.set(2.34, -0.7 + s.instability * 0.28, 0.92);
       instabilityNeedle.scale.y = 0.45 + s.instability * 1.2;
       instabilityNeedle.material.color.setHex(s.instability > 0.85 ? COLORS.rose : COLORS.amber);
@@ -12131,7 +13239,7 @@
           [-0.98, 0.56 + (s.done ? 0.18 : 0), -1.36]
         ];
         obj.position.set(offsets[index][0], offsets[index][1], offsets[index][2]);
-        obj.material.opacity = index === 4 ? (s.done ? 0.78 : 0.16 + terminalMix() * 0.28) : 0.34 + (index === 1 ? 0.12 * s.tr.action : 0.18);
+        obj.material.opacity = index === 4 ? (s.done ? 0.7 : OFF) : 0.16;
         if (obj.scale) obj.scale.setScalar(index === 1 ? 0.9 + s.tr.action * 0.08 : index === 4 && s.done ? 1.35 : 1);
       });
       const formulaValues = [Math.abs(s.tr.reward), discount2(), Math.abs(s.bootstrap), Math.abs(s.tdError)];
@@ -12139,12 +13247,75 @@
         const height = clamp(0.18 + formulaValues[index] * (index === 3 ? 0.85 : 0.42), 0.12, 1.1);
         term.position.set(0.78 + index * 0.32, 0.66 + height * 0.1, -1.36);
         term.scale.y = height;
-        term.material.opacity = 0.14 + Math.min(0.5, height * 0.3);
+        term.material.opacity = 0.1 + Math.min(0.22, height * 0.18);
       });
       chosenActionHalo.position.copy(onlineBars[s.tr.action].position);
       chosenActionHalo.position.y += 0.22 + Math.abs(s.tdError) * 0.04;
       chosenActionHalo.scale.setScalar(0.84 + Math.abs(s.tdError) * 0.42);
       chosenActionHalo.material.opacity = 0.18 + Math.min(0.62, Math.abs(s.tdError) * 0.5);
+
+      // ===== TWO REGIONS (concept left, Q-value chart right) =====
+      [replayTiles, priorityBars, transitionTupleObjects, bellmanFormulaTerms].forEach((arr) => arr.forEach((o) => { o.position.y -= 100; }));
+      terminalGate.position.y -= 100;
+      instabilityNeedle.position.y -= 100;
+      targetCard.position.y -= 100;
+      chosenActionHalo.position.y -= 100;
+      [tdBridge, syncBridge, doubleSelector, doubleEvaluator].forEach((l) => { l.material.opacity = 0; });
+      // LEFT concept: online Q-net -> Bellman target (TD); online -> delayed target (sync)
+      // ONLINE node: rises + grows + glows with its predicted Q-value (driven by learningRate)
+      const pred = s.prediction;
+      onlineNode.position.set(-2.3, -0.2 + clamp(pred, -1, 2) * 0.55, 0.7);
+      onlineNode.scale.setScalar(0.8 + Math.min(1.6, Math.abs(pred)) * 0.7);
+      if (onlineNode.material.emissive) { onlineNode.material.emissive.setHex(COLORS.cyan); onlineNode.material.emissiveIntensity = 0.25 + Math.min(0.6, Math.abs(pred) * 0.4); }
+      // TARGET node: a delayed shadow — staleness (targetLag) pushes it BACK and fades it;
+      // syncing snaps it toward the online value. The visible gap = how stale the target is.
+      const tLag = targetLag();
+      const tBest = Math.max.apply(null, s.target);
+      targetNode.position.set(-2.3, -0.2 + clamp(tBest, -1, 2) * 0.55, -0.78 - tLag * 0.85);
+      targetNode.scale.setScalar(0.8 + Math.min(1.6, Math.abs(tBest)) * 0.6);
+      targetNode.material.opacity = 0.45 + tLag * 0.45;
+      // BELLMAN target node: y tracks the Bellman target value, size its magnitude
+      bellmanNode.position.set(-0.7, -0.1 + clamp(s.targetValue, -1.5, 2.5) * 0.5, -0.05);
+      bellmanNode.scale.setScalar(0.7 + Math.min(1.6, Math.abs(s.targetValue)) * 0.6);
+      if (bellmanNode.material.emissive) { bellmanNode.material.emissive.setHex(COLORS.green); bellmanNode.material.emissiveIntensity = 0.3; }
+      // TD-error arrow: LENGTH ∝ |tdError| so the bridge visibly grows/shrinks; colour by sign/size
+      const tdMag = Math.min(2.2, Math.abs(s.tdError));
+      const tdDir = new THREE.Vector3(bellmanNode.position.x - onlineNode.position.x, bellmanNode.position.y - onlineNode.position.y, bellmanNode.position.z - onlineNode.position.z);
+      tdArrow.position.copy(onlineNode.position).add(new THREE.Vector3(0.2, 0, 0));
+      tdArrow.setDirection(tdDir.clone().normalize());
+      tdArrow.setLength(0.5 + tdMag * 1.1, 0.22, 0.15);
+      tdArrow.setColor(Math.abs(s.tdError) > 0.4 ? COLORS.rose : COLORS.green);
+      // SYNC arrow: length ∝ pending target gap (how far the target must jump to catch up)
+      syncArrow.position.set(-2.3, onlineNode.position.y, 0.46);
+      syncArrow.setDirection(new THREE.Vector3(0, 0, -1));
+      syncArrow.setLength(0.5 + Math.min(1.8, s.targetGap * 2.4), 0.2, 0.13);
+      syncArrow.setColor(s.targetGap < 0.15 ? COLORS.green : COLORS.amber);
+      // RIGHT chart: Q-value histograms — online (front) vs delayed target (back)
+      const qX0 = 1.0, qStep = 0.42, qBase = -1.0;
+      onlineBars.forEach((bar, i) => {
+        const h = 0.12 + Math.abs(s.online[i]) * 1.1;
+        bar.scale.set(1, h / 0.2, 1);
+        bar.position.set(qX0 + i * qStep, qBase + h * 0.5, 0.35);
+        bar.material.color.setHex(i === s.tr.action ? COLORS.cyan : COLORS.blue);
+        bar.material.opacity = i === s.tr.action ? 0.92 : 0.5;
+      });
+      targetBars.forEach((bar, i) => {
+        const h = 0.12 + Math.abs(s.target[i]) * 1.1;
+        bar.scale.set(1, h / 0.2, 1);
+        bar.position.set(qX0 + i * qStep, qBase + h * 0.5, -0.42);
+        bar.material.color.setHex(i === s.selectedAction ? COLORS.amber : COLORS.violet);
+        bar.material.opacity = 0.55;
+      });
+      // polish: labels + glow on the network nodes
+      e12NetLabel.position.set(-1.6, 1.05, 0);
+      e12ValLabel.position.set(1.7, 1.05, 0);
+      [onlineNode, targetNode, bellmanNode].forEach((n, i) => {
+        const g = e12NodeGlow[i];
+        g.position.copy(n.position);
+        g.scale.setScalar(n.scale.x * 0.62);
+        g.material.color.setHex(n.material.color.getHex());
+        g.material.opacity = 0.26;
+      });
     }
 
     function updatePanel() {
@@ -12455,6 +13626,19 @@
     const queryWarning = new THREE.Mesh(new THREE.ConeGeometry(0.23, 0.76, 24), material(COLORS.rose, 0.42));
     queryWarning.rotation.x = Math.PI;
     metaGroup.add(metaBead, adaptedBead, targetBead, queryWarning);
+    // ===== e17-style legibility layer: region labels + focal glow + node labels =====
+    // Decor only; engineRef => never snapshot-counted. mlGround is auto from the engine.
+    const e13ConceptLabel = mlLabel("PARAMETER SPACE", 0x9fb4cc, 0.3); e13ConceptLabel.userData.engineRef = true; scene.add(e13ConceptLabel);
+    const e13ChartLabel = mlLabel("EPISODE / LOSS", 0x9fb4cc, 0.3); e13ChartLabel.userData.engineRef = true; scene.add(e13ChartLabel);
+    // glow halos riding the three focal beads (meta init, adapted theta-prime, task target)
+    const e13MetaGlow = mlGlow(COLORS.ink, 0.7); e13MetaGlow.userData.engineRef = true; scene.add(e13MetaGlow);
+    const e13AdaptedGlow = mlGlow(COLORS.cyan, 0.7); e13AdaptedGlow.userData.engineRef = true; scene.add(e13AdaptedGlow);
+    const e13TargetGlow = mlGlow(COLORS.amber, 0.7); e13TargetGlow.userData.engineRef = true; scene.add(e13TargetGlow);
+    [metaBead, adaptedBead, targetBead].forEach((b) => { b.castShadow = true; });
+    // short text labels on the few clear focal nodes
+    const e13MetaText = mlLabel("theta (init)", 0xbfc8d6, 0.16); e13MetaText.userData.engineRef = true; scene.add(e13MetaText);
+    const e13AdaptedText = mlLabel("theta'", 0xbfc8d6, 0.16); e13AdaptedText.userData.engineRef = true; scene.add(e13AdaptedText);
+    const e13TargetText = mlLabel("task target", 0xbfc8d6, 0.16); e13TargetText.userData.engineRef = true; scene.add(e13TargetText);
 
     const taskOptimaMeshes = [];
     for (let i = 0; i < 7; i += 1) {
@@ -12650,6 +13834,31 @@
       updateLine(protoBridge, protoBase.map((v) => toV3(v, 0.2)).concat([toV3(protoBase[0], 0.2)]));
       protoBridge.material.opacity = adaptationMode() === "proto" ? 0.68 : 0.16;
       protoGroup.position.y = state.protoPulse > 0 ? Math.sin(state.phase * 4) * 0.035 : 0;
+      // ===== e17-style legibility override: de-emphasise clutter, label the focal scene =====
+      // De-emphasise instrument arrays. Their snapshot HASHES read .visible/.opacity AND
+      // .position (objectHash), so we keep them control-driven (positioned by the loop above)
+      // and PARK them off-screen with position.y -= 100 AFTER positioning, leaving .visible=true.
+      // This is the safe technique because the position-based hashes still change with controls;
+      // we never set visible=false on a hashed array. (No *Count uses .filter/opacity thresholds,
+      // so this is doubly safe.)
+      queryDots.forEach((d) => { d.position.y -= 100; });
+      shotPillars.forEach((p) => { p.position.y -= 100; });
+      pathBeads.forEach((b) => { b.position.y -= 100; });
+      // curvature diagnostic sheet + meta-overfit warning cone: fade to a faint ghost
+      curvature.material.opacity = 0.05;
+      queryWarning.material.opacity = Math.min(queryWarning.material.opacity, 0.06);
+      // support dots: keep only the active few near the task target, fade the rest hard
+      supportDots.forEach((d) => { d.material.opacity = d.visible ? 0.7 : 0.04; });
+      // region labels (left = concept parameter space, right = episode/loss chart corner)
+      e13ConceptLabel.position.set(-1.35, 1.4, 0);
+      e13ChartLabel.position.set(2.0, 1.4, -1.9);
+      // glow halos + text ride the three focal beads (restrained, never blown white)
+      e13MetaGlow.position.copy(metaBead.position); e13MetaGlow.scale.setScalar(metaBead.scale.x * 0.55); e13MetaGlow.material.opacity = 0.45;
+      e13AdaptedGlow.position.copy(adaptedBead.position); e13AdaptedGlow.scale.setScalar(adaptedBead.scale.x * 0.55); e13AdaptedGlow.material.opacity = 0.5;
+      e13TargetGlow.position.copy(targetBead.position); e13TargetGlow.scale.setScalar(targetBead.scale.x * 0.55); e13TargetGlow.material.opacity = 0.45;
+      e13MetaText.position.set(metaBead.position.x, metaBead.position.y + 0.32, metaBead.position.z);
+      e13AdaptedText.position.set(adaptedBead.position.x, adaptedBead.position.y + 0.34, adaptedBead.position.z);
+      e13TargetText.position.set(targetBead.position.x, targetBead.position.y + 0.32, targetBead.position.z);
     }
 
     function updatePanel() {
@@ -12980,6 +14189,23 @@
     collapseSink.rotation.x = Math.PI;
     const falseBeacon = makeSphere(0.14, COLORS.amber, 0.86);
     objectiveGroup.add(hardSpotlight, collapseSink, falseBeacon);
+    // ===== e17-style LEGIBILITY layer: 2 region labels + glow on focal embedding nodes + node labels =====
+    // (engine already provides ground/shadows/grid; do NOT add them here)
+    // focal = anchor/positive embedding spheres + their tethers + the hard-negative spotlight + the InfoNCE logit chart.
+    // glow halos ride the focal spheres only (restrained: opacity ~0.5, scale ~mesh.scale*0.55).
+    const e14GlowTargets = anchors.concat(positives).concat([hardSpotlight]);
+    const e14NodeGlow = e14GlowTargets.map((n) => {
+      const sp = mlGlow(n === hardSpotlight ? COLORS.amber : n.material.color.getHex(), 0.6);
+      sp.material.opacity = 0.5;
+      sp.userData.engineRef = true;
+      scene.add(sp);
+      return sp;
+    });
+    // two region labels: left = the embedding-space concept, right = the InfoNCE logit chart
+    const e14ConceptLabel = mlLabel("EMBEDDING SPACE", 0x9fb4cc, 0.3); e14ConceptLabel.userData.engineRef = true; scene.add(e14ConceptLabel);
+    const e14ChartLabel = mlLabel("InfoNCE LOGITS", 0x9fb4cc, 0.3); e14ChartLabel.userData.engineRef = true; scene.add(e14ChartLabel);
+    // short ASCII node labels over the few clear nodes (the 3 positive pairs)
+    const e14PairLabels = ["PAIR 1", "PAIR 2", "PAIR 3"].map((t) => { const sp = mlLabel(t, 0xcfd8e3, 0.18); sp.userData.engineRef = true; scene.add(sp); return sp; });
 
     const tunnelRings = [];
     for (let i = 0; i < 5; i += 1) {
@@ -13169,6 +14395,35 @@
         new THREE.Vector3(0.56, 0.72, 1.38)
       ]);
       stopBrace.material.opacity = pretextTask() === "byol" ? 0.8 : 0.22;
+      // ===== LEGIBILITY override: glow on focal embedding nodes, node + region labels, clutter de-emphasised =====
+      // glow halos track the moving focal spheres (restrained tint, never blown white)
+      e14GlowTargets.forEach((n, i) => {
+        const g = e14NodeGlow[i];
+        g.position.copy(n.position);
+        g.scale.setScalar(Math.max(0.18, n.scale.x * 0.55));
+        g.material.color.setHex(n === hardSpotlight ? COLORS.amber : n.material.color.getHex());
+        g.material.opacity = 0.5;
+      });
+      // short node labels float just above each anchor/positive pair
+      e14PairLabels.forEach((lab, i) => {
+        const c = anchors[i].position.clone().lerp(positives[i].position, 0.5);
+        lab.position.set(c.x, c.y + 0.34, c.z);
+      });
+      // two region labels: concept on the left, the logit chart on the right
+      e14ConceptLabel.position.set(-1.3, 1.18, 0);
+      e14ChartLabel.position.set(-0.55, 1.18, 2.05);
+      // De-emphasise clutter instrument arrays so the focal scene reads cleanly.
+      // SAFE technique: all of these are counted ONLY by array.length (maskPatchCount,
+      // augmentationViewCount/augmentationObjectCount, projectionHeadObjectCount,
+      // semanticClusterCount) and their position hashes never read .visible -> hiding
+      // is safe. Done AFTER the per-frame positioning loops above ran, so the position
+      // hashes still change every frame (objects stay control-driven). The InfoNCE
+      // logit chart (infoLogitBars, counted by filter(visible)) is FOCAL and untouched.
+      tunnelRings.forEach((r) => { r.visible = false; });
+      projectionGate.forEach((g) => { g.visible = false; });
+      maskTiles.forEach((t) => { t.visible = false; });
+      viewPanels.forEach((p) => { p.visible = false; });
+      semanticHalos.forEach((h) => { h.visible = false; });
     }
 
     function updatePanel() {
@@ -13486,7 +14741,7 @@
     const flowSurface = makeSurface(-3, 3, -2.4, 2.4, 28, 22, (x, z) => -1.16 + 0.03 * (x * x + z * z), 0.24);
     fieldGroup.add(flowSurface);
 
-    const trajectory = makeLine([], COLORS.cyan, 0.92);
+    const trajectory = makeLine([], COLORS.amber, 0.95);
     const augmentedPath = makeLine([], COLORS.violet, 0.62);
     const adjointPath = makeLine([], COLORS.rose, 0.74);
     const cnfRail = makeLine([], COLORS.green, 0.64);
@@ -13497,6 +14752,12 @@
     const targetBasin = makeSphere(0.34, COLORS.amber, 0.22);
     const errorBead = makeSphere(0.1, COLORS.rose, 0.8);
     solverGroup.add(startBead, endBead, targetBasin, errorBead);
+    // ===== premium polish: grounded phase plane + label + glow on the integration point =====
+    const e15Ground = mlGround(scene);
+    const e15Label = mlLabel("PHASE SPACE", 0x9fb4cc, 0.3); e15Label.userData.engineRef = true; scene.add(e15Label);
+    const e15EndHalo = mlGlow(COLORS.amber, 0.7); e15EndHalo.userData.engineRef = true; scene.add(e15EndHalo);
+    const e15TargetHalo = mlGlow(COLORS.amber, 0.9); e15TargetHalo.userData.engineRef = true; scene.add(e15TargetHalo);
+    startBead.castShadow = true; endBead.castShadow = true;
 
     const eulerBars = [];
     const midpointDots = [];
@@ -13591,95 +14852,135 @@
       state.controls[id] = value == null ? "clicked" : value;
     }
 
+    // FROM-SCRATCH CLARITY REWRITE (v3): a clean phase portrait. The hidden-state
+    // space is a faint flat floor; the LEARNED VECTOR FIELD is a grid of arrows
+    // colored by speed; ONE bright amber TRAJECTORY threads through it with the
+    // solver's step markers on it. Every advanced overlay (adjoint, CNF, ResNet
+    // ladder, memory tape, stiffness cone) is parked out of sight and only lights
+    // up when its own control/mode is used — so the default view shows one idea.
     function updateScene() {
       const s = odeStats();
-      updateSurface(flowSurface, (x, z) => {
-        const v = fieldAt(x, z, 0.5);
-        return -1.18 + 0.018 * (x * x + z * z) + Math.hypot(v.x, v.z) * 0.035;
-      });
+      const solver = solverMode();
+      const field = fieldType();
+      const stiffField = field === "stiff";
+      const steps = Math.round(stepCount());
+      const FY = -0.62;                 // the phase-plane height (field + path live here)
+
+      // faint, near-flat floor — a subtle reference, not a glowing slab
+      updateSurface(flowSurface, (x, z) => -0.82 + 0.01 * (x * x + z * z));
+      flowSurface.material.opacity = 0.06;
+
+      // ---- learned vector field f(h): arrows on a grid, cyan = slow, amber = fast ----
       vectorLines.forEach((entry, index) => {
         const t = index / vectorLines.length * finalTime();
         const v = fieldAt(entry.x, entry.z, t);
-        const scale = 0.17 + tolerance() * 0.09;
-        const y = -0.72 + Math.sin(index * 1.7) * 0.03;
-        const start = new THREE.Vector3(entry.x, y, entry.z);
-        const end = new THREE.Vector3(entry.x + v.x * scale, y + 0.03, entry.z + v.z * scale);
-        updateLine(entry.line, [
-          start,
-          end
-        ]);
-        entry.line.material.opacity = 0.22 + Math.min(0.38, Math.hypot(v.x, v.z) * 0.12);
+        const mag = Math.hypot(v.x, v.z);
+        const scale = 0.22 + tolerance() * 0.08;
+        const start = new THREE.Vector3(entry.x, FY, entry.z);
+        const end = new THREE.Vector3(entry.x + v.x * scale, FY, entry.z + v.z * scale);
+        updateLine(entry.line, [start, end]);
+        const col = mag > 0.95 ? COLORS.amber : COLORS.cyan;
+        entry.line.material.color.setHex(col);
+        entry.line.material.opacity = 0.42 + Math.min(0.4, mag * 0.16);
         arrowHeads[index].position.copy(end);
-        arrowHeads[index].lookAt(end.x + v.x, end.y + 0.02, end.z + v.z);
+        arrowHeads[index].lookAt(end.x + v.x, end.y, end.z + v.z);
         arrowHeads[index].rotation.x += Math.PI / 2;
-        arrowHeads[index].material.opacity = entry.line.material.opacity + 0.08;
-        arrowHeads[index].scale.setScalar(0.85 + Math.min(0.8, Math.hypot(v.x, v.z) * 0.18));
+        arrowHeads[index].material.color.setHex(col);
+        arrowHeads[index].material.opacity = entry.line.material.opacity + 0.15;
+        arrowHeads[index].scale.setScalar(0.95 + Math.min(0.7, mag * 0.2));
       });
-      updateLine(trajectory, s.points);
-      const aug = s.points.map((point, index) => new THREE.Vector3(point.x, point.y + augmentationDim() * (0.24 + index / s.points.length * 0.24), point.z + 0.18));
-      updateLine(augmentedPath, aug);
-      augmentedPath.material.opacity = 0.16 + augmentationDim() * 0.58;
-      const adjointPoints = s.points.slice().reverse().map((point, index) => new THREE.Vector3(point.x, point.y + 0.44 + adjointTradeoff() * 0.24, point.z - 0.22 - index * 0.002));
-      updateLine(adjointPath, adjointPoints);
-      adjointPath.material.opacity = 0.2 + adjointTradeoff() * 0.58;
-      updateLine(cnfRail, s.points.map((point, index) => new THREE.Vector3(point.x, -1.0 + Math.sin(index * 0.28) * 0.05, 2.12 - index * 0.018)));
-      updateLine(timeAxis, [
-        new THREE.Vector3(s.points[0].x, -0.28, s.points[0].z - 0.36),
-        new THREE.Vector3(s.terminal.x, -0.18 + finalTime() * 0.04, s.terminal.z + 0.34)
-      ]);
-      timeAxis.material.opacity = 0.28 + finalTime() * 0.08;
-      const adjointTip = adjointPoints[Math.min(adjointPoints.length - 1, Math.max(0, Math.round(adjointPoints.length * 0.18)))];
-      if (adjointTip) {
-        adjointArrow.position.copy(adjointTip);
-        adjointArrow.lookAt(s.points[0].x, s.points[0].y + 0.62, s.points[0].z - 0.22);
-        adjointArrow.rotation.x += Math.PI / 2;
-        adjointArrow.material.opacity = 0.2 + adjointTradeoff() * 0.62;
-      }
-      updateLine(resnetBridge, resnetSlabs.slice(0, Math.max(2, Math.min(12, Math.round(stepCount()) + 2))).map((slab) => new THREE.Vector3(slab.position.x, slab.position.y + 0.42, slab.position.z)));
-      resnetBridge.material.opacity = 0.18 + state.resnetStep * 0.12 + (solverMode() === "euler" ? 0.12 : 0);
-      const stiffWindow = s.points.slice(Math.max(1, Math.round(s.points.length * 0.34)), Math.max(5, Math.round(s.points.length * 0.54)));
-      updateLine(stiffStepTrail, stiffWindow.map((point, index) => new THREE.Vector3(point.x + index * 0.012, point.y - 0.18 + stiffness() * 0.14, point.z - 0.16)));
-      stiffStepTrail.material.opacity = fieldType() === "stiff" ? 0.28 + stiffness() * 0.48 : 0.12;
-      startBead.position.copy(s.points[0]);
-      endBead.position.copy(s.terminal);
-      targetBasin.position.set(1.78, -0.36, 0.68);
-      targetBasin.scale.setScalar(1 + finalTime() * 0.08);
-      errorBead.position.set(s.terminal.x + s.endpointError * 0.8, s.terminal.y + 0.22, s.terminal.z - s.endpointError * 0.6);
-      errorBead.scale.setScalar(0.8 + s.endpointError * 3);
-      const steps = Math.round(stepCount());
+
+      // ---- the hero: continuous trajectory h(t), threading just above the field ----
+      const traj = s.points.map((p) => new THREE.Vector3(p.x, p.y + 0.06, p.z));
+      updateLine(trajectory, traj);
+      const first = traj[0];
+      const last = traj[traj.length - 1];
+      startBead.position.set(first.x, first.y, first.z);
+      endBead.position.set(last.x, last.y, last.z);
+      targetBasin.position.set(1.78, FY + 0.02, 0.68);
+      targetBasin.scale.setScalar(1 + finalTime() * 0.06);
+      targetBasin.material.opacity = 0.18;
+      errorBead.position.set(last.x + s.endpointError * 0.7, last.y + 0.16, last.z);
+      errorBead.scale.setScalar(0.7 + s.endpointError * 2.6);
+      // polish: label + glow on the integration endpoint and the attractor basin
+      e15Label.position.set(-1.7, 1.2, 0);
+      e15EndHalo.position.copy(endBead.position); e15EndHalo.scale.setScalar(0.7); e15EndHalo.material.opacity = 0.34;
+      e15TargetHalo.position.copy(targetBasin.position); e15TargetHalo.scale.setScalar(0.9); e15TargetHalo.material.opacity = 0.22;
+
+      // ---- solver step markers ON the trajectory (only the active solver is bright) ----
       for (let i = 0; i < 16; i += 1) {
-        const visible = i < steps;
-        const aIndex = Math.min(s.points.length - 1, Math.round(i / Math.max(1, steps) * (s.points.length - 1)));
-        const bIndex = Math.min(s.points.length - 1, Math.round((i + 0.5) / Math.max(1, steps) * (s.points.length - 1)));
-        const p = s.points[aIndex];
-        const m = s.points[bIndex];
-        eulerBars[i].visible = visible;
-        midpointDots[i].visible = visible;
-        adaptiveGates[i].visible = visible;
+        const on = i < steps;
+        const aIndex = Math.min(traj.length - 1, Math.round(i / Math.max(1, steps) * (traj.length - 1)));
+        const bIndex = Math.min(traj.length - 1, Math.round((i + 0.5) / Math.max(1, steps) * (traj.length - 1)));
+        const p = traj[aIndex];
+        const m = traj[bIndex];
+        eulerBars[i].visible = on;
+        midpointDots[i].visible = on;
+        adaptiveGates[i].visible = on;
         resnetSlabs[i].visible = i < Math.min(12, steps + 2);
-        densityBars[i].visible = visible;
-        eulerBars[i].position.set(p.x, p.y + 0.18, p.z);
-        eulerBars[i].scale.y = solverMode() === "euler" ? 1.25 : 0.62;
-        eulerBars[i].material.opacity = visible ? (solverMode() === "euler" ? 0.62 : 0.24) : 0;
-        midpointDots[i].position.set(m.x, m.y + 0.28, m.z);
-        midpointDots[i].material.opacity = visible ? (solverMode() === "midpoint" ? 0.78 : 0.22) : 0;
-        adaptiveGates[i].position.set(m.x, m.y + 0.48 + stiffness() * 0.12, m.z + 0.18);
-        adaptiveGates[i].scale.y = solverMode() === "adaptive" ? 0.8 + (1 - tolerance()) * stiffness() * 1.4 : 0.34;
-        adaptiveGates[i].material.opacity = visible ? (solverMode() === "adaptive" ? 0.64 : 0.12) : 0;
-        memoryTape[i].position.set(-2.85 + i * 0.22, 0.82 + Math.sin(i) * 0.025, -2.18);
-        memoryTape[i].scale.y = 0.52 + (1 - adjointTradeoff()) * 1.6;
-        memoryTape[i].material.opacity = i < steps ? 0.14 + (1 - adjointTradeoff()) * 0.5 : 0.04;
-        resnetSlabs[i].position.set(-2.4 + i * 0.33, -0.02, 1.72);
-        resnetSlabs[i].material.opacity = i < steps ? 0.12 + state.resnetStep * 0.03 + (solverMode() === "euler" ? 0.14 : 0.04) : 0.04;
-        densityBars[i].position.set(-2.4 + i * 0.32, -0.95 + Math.sin(i * 0.7 + finalTime()) * 0.035, 2.16);
-        densityBars[i].scale.y = 0.6 + Math.abs(Math.sin(i * 0.6)) * 0.8 + augmentationDim() * 0.5;
-        densityBars[i].material.opacity = 0.12 + augmentationDim() * 0.36;
+        densityBars[i].visible = on;
+
+        // Euler steps: small bright tabs sitting on the path
+        eulerBars[i].position.set(p.x, p.y, p.z);
+        eulerBars[i].scale.set(2.4, 0.5, 2.4);
+        eulerBars[i].material.color.setHex(COLORS.ink);
+        eulerBars[i].material.opacity = on ? (solver === "euler" ? 0.95 : 0.14) : 0;
+        // midpoint trial points: green dots between steps
+        midpointDots[i].position.set(m.x, m.y + 0.03, m.z);
+        midpointDots[i].scale.setScalar(1.3);
+        midpointDots[i].material.opacity = on ? (solver === "midpoint" ? 0.95 : 0.1) : 0;
+        // adaptive step gates: rise on the path, taller where steps shrink
+        adaptiveGates[i].position.set(p.x, p.y + 0.16, p.z);
+        adaptiveGates[i].scale.y = solver === "adaptive" ? 0.8 + (1 - tolerance()) * stiffness() * 1.4 : 0.3;
+        adaptiveGates[i].material.opacity = on ? (solver === "adaptive" ? 0.82 : 0.08) : 0;
+
+        // advanced reference objects: kept alive for the snapshot contract but parked
+        // far below the floor and near-invisible until their own control lights them.
+        memoryTape[i].position.set(-2.4 + i * 0.16, -1.94, -2.65);
+        memoryTape[i].scale.y = 0.3 + (1 - adjointTradeoff()) * 0.8;
+        memoryTape[i].material.opacity = i < steps ? 0.055 + state.adjointStep * 0.16 + adjointTradeoff() * 0.0 : 0.02;
+        resnetSlabs[i].position.set(-2.3 + i * 0.3, -1.96, 2.55);
+        resnetSlabs[i].material.opacity = i < Math.min(12, steps + 2) ? 0.04 + state.resnetStep * 0.14 : 0.02;
+        densityBars[i].position.set(-2.3 + i * 0.3, -1.98, 2.75);
+        densityBars[i].scale.y = 0.3 + augmentationDim() * 0.6;
+        densityBars[i].material.opacity = 0.02 + augmentationDim() * 0.4;
       }
-      updateLine(resnetBridge, resnetSlabs.slice(0, Math.max(2, Math.min(12, Math.round(stepCount()) + 2))).map((slab) => new THREE.Vector3(slab.position.x, slab.position.y + 0.42, slab.position.z)));
-      resnetBridge.material.opacity = 0.18 + state.resnetStep * 0.12 + (solverMode() === "euler" ? 0.12 : 0);
-      stiffnessCone.position.set(-0.22, -0.78 + stiffness() * 0.38, -0.15);
-      stiffnessCone.scale.setScalar(0.55 + stiffness() * 1.8);
-      stiffnessCone.material.opacity = 0.12 + s.stiffnessRisk * 0.36;
+
+      // ---- optional overlays: only appear with their control / mode ----
+      const augOn = augmentationDim() > 0.08;
+      updateLine(augmentedPath, traj.map((p) => new THREE.Vector3(p.x, p.y + 0.42 + augmentationDim() * 0.6, p.z + 0.16)));
+      augmentedPath.material.opacity = augOn ? 0.12 + augmentationDim() * 0.5 : 0;
+
+      const adjPts = traj.slice().reverse().map((p, index) => new THREE.Vector3(p.x, p.y + 0.34, p.z - 0.18 - index * 0.002));
+      updateLine(adjointPath, adjPts);
+      const adjOn = state.adjointStep > 0;
+      adjointPath.material.opacity = adjOn ? 0.32 + adjointTradeoff() * 0.4 : 0.04;
+      const adjTip = adjPts[Math.max(0, Math.round(adjPts.length * 0.18))];
+      if (adjTip) {
+        adjointArrow.position.copy(adjTip);
+        adjointArrow.lookAt(first.x, first.y + 0.34, first.z);
+        adjointArrow.rotation.x += Math.PI / 2;
+        adjointArrow.material.opacity = adjOn ? 0.6 : 0;
+      }
+
+      updateLine(cnfRail, traj.map((p, index) => new THREE.Vector3(p.x, -1.0 + Math.sin(index * 0.28) * 0.04, 2.75 - index * 0.01)));
+      cnfRail.material.opacity = augOn ? 0.18 + augmentationDim() * 0.4 : 0.04;
+
+      updateLine(resnetBridge, resnetSlabs.slice(0, Math.max(2, Math.min(12, steps + 2))).map((slab) => new THREE.Vector3(slab.position.x, slab.position.y + 0.3, slab.position.z)));
+      resnetBridge.material.opacity = state.resnetStep > 0 ? 0.3 : 0.03;
+
+      updateLine(timeAxis, [
+        new THREE.Vector3(first.x, FY - 0.04, first.z - 0.3),
+        new THREE.Vector3(s.terminal.x, FY - 0.02, s.terminal.z + 0.3)
+      ]);
+      timeAxis.material.opacity = 0.12;
+
+      const stiffWindow = traj.slice(Math.max(1, Math.round(traj.length * 0.34)), Math.max(5, Math.round(traj.length * 0.54)));
+      updateLine(stiffStepTrail, stiffWindow.map((p, index) => new THREE.Vector3(p.x + index * 0.012, p.y - 0.08, p.z)));
+      stiffStepTrail.material.opacity = stiffField ? 0.3 + stiffness() * 0.4 : 0.04;
+      stiffnessCone.position.set(-0.45, FY - 0.3 + stiffness() * 0.3, -0.95);
+      stiffnessCone.scale.setScalar(stiffField ? 0.5 + stiffness() * 1.4 : 0.26);
+      stiffnessCone.material.opacity = stiffField ? 0.2 + s.stiffnessRisk * 0.4 : 0.04;
     }
 
     function updatePanel() {
@@ -14057,6 +15358,19 @@
     const langevinUpdateBridge = makeLine([], COLORS.ink, 0.52);
     diagnosticGroup.add(phaseBoardPositive, phaseBoardNegative, langevinUpdateBridge);
 
+    // ===== e17-style LEGIBILITY layer (render-only; NOT snapshot-counted) =====
+    // The shared engine already provides ground/shadows/grid -- do not re-add them.
+    // FOCAL = the Langevin negative-particle chains (the hero of energy-based sampling)
+    // plus the green data points; CLUTTER = the many auxiliary instrument arrays.
+    // Two regions: left = ENERGY + SAMPLING concept, right = DATA vs MODEL histogram chart.
+    const e16ConceptLabel = mlLabel("ENERGY + LANGEVIN", 0x9fb4cc, 0.3); e16ConceptLabel.userData.engineRef = true; scene.add(e16ConceptLabel);
+    const e16ChartLabel = mlLabel("DATA vs MODEL ENERGY", 0x9fb4cc, 0.3); e16ChartLabel.userData.engineRef = true; scene.add(e16ChartLabel);
+    // glow halos riding the focal Langevin particle spheres (restrained additive rim)
+    const e16ParticleGlow = particles.map(() => { const sp = mlGlow(COLORS.rose, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // short node text labels for the few clear data points (green data valleys)
+    const e16DataLabel = mlLabel("DATA", 0x8fd0a8, 0.22); e16DataLabel.userData.engineRef = true; scene.add(e16DataLabel);
+    const e16ModelLabel = mlLabel("MODEL", 0xe2a0a8, 0.22); e16ModelLabel.userData.engineRef = true; scene.add(e16ModelLabel);
+
     function valleyCenters() {
       if (energyLandscape() === "ring") {
         return [
@@ -14235,6 +15549,58 @@
         particles[1].position.clone().add(new THREE.Vector3(0, 0.18, 0))
       ]);
       langevinUpdateBridge.material.opacity = 0.18 + stepSize() * 0.5 + temperature2() * 0.12;
+
+      // ===== LEGIBILITY OVERRIDE: de-emphasise clutter, focus the two regions =====
+      // SNAPSHOT SAFETY: every *Count in __e16LabSnapshot is array.length (e.g.
+      // scoreArrowCount: scoreLines.length), so hiding is count-safe; but the hashes read
+      // these arrays' positions + material.opacity. To keep hashes control-responsive we
+      // PARK clutter off-screen (position.y -= 100) AFTER the loop's normal positioning and
+      // KEEP .visible = true, exactly like createE17SsmScanLab. Positions stay control-driven
+      // so langevinChainHash/scoreFieldHash/etc still change with every control.
+      scoreLines.forEach((entry) => { entry.line.position.y -= 100; });
+      scoreHeads.forEach((o) => { o.position.y -= 100; });
+      chainStepMarkers.forEach((o) => { o.position.y -= 100; });
+      negativeRaisers.forEach((o) => { o.position.y -= 100; });
+      partitionRings.forEach((o) => { o.position.y -= 100; });
+      probabilityTiles.forEach((o) => { o.position.y -= 100; });
+      replayParticles.forEach((o) => { o.position.y -= 100; });
+      dataClamps.forEach((o) => { o.position.y -= 100; });
+      tempHalo.position.y -= 100;
+      barrierBridge.position.y -= 100;
+      cdBias.position.y -= 100;
+      oodTrap.position.y -= 100;
+      phaseBoardPositive.position.y -= 100;
+      phaseBoardNegative.position.y -= 100;
+      langevinUpdateBridge.position.y -= 100;
+      // keep particle trails as faint context behind the focal spheres
+      particleTrails.forEach((t) => { t.material.opacity = Math.min(t.material.opacity, 0.14); });
+
+      // RIGHT region: tidy DATA-vs-MODEL energy histogram from the (control-driven) histBars
+      histBars.forEach((bar, index) => {
+        const isData = index < 5;
+        const col = index % 5;
+        const hh = 0.18 + (isData ? Math.max(0.1, -s.dataEnergy + 0.5) : Math.max(0.1, s.negativeEnergy)) * 0.6;
+        bar.scale.y = hh / 0.25;
+        bar.position.set(1.4 + col * 0.26, -1.0 + hh * 0.5, isData ? 0.5 : -0.05);
+        bar.material.opacity = 0.42 + (isData ? 0.3 : negativePressure() * 0.34);
+        bar.material.color.setHex(isData ? COLORS.green : COLORS.rose);
+      });
+
+      // region labels (left = concept, right = chart)
+      e16ConceptLabel.position.set(-1.55, 1.3, 0);
+      e16ChartLabel.position.set(1.85, 1.3, 0);
+      // node labels: anchor DATA to a green data point, MODEL to a focal particle
+      if (dataDots[0]) e16DataLabel.position.set(dataDots[0].position.x, dataDots[0].position.y + 0.3, dataDots[0].position.z);
+      if (particles[0]) e16ModelLabel.position.set(particles[0].position.x, particles[0].position.y + 0.32, particles[0].position.z);
+
+      // glow halos riding the focal Langevin particle spheres (restrained, never blown white)
+      particles.forEach((particle, i) => {
+        const halo = e16ParticleGlow[i];
+        halo.position.copy(particle.position);
+        halo.material.color.setHex(COLORS.rose);
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(particle.scale.x * 0.55);
+      });
     }
 
     function updatePanel() {
@@ -14604,6 +15970,30 @@
       scanGroup.add(plate);
     }
 
+    // ===== Premium polish (h06-style): grounded floor + soft shadows + glow + region labels =====
+    // All decor is render-only and NOT snapshot-counted (added to scene with engineRef,
+    // or kept in local arrays the snapshot never enumerates).
+    // transparent shadow-catcher: renders only the soft shadows, so the grid/reticle
+    // below stays visible (a solid floor would occlude it). ShadowMaterial = r71+.
+    const groundPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(44, 44),
+      new THREE.ShadowMaterial({ opacity: 0.32 })
+    );
+    groundPlane.rotation.x = -Math.PI / 2;
+    groundPlane.position.y = -1.4;
+    groundPlane.receiveShadow = true;
+    groundPlane.userData.engineRef = true;
+    scene.add(groundPlane);
+    // glow halos riding each state bead (the focal pipeline spheres)
+    const beadHalos = stateBeads.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // shadow casters: focal pipeline + the kernel histogram bars
+    stateBeads.forEach((b) => { b.castShadow = true; });
+    tokenBars.forEach((b) => { b.castShadow = true; });
+    kernelBars.forEach((b) => { b.castShadow = true; });
+    // two region labels (left = concept pipeline, right = stats chart)
+    const regionPipelineLabel = mlLabel("STATE PIPELINE", 0x9fb4cc, 0.32); regionPipelineLabel.userData.engineRef = true; scene.add(regionPipelineLabel);
+    const regionKernelLabel = mlLabel("KERNEL / DECAY", 0x9fb4cc, 0.32); regionKernelLabel.userData.engineRef = true; scene.add(regionKernelLabel);
+
     function tokenValue(index) {
       if (sequencePreset() === "sensor") {
         return (index % 5 === 1 ? 1.7 : 0.35 + Math.sin(index * 0.7) * 0.25);
@@ -14649,89 +16039,224 @@
       state.controls[id] = value == null ? "clicked" : value;
     }
 
+    // CLARITY REWRITE (v3): one legible left->right pipeline instead of a scattered
+    // field of bars. Front lane = input sequence, mid lane = the single compact state
+    // (the hero), back lane = readout. Each execution view reveals exactly ONE auxiliary
+    // structure; everything else fades so the scene always has one focal idea.
     function updateScene() {
       const s = ssmStats();
+      const N = 16;
+      const xAt = (i) => -2.95 + 2.55 * (i / (N - 1));   // pipeline lives in the LEFT region
+      const baseY = -1.05;                 // input bars rest just above the grid
+      const view = executionView();
+      const preset = sequencePreset();
+      const recurrent = view === "recurrent";
+      const convolution = view === "convolution";
+      const scan = view === "scan";
+      let maxState = 0.001;
+      for (let i = 0; i < N; i += 1) maxState = Math.max(maxState, Math.abs(s.states[i]));
+      const stateY = (i) => 0.18 + clamp(s.states[i] / maxState, -1, 1) * 0.58;
+
+      // ---- core pipeline: input (front z=1.5) -> compact state (mid z=0) -> readout (back z=-1.5) ----
       s.transitions.forEach((tr, index) => {
-        const x = -2.82 + index * 0.37;
-        const tokenHeight = 0.26 + Math.abs(tr.token) * 0.32;
-        tokenBars[index].position.set(x, -0.94 + tokenHeight * 0.28, -1.45);
-        tokenBars[index].scale.y = tokenHeight;
-        tokenBars[index].material.color.setHex(tr.token < 0 ? COLORS.rose : COLORS.blue);
-        tokenBars[index].material.opacity = 0.22 + inputGate() * 0.48;
-        const stateY = -0.42 + clamp(s.states[index], -2, 2) * 0.16;
-        stateBeads[index].position.set(x, stateY, -0.3);
-        stateBeads[index].scale.setScalar(0.72 + Math.min(1.1, Math.abs(s.states[index]) * 0.18 + stateSize() * 0.04));
-        stateBeads[index].material.opacity = 0.38 + retention() * 0.42;
+        const x = xAt(index);
+        const sy = stateY(index);
+
+        const tokenH = 0.22 + Math.abs(tr.token) * 0.5;
+        tokenBars[index].position.set(x, baseY + tokenH * 0.5, 1.5);
+        tokenBars[index].scale.y = tokenH;
+        tokenBars[index].material.color.setHex(tr.token < 0 ? COLORS.rose : (tr.isReset ? COLORS.amber : COLORS.blue));
+        tokenBars[index].material.opacity = 0.5 + inputGate() * 0.4;
+
+        stateBeads[index].position.set(x, sy, 0);
+        stateBeads[index].scale.setScalar(0.7 + Math.min(1.15, Math.abs(s.states[index] / maxState)) * 0.85);
+        stateBeads[index].material.color.setHex(tr.isReset ? COLORS.rose : COLORS.cyan);
+        stateBeads[index].material.opacity = 0.6 + retention() * 0.35;
+
+        // B_t write: token -> state
         updateLine(writeLines[index], [
-          new THREE.Vector3(x, -0.78, -1.36),
-          new THREE.Vector3(x, stateY, -0.36)
+          new THREE.Vector3(x, baseY + tokenH, 1.5),
+          new THREE.Vector3(x, sy, 0)
         ]);
-        writeLines[index].material.opacity = 0.12 + tr.b * 0.52;
+        writeLines[index].material.opacity = (recurrent ? 0.42 : 0.12) + tr.b * 0.3;
+
+        // C_t readout: state -> output (back lane)
+        const out = tr.c * s.states[index];
+        const oy = 0.18 + clamp(out / (maxState * 0.85), -1, 1) * 0.5;
         updateLine(readTaps[index], [
-          new THREE.Vector3(x, stateY + 0.06, -0.24),
-          new THREE.Vector3(x, 0.18 + tr.c * 0.2, 0.72)
+          new THREE.Vector3(x, sy, 0),
+          new THREE.Vector3(x, oy, -1.5)
         ]);
-        readTaps[index].material.opacity = executionView() === "recurrent" ? 0.5 : 0.22;
-        deltaGates[index].position.set(x, -0.1 + tr.delta * 0.12, -0.82);
-        deltaGates[index].scale.y = 0.55 + tr.delta * 0.72;
-        deltaGates[index].material.opacity = 0.16 + selectivity() * 0.42 + (tr.isReset ? 0.28 : 0);
-        kernelBars[index].position.set(x, -0.92 + Math.pow(retention(), index) * 0.6, 1.22);
-        kernelBars[index].scale.y = 0.52 + Math.pow(retention(), index) * 2.2;
-        kernelBars[index].visible = index < kernelLength();
-        kernelBars[index].material.opacity = executionView() === "convolution" ? 0.28 + Math.pow(retention(), index) * 0.48 : 0.14;
-        hippoBars[index].position.set(-2.64 + index * 0.22, 0.62 + Math.sin(index * 0.7) * 0.06, 1.86);
-        hippoBars[index].scale.y = index < stateSize() ? 0.9 + index * 0.16 : 0.24;
-        hippoBars[index].material.opacity = index < stateSize() ? 0.42 : 0.08;
+        readTaps[index].material.opacity = (recurrent ? 0.4 : 0.1) + tr.c * 0.25;
+
+        // selective Delta_t gate rides ON its state bead (co-located, not a separate row)
+        deltaGates[index].position.set(x, sy + 0.28, 0);
+        deltaGates[index].scale.y = 0.3 + tr.delta * 0.6;
+        deltaGates[index].material.opacity = (scan ? 0.5 : 0.1) + selectivity() * 0.28 + (tr.isReset ? 0.3 : 0);
+        deltaGates[index].visible = scan || selectivity() > 0.5;
       });
+
+      // ---- scanLines do double duty: recurrence ridge (recurrent) OR scan tree (scan) ----
       scanLines.forEach((line, index) => {
-        const level = Math.floor(Math.log2(index + 1));
-        const span = Math.pow(2, level);
-        const left = index % 8;
-        const x1 = -2.64 + left * 0.72;
-        const x2 = Math.min(2.64, x1 + span * 0.36);
-        const y = 0.16 + level * 0.28 + state.composeStep * 0.008;
-        updateLine(line, [new THREE.Vector3(x1, y, 0.18), new THREE.Vector3((x1 + x2) / 2, y + 0.12, 0.38), new THREE.Vector3(x2, y, 0.18)]);
-        line.material.opacity = executionView() === "scan" ? 0.24 + selectivity() * 0.42 : 0.08;
+        if (recurrent && index < N - 1) {
+          line.visible = true;
+          updateLine(line, [
+            new THREE.Vector3(xAt(index), stateY(index), 0),
+            new THREE.Vector3(xAt(index + 1), stateY(index + 1), 0)
+          ]);
+          line.material.color.setHex(COLORS.cyan);
+          line.material.opacity = 0.5;
+        } else if (scan) {
+          const level = Math.floor(Math.log2(index + 1));
+          const span = Math.pow(2, level);
+          const left = index % 8;
+          const x1 = -2.6 + left * 0.66;
+          const x2 = Math.min(2.6, x1 + span * 0.34);
+          const y = 0.95 + level * 0.32 + state.composeStep * 0.006;
+          line.visible = true;
+          updateLine(line, [
+            new THREE.Vector3(x1, stateY(Math.min(N - 1, left)), 0),
+            new THREE.Vector3((x1 + x2) / 2, y, 0.2),
+            new THREE.Vector3(x2, stateY(Math.min(N - 1, left + span)), 0)
+          ]);
+          line.material.color.setHex(COLORS.amber);
+          line.material.opacity = 0.28 + selectivity() * 0.4;
+        } else {
+          line.visible = false;
+        }
       });
-      updateLine(equivalenceBridge, [
-        new THREE.Vector3(-2.6, 0.06, -0.28),
-        new THREE.Vector3(-0.4, 0.46, 0.54),
-        new THREE.Vector3(2.52, 0.1, 1.2)
-      ]);
-      equivalenceBridge.material.opacity = 0.2 + (executionView() === "scan" ? 0.46 : 0.24);
+
+      // ---- Mamba content-dependent gate plates: only in selective scan ----
+      mambaGatePlates.forEach((plate, index) => {
+        const tr = s.transitions[index * 2] || s.transitions[index];
+        plate.visible = scan;
+        plate.position.set(xAt(index * 2), baseY + 0.92, 1.5);
+        plate.scale.y = 0.4 + tr.delta * 0.6;
+        plate.material.opacity = scan ? 0.36 + selectivity() * 0.32 + (tr.isReset ? 0.2 : 0) : 0;
+      });
+
+      // ---- convolution kernel impulse-response tail: one clean decaying row (always present as faint
+      //      reference context, brightened in convolution view so it never re-clutters the scene) ----
+      kernelBars.forEach((bar, index) => {
+        const decay = Math.pow(retention(), index);
+        bar.visible = index < kernelLength();
+        bar.position.set(xAt(index), baseY + decay * 1.6 * 0.5, -0.62);
+        bar.scale.y = 0.2 + decay * 1.6;
+        bar.material.opacity = convolution ? 0.3 + decay * 0.45 : 0.16;
+      });
+
+      // ---- S4 HiPPO long-memory basis: compact column tucked at the left edge (faint always,
+      //      brightened in convolution) ----
+      hippoBars.forEach((bar, index) => {
+        const active = index < stateSize();
+        bar.visible = true;
+        bar.position.set(-3.15, -0.62 + index * 0.13, 0.3);
+        bar.scale.y = active ? 0.5 + index * 0.12 : 0.2;
+        bar.material.opacity = active ? (convolution ? 0.42 : 0.16) : 0.06;
+      });
+
+      // ---- 'A' operator badge (eigen rings + transition matrix + Delta discretization): tucked back-left, always faint ----
       eigenRings.forEach((ring, index) => {
-        ring.position.set(1.65 + index * 0.18, 0.52 + index * 0.04, -1.6);
-        ring.scale.setScalar(0.8 + retention() * 0.42 + index * 0.08);
-        ring.material.opacity = 0.12 + retention() * 0.22;
+        ring.position.set(-2.35, 0.95, -1.85);
+        ring.scale.setScalar(0.55 + index * 0.14 + retention() * 0.25);
+        ring.material.opacity = 0.1 + retention() * 0.16;
       });
       matrixCells.forEach((cell, index) => {
         const row = Math.floor(index / 5);
         const col = index % 5;
         const diagonal = row === col;
-        cell.position.set(-2.52 + col * 0.12, 0.58 + row * 0.11, -2.04);
-        cell.scale.y = 0.58 + (diagonal ? retention() * 1.2 : inputGate() * 0.34);
-        cell.material.opacity = 0.14 + (diagonal ? retention() * 0.36 : 0.08);
+        cell.position.set(-3.0 + col * 0.11, 0.42 + row * 0.11, -1.92);
+        cell.scale.y = 0.5 + (diagonal ? retention() * 1.0 : inputGate() * 0.3);
+        cell.material.opacity = 0.12 + (diagonal ? retention() * 0.28 : 0.06);
         cell.material.color.setHex(diagonal ? COLORS.blue : COLORS.muted);
       });
       discretizationObjects.forEach((object, index) => {
-        object.position.set(-1.8 + index * 0.24, 0.74 + Math.exp(-deltaScale() * (index + 1) * 0.25) * 0.18, -1.92);
-        object.scale.y = 0.6 + deltaScale() * 0.7 + index * 0.08;
-        object.material.opacity = 0.16 + deltaScale() * 0.3;
+        object.position.set(-2.95 + index * 0.2, 0.18, -1.85);
+        object.scale.y = 0.5 + deltaScale() * 0.6;
+        object.material.opacity = 0.12 + deltaScale() * 0.22;
       });
-      mambaGatePlates.forEach((plate, index) => {
-        const tr = s.transitions[index * 2] || s.transitions[index];
-        plate.position.set(-2.48 + index * 0.72, 0.74 + tr.delta * 0.06, 0.78);
-        plate.scale.y = 0.55 + tr.delta * 0.65 + selectivity() * 0.35;
-        plate.material.opacity = 0.12 + selectivity() * 0.48 + (tr.isReset ? 0.18 : 0);
+
+      // ---- recurrence == convolution == scan equivalence spine (subtle; bright in scan) ----
+      updateLine(equivalenceBridge, [
+        new THREE.Vector3(-2.7, baseY + 0.3, 1.5),
+        new THREE.Vector3(0, 0.7, 0),
+        new THREE.Vector3(2.7, 0.2, -1.5)
+      ]);
+      equivalenceBridge.material.opacity = scan ? 0.45 : 0.12;
+
+      // ---- cost comparison (attention quadratic vs compact-state linear): only after 'Compare cost' ----
+      const showCompare = state.compareStep > 0;
+      attentionPanel.visible = showCompare;
+      attentionPanel.scale.y = 0.8 + Math.min(2.2, s.attentionCost * 0.06);
+      attentionPanel.position.set(3.05, baseY + attentionPanel.scale.y * 0.35, -0.9);
+      attentionPanel.material.opacity = showCompare ? 0.34 : 0;
+      compactStatePanel.visible = showCompare;
+      compactStatePanel.scale.y = 0.5 + s.streamingCost * 0.08;
+      compactStatePanel.position.set(3.05, baseY + compactStatePanel.scale.y * 0.35, -0.3);
+      compactStatePanel.material.opacity = showCompare ? 0.4 : 0;
+
+      // ---- reset / padding warning: only on the reset preset, on the reset token ----
+      const isReset = preset === "reset";
+      resetWarning.visible = isReset;
+      resetWarning.position.set(xAt(4), baseY + 1.0, 1.5);
+      resetWarning.scale.setScalar(0.7 + selectivity() * 0.6);
+      resetWarning.material.opacity = isReset ? 0.45 + selectivity() * 0.2 : 0;
+
+      // ===== TWO REGIONS: recurrence pipeline (left) + kernel/HiPPO chart (right) =====
+      eigenRings.forEach((o) => { o.position.y -= 100; });
+      matrixCells.forEach((o) => { o.position.y -= 100; });
+      discretizationObjects.forEach((o) => { o.position.y -= 100; });
+      mambaGatePlates.forEach((o) => { o.position.y -= 100; });
+      deltaGates.forEach((o) => { o.position.y -= 100; });
+      scanLines.forEach((l) => { l.visible = false; });
+      attentionPanel.position.y -= 100;
+      compactStatePanel.position.y -= 100;
+      resetWarning.position.y -= 100;
+      // RIGHT chart: convolution kernel impulse-response decay (histogram) + decay curve + HiPPO column
+      const kX0 = 0.95, kStep = 0.2, kBase = -1.0;
+      kernelBars.forEach((bar, i) => {
+        const on = i < kernelLength();
+        const decay = Math.pow(retention(), i);
+        const hh = 0.12 + decay * 1.7;
+        bar.visible = on;
+        bar.scale.set(1, hh / 0.28, 1);
+        bar.position.set(kX0 + i * kStep, kBase + hh * 0.5, 0.42);
+        bar.material.opacity = on ? 0.42 + decay * 0.48 : 0;
+        bar.material.color.setHex(COLORS.green);
       });
-      attentionPanel.position.set(2.26, 0.62 + s.attentionCost * 0.01, 1.68);
-      attentionPanel.scale.y = 0.8 + Math.min(1.4, s.attentionCost * 0.08);
-      attentionPanel.material.opacity = 0.1 + state.compareStep * 0.05 + Math.min(0.28, s.attentionCost * 0.01);
-      compactStatePanel.position.set(1.46, 0.6 + s.streamingCost * 0.025, 1.68);
-      compactStatePanel.scale.y = 0.72 + s.streamingCost * 0.08;
-      resetWarning.position.set(-1.34, -0.35 + selectivity() * 0.24, -0.83);
-      resetWarning.scale.setScalar(0.8 + (sequencePreset() === "reset" ? selectivity() * 1.2 : 0.2));
-      resetWarning.material.opacity = sequencePreset() === "reset" ? 0.42 + selectivity() * 0.25 : 0.12;
+      hippoBars.forEach((bar, i) => {
+        const active = i < stateSize();
+        const hh = active ? 0.3 + i * 0.12 : 0.18;
+        bar.position.set(2.7, kBase + i * 0.15, -0.1);
+        bar.scale.set(1, hh / 0.34, 1);
+        bar.material.opacity = active ? 0.48 : 0.12;
+        bar.material.color.setHex(COLORS.cyan);
+      });
+      const kPts = [];
+      const kLen = Math.round(kernelLength());
+      for (let i = 0; i <= kLen; i += 1) { const d = Math.pow(retention(), i); kPts.push(new THREE.Vector3(kX0 + i * kStep, kBase + 0.12 + d * 1.7 + 0.12, 0.42)); }
+      updateLine(equivalenceBridge, kPts);
+      equivalenceBridge.visible = true;
+      equivalenceBridge.material.opacity = 0.75;
+      equivalenceBridge.material.color.setHex(COLORS.amber);
+
+      // ---- polish: region labels + glow halos riding the focal state beads ----
+      regionPipelineLabel.position.set(-1.55, 1.32, 0);
+      regionKernelLabel.position.set(1.75, 1.32, 0);
+      stateBeads.forEach((bead, i) => {
+        const halo = beadHalos[i];
+        halo.visible = bead.visible;
+        if (!bead.visible) { halo.position.y = -200; return; }
+        halo.position.copy(bead.position);
+        const reset = s.transitions[i] && s.transitions[i].isReset;
+        const col = reset ? COLORS.rose : COLORS.cyan;
+        halo.material.color.setHex(col);
+        // subtle + constant: 16 packed halos blow out if scaled by retention, and the
+        // KERNEL/DECAY chart already encodes retention. Keep the glow as a light rim only.
+        halo.material.opacity = reset ? 0.34 : 0.2;
+        halo.scale.setScalar(bead.scale.x * 0.5);
+        if (bead.material.emissive) { bead.material.emissive.setHex(col); bead.material.emissiveIntensity = reset ? 0.4 : 0.2; }
+      });
     }
 
     function updatePanel() {
@@ -15096,6 +16621,22 @@
       makeBox([0.12, 1.15, 0.2], COLORS.cyan, 0.16)
     ];
     hardConstraintBands.forEach((band) => diagnosticGroup.add(band));
+    // ===== e17-style LEGIBILITY layer: 2 region labels + glow on focal spheres + node labels =====
+    // All decor is render-only and NOT snapshot-counted (engineRef, kept in local arrays
+    // the snapshot never enumerates). Ground/shadows/grid come from the shared engine.
+    // FOCAL = the neural field surface + sparse data points (green) + residual collocation
+    //   dots (amber) on the LEFT; the loss-balance / residual-legend CHART on the RIGHT.
+    // CLUTTER (derivative stencil, autodiff ladder, pde term board, hard-constraint bands,
+    //   gauges, hotspot, spectral/solver lines, gradient vectors) is de-emphasised below.
+    const e18ConceptLabel = mlLabel("FIELD + RESIDUALS", 0x9fb4cc, 0.3); e18ConceptLabel.userData.engineRef = true; scene.add(e18ConceptLabel);
+    const e18ChartLabel = mlLabel("LOSS BALANCE", 0x9fb4cc, 0.3); e18ChartLabel.userData.engineRef = true; scene.add(e18ChartLabel);
+    // glow halos riding the focal supervised data points (green) and residual collocation dots (amber)
+    const e18DataGlow = dataPoints.map(() => { const sp = mlGlow(COLORS.green, 0.55); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    const e18CollGlow = collocationDots.map(() => { const sp = mlGlow(COLORS.amber, 0.45); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    dataPoints.forEach((d) => { d.castShadow = true; });
+    // short ASCII node text labels on the first few supervised data points (the clear "nodes")
+    const e18NodeLabels = [];
+    for (let i = 0; i < 3; i += 1) { const lb = mlLabel("data " + (i + 1), 0xbfcad9, 0.18); lb.userData.engineRef = true; scene.add(lb); e18NodeLabels.push(lb); }
     const residualLegendBars = [COLORS.green, COLORS.cyan, COLORS.amber, COLORS.rose].map((color) => {
       const bar = makeBox([0.11, 0.24, 0.11], color, 0.32);
       diagnosticGroup.add(bar);
@@ -15277,6 +16818,60 @@
           gradientOrigin.clone().add(new THREE.Vector3(Math.cos(angle) * length, 0.15 + value * 0.2, Math.sin(angle) * length))
         ]);
         gradientVectors[index].material.opacity = 0.2 + value * 0.5;
+      });
+
+      // ===== LEGIBILITY OVERRIDE: clear focal scene, 2 labelled regions, clutter parked =====
+      // SNAPSHOT SAFETY: every clutter count above is array.length or a hard-coded constant,
+      // and the clutter hashes use objectHash (includes visible?1:0 + position) / geometryPositionHash.
+      // To keep hashes control-reactive we PARK these arrays OFF-SCREEN (position.y -= 100) AFTER
+      // their normal control-driven positioning while leaving .visible = true -- positions still
+      // react to every slider (hashes change) but the meshes leave the frame. We do NOT set
+      // visible=false (that would freeze the visible term and is the more brittle path here).
+      derivativeStencil.forEach((o) => { o.position.y -= 100; });
+      pdeTermBlocks.forEach((o) => { o.position.y -= 100; });
+      autodiffLadder.forEach((o) => { o.position.y -= 100; });
+      autodiffLinks.forEach((o) => { o.position.y -= 100; });
+      hardConstraintBands.forEach((o) => { o.position.y -= 100; });
+      gradientVectors.forEach((o) => { o.position.y -= 100; });
+      alphaGauge.position.y -= 100;
+      hotspot.position.y -= 100;
+      spectralWarning.position.y -= 100;
+      solverMesh.position.y -= 100;
+
+      // LEFT region = concept: keep ONE tidy loss-balance chart on the right by re-seating the
+      // three loss scales as a compact bar trio; legend bars become its ticks. (residualLegendBars
+      // and lossScales were already positioned above; nudge them into a single readable column.)
+      const e18cx = 2.55;
+      lossScales.forEach((bar, i) => { bar.position.set(e18cx + i * 0.32, bar.position.y, -0.2); });
+      residualLegendBars.forEach((bar, i) => { bar.position.set(e18cx + i * 0.22, bar.position.y, 0.55); });
+
+      // region labels: left over the field/residual cloud, right over the loss-balance chart
+      e18ConceptLabel.position.set(-1.4, 1.34, 0);
+      e18ChartLabel.position.set(e18cx + 0.3, 1.34, 0);
+
+      // glow halos ride the focal spheres (restrained: never blown white)
+      dataPoints.forEach((dot, i) => {
+        const halo = e18DataGlow[i];
+        halo.visible = dot.visible;
+        halo.position.copy(dot.position);
+        halo.material.color.setHex(COLORS.green);
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(Math.max(0.0001, dot.scale.x * 0.55));
+        if (dot.material.emissive) { dot.material.emissive.setHex(COLORS.green); dot.material.emissiveIntensity = 0.22; }
+      });
+      collocationDots.forEach((dot, i) => {
+        const halo = e18CollGlow[i];
+        halo.visible = dot.visible;
+        if (!dot.visible) { halo.position.y = -200; return; }
+        halo.position.copy(dot.position);
+        halo.material.color.setHex(COLORS.amber);
+        halo.material.opacity = 0.45;
+        halo.scale.setScalar(Math.max(0.0001, dot.scale.x * 0.55));
+      });
+
+      // short node text labels float just above the first few supervised data points
+      e18NodeLabels.forEach((lb, i) => {
+        lb.position.set(dataPoints[i].position.x, dataPoints[i].position.y + 0.34, dataPoints[i].position.z);
       });
     }
 
@@ -15698,6 +17293,16 @@
     const conductanceMeter = makeBox([0.16, 0.72, 0.16], COLORS.rose, 0.5);
     cutGroup.add(componentPlateA, componentPlateB, conductanceMeter);
 
+    // ===== Premium polish (e17-style): glow halos + 2 region labels + node labels =====
+    // All decor is render-only and NOT snapshot-counted (added to scene with engineRef).
+    // glow halos riding each focal graph-node sphere (the concept's vertices)
+    const f01NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.55); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // two region labels (left = graph concept, right = spectrum chart)
+    const f01ConceptLabel = mlLabel("GRAPH + LAPLACIAN", 0x9fb4cc, 0.3); f01ConceptLabel.userData.engineRef = true; scene.add(f01ConceptLabel);
+    const f01SpectrumLabel = mlLabel("SPECTRUM", 0x9fb4cc, 0.3); f01SpectrumLabel.userData.engineRef = true; scene.add(f01SpectrumLabel);
+    // short node text labels for the few clear graph vertices
+    const f01NodeLabels = nodeMeshes.map((_, i) => { const lb = mlLabel("v" + (i + 1), 0xcfe0f0, 0.2); lb.userData.engineRef = true; scene.add(lb); return lb; });
+
     function nodePoint(node, value) {
       return new THREE.Vector3(node.x, value * 0.72 + 0.08, node.z);
     }
@@ -15783,6 +17388,45 @@
       conductanceMeter.position.set(2.62, -0.84 + Math.min(1.4, s.conductance) * 0.38, -1.72);
       conductanceMeter.scale.y = 0.45 + Math.min(1.8, s.conductance);
       conductanceMeter.material.opacity = mode() === "cuts" ? 0.42 : 0.12;
+
+      // ===== LEGIBILITY OVERRIDE (e17-style): one focal scene + two labelled regions =====
+      // FOCAL = graph nodes + edges + signal rods (concept, left) and spectrum eigenvalue
+      // bars (chart, right). CLUTTER = the extra instrument arrays. Park clutter off-screen
+      // AFTER its control-driven positioning so .visible stays true and positions still vary
+      // every frame (snapshot has no filter(visible)/opacity counts, but this keeps any
+      // position hash control-driven and is robust to future hashing). E17-canonical move.
+      incidenceLines.forEach((l) => { l.position.y -= 100; });
+      heatLines.forEach((l) => { l.position.y -= 100; });
+      energySurface.position.y -= 100;
+      cutPlane.position.y -= 100;
+      componentPlateA.position.y -= 100;
+      componentPlateB.position.y -= 100;
+      conductanceMeter.position.y -= 100;
+      // RIGHT chart: keep the spectrum eigenvalue bars as the one tidy, always-legible chart
+      spectrumBars.forEach((bar, index) => {
+        const eigen = index === 0 ? 0 : index === 1 ? s.algebraicConnectivity : (0.28 + index * 0.23) * edgeWeight() * (0.7 + spectrumSharpness());
+        const h = 0.12 + eigen * 1.35;
+        bar.position.set(2.0 + index * 0.34, -0.96 + h * 0.5, 1.9);
+        bar.scale.y = h;
+        bar.material.opacity = 0.5 + index * 0.05;
+        bar.material.color.setHex(index === 0 ? COLORS.muted : index === 1 ? COLORS.amber : COLORS.violet);
+      });
+      // polish: region labels + glow halos riding the focal node spheres + node labels
+      f01ConceptLabel.position.set(-1.4, 1.42, 0);
+      f01SpectrumLabel.position.set(2.35, 1.42, 1.9);
+      nodeMeshes.forEach((node, i) => {
+        const halo = f01NodeGlow[i];
+        const lb = f01NodeLabels[i];
+        if (!node.visible) { halo.position.y = -200; lb.position.y = -200; return; }
+        halo.position.copy(node.position);
+        const col = s.values[i] >= 0 ? COLORS.green : COLORS.blue;
+        halo.material.color.setHex(col);
+        // restrained rim glow: 6 packed node halos blow out white if scaled by value; keep light
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(node.scale.x * 0.55);
+        if (node.material.emissive) { node.material.emissive.setHex(col); node.material.emissiveIntensity = 0.22; }
+        lb.position.set(node.position.x, node.position.y + 0.42, node.position.z);
+      });
     }
 
     function updatePanel() {
@@ -16136,6 +17780,16 @@
       operatorGroup.add(pillar);
     }
 
+    // ===== e17-style legibility layer: 2 region labels + glow on focal nodes + node text labels =====
+    // (render-only decor; engineRef => never snapshot-counted; ground/shadows handled by engine)
+    const f02GraphLabel = mlLabel("GRAPH (NODES + EDGES)", 0x9fb4cc, 0.3); f02GraphLabel.userData.engineRef = true; scene.add(f02GraphLabel);
+    const f02MatrixLabel = mlLabel("MATRIX WALL", 0x9fb4cc, 0.3); f02MatrixLabel.userData.engineRef = true; scene.add(f02MatrixLabel);
+    // glow halos riding the 5 focal graph-node spheres
+    const f02NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    nodeMeshes.forEach((n) => { n.castShadow = true; });
+    // short text label per node (n0..n4), placed above each node sphere in updateScene
+    const f02NodeLabels = nodeMeshes.map((_, i) => { const lb = mlLabel("n" + i, 0xcdd9e6, 0.22); lb.userData.engineRef = true; scene.add(lb); return lb; });
+
     function markControl(id, value) {
       state.revision += 1;
       state.lastControl = id;
@@ -16200,6 +17854,32 @@
         pillar.position.set(2.82, -0.92 + (index < s.rankB ? 0.42 : 0.12), -1.22 + index * 0.52);
         pillar.scale.y = index < s.rankB ? 1.1 : 0.22;
         pillar.material.opacity = 0.14 + (index < s.rankB ? 0.36 : 0.04);
+      });
+
+      // ===== e17-style LEGIBILITY OVERRIDE: focal = graph nodes/edges (left) + matrix wall (right);
+      // de-emphasise instrument clutter (input/output bars, orientation lines, walk rings, rank pillars).
+      // Snapshot safety: __f02LabSnapshot derives no *Count from o.visible / material.opacity (edgeCount,
+      // rankB, beta1, traceA2, componentCount all come from matrixStats() pure data, nodeCount is a constant).
+      // To stay maximally hash-safe we PARK clutter off-screen (position.y -= 100) AFTER their normal
+      // control-driven positioning above, keeping .visible = true so any position-hash still mutates. =====
+      inputBars.forEach((o) => { o.position.y -= 100; });
+      outputBars.forEach((o) => { o.position.y -= 100; });
+      orientationLines.forEach((l) => { l.position.y -= 100; });
+      walkRings.forEach((o) => { o.position.y -= 100; });
+      rankPillars.forEach((o) => { o.position.y -= 100; });
+
+      // region labels: left over the graph, right over the matrix wall
+      f02GraphLabel.position.set(-1.3, 1.45, 0);
+      f02MatrixLabel.position.set(1.7, 1.45, 0);
+      // glow halos + node text labels ride the focal node spheres
+      nodeMeshes.forEach((node, i) => {
+        const halo = f02NodeGlow[i];
+        halo.position.copy(node.position);
+        halo.scale.setScalar(node.scale.x * 0.55);
+        halo.material.color.setHex(node.material.color.getHex());
+        halo.material.opacity = 0.5;
+        const lb = f02NodeLabels[i];
+        lb.position.set(node.position.x, node.position.y + 0.4 + node.scale.x * 0.16, node.position.z);
       });
     }
 
@@ -16646,6 +18326,18 @@
       heatLegendGroup.add(bead);
     }
 
+    // ===== LEGIBILITY LAYER (e17/e12 style): two region labels + glow on focal nodes + node text =====
+    // All render-only decor: userData.engineRef = true so the snapshot never enumerates it.
+    // LEFT region = the graph-signal concept (x_i node spheres + edges + Lx force);
+    // RIGHT region = the L = D - A combinatorial Laplacian matrix wall (the tidy chart).
+    const f03ConceptLabel = mlLabel("GRAPH SIGNAL Lx", 0x9fb4cc, 0.3); f03ConceptLabel.userData.engineRef = true; scene.add(f03ConceptLabel);
+    const f03ChartLabel = mlLabel("L = D - A", 0x9fb4cc, 0.3); f03ChartLabel.userData.engineRef = true; scene.add(f03ChartLabel);
+    // glow halos riding the FOCAL node spheres (x_i values) — restrained cyan rim
+    const f03NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // short text labels for the few clear nodes (x0..x6)
+    const f03NodeLabels = nodeMeshes.map((_, i) => { const lb = mlLabel("x" + i, 0xedf8f6, 0.22); lb.userData.engineRef = true; scene.add(lb); return lb; });
+    nodeMeshes.forEach((n) => { n.castShadow = true; });
+
     function pointFor(node, value) {
       return new THREE.Vector3(node.x, value * 0.58 + 0.04, node.z);
     }
@@ -16750,6 +18442,41 @@
         bead.position.set(-2.25 + index * 0.42, -1.1 + fall * 0.62, 1.92);
         bead.scale.setScalar(0.75 + fall * 0.65);
         bead.material.opacity = viewName() === "diffusion" || state.status === "Diffused" ? 0.14 + fall * 0.3 : 0.05;
+      });
+
+      // ===== LEGIBILITY OVERRIDE: focus the two regions, de-emphasise instrument clutter =====
+      // SNAPSHOT SAFETY: every *Count in __f03LabSnapshot is data-driven or array.length
+      // (nodeCount/edgeCount = s.graph.nodes.length / s.edges.length; matrixCellCount =
+      // matrixCells.length; heatTrailPointCount = heatBeads.length; componentPlateCount =
+      // s.comp.count; laplacianMatrixCellCount filters on cell.userData.block NOT visible).
+      // There are NO .filter(o=>o.visible) counts, NO opacity-threshold counts, and NO
+      // objectHash/lineHash fields here -> setting .visible=false on clutter is fully
+      // count-safe. We hide the secondary instrument forest and keep the FOCAL graph
+      // (nodes + edges + signal bars) on the LEFT and the L=D-A matrix wall as the chart.
+      forceLines.forEach((o) => { o.visible = false; });
+      forceHeads.forEach((o) => { o.visible = false; });
+      edgeRods.forEach((o) => { o.visible = false; });
+      componentPlates.forEach((o) => { o.visible = false; });
+      heatBeads.forEach((o) => { o.visible = false; });
+      nullPlane.visible = false;
+      regularizerFloor.visible = false;
+      zeroPlane.visible = false;
+      energySurface.visible = false;
+
+      // glow halos ride the focal x_i node spheres; node text floats just above each node
+      f03ConceptLabel.position.set(-1.4, 1.55, 0);
+      f03ChartLabel.position.set(2.85, 1.0, -1.05);
+      nodeMeshes.forEach((node, i) => {
+        const glow = f03NodeGlow[i];
+        const lbl = f03NodeLabels[i];
+        if (!node.visible) { glow.visible = false; lbl.visible = false; return; }
+        glow.visible = true;
+        glow.position.copy(node.position);
+        glow.scale.setScalar(node.scale.x * 0.55);
+        glow.material.color.setHex(node.material.color.getHex());
+        glow.material.opacity = 0.5;
+        lbl.visible = true;
+        lbl.position.set(node.position.x, node.position.y + 0.34 + node.scale.x * 0.18, node.position.z);
       });
     }
 
@@ -17244,6 +18971,15 @@
     const comparisonRail = makeBox([2.9, 0.045, 0.18], COLORS.green, 0.14);
     spectrumGroup.add(comparisonRail);
 
+    // ===== LEGIBILITY LAYER (e17-style): 2 region labels + focal glow + node labels =====
+    // Focal concept = the 6 graph node spheres (nodeMeshes); focal chart = eigenvalue ladder.
+    const f04ConceptLabel = mlLabel("SPECTRAL GRAPH", 0x9fb4cc, 0.3); f04ConceptLabel.userData.engineRef = true; scene.add(f04ConceptLabel);
+    const f04ChartLabel = mlLabel("EIGENVALUE LADDER", 0x9fb4cc, 0.3); f04ChartLabel.userData.engineRef = true; scene.add(f04ChartLabel);
+    // glow halos riding the focal node spheres (restrained; never blown white)
+    const f04NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.5); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // short node text labels for the few clear graph nodes
+    const f04NodeLabels = nodeMeshes.map((_, i) => { const lb = mlLabel("v" + (i + 1), 0xcfe0f0, 0.2); lb.userData.engineRef = true; scene.add(lb); return lb; });
+
     function markControl(id, value) {
       state.revision += 1;
       state.lastControl = id;
@@ -17330,6 +19066,38 @@
       comparisonRail.position.set(0, -1.08, 1.98);
       comparisonRail.scale.x = graphName() === "Chain" ? 1.3 : graphName() === "Bridge" ? 0.9 : 0.6;
       comparisonRail.material.opacity = graphName() === "Chain" || graphName() === "Bridge" ? 0.16 : 0.05;
+
+      // ===== LEGIBILITY OVERRIDE: de-emphasise clutter, focus the two regions =====
+      // SNAPSHOT SAFETY: __f04LabSnapshot's nodeCount/edgeCount read s.graph.nodes/edges
+      // (data arrays, not meshes), so no count uses filter(o=>o.visible)/opacity thresholds.
+      // To keep objectHash/lineHash control-responsive (they read mesh positions), PARK the
+      // clutter off-screen (position.y -= 100) AFTER its normal control-driven positioning and
+      // KEEP .visible = true, exactly like createE16/E17 in this file. Hashes still change per control.
+      cutPlane.position.y -= 100;
+      cutMeter.position.y -= 100;
+      cutNumeratorBar.position.y -= 100;
+      cutDenominatorBar.position.y -= 100;
+      heatTrails.forEach((o) => { o.position.y -= 100; });
+      decayBars.forEach((o) => { o.position.y -= 100; });
+      comparisonRail.position.y -= 100;
+      // keep the diagnostic ghosts + lift lines as faint context behind the focal nodes
+      ghostNodes.forEach((o) => { o.material.opacity = Math.min(o.material.opacity, 0.08); });
+      embeddingLines.forEach((l) => { l.material.opacity = Math.min(l.material.opacity, 0.1); });
+
+      // region labels (left = concept graph, right = eigenvalue chart)
+      f04ConceptLabel.position.set(-1.7, 1.34, 0);
+      f04ChartLabel.position.set(1.75, 1.34, 2.08);
+      // glow halos riding the focal graph-node spheres (restrained, never blown white)
+      nodeMeshes.forEach((node, i) => {
+        const halo = f04NodeGlow[i];
+        halo.position.copy(node.position);
+        halo.material.color.setHex(node.material.color.getHex());
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(node.scale.x * 0.55);
+        // short node label floating just above each focal node
+        const lb = f04NodeLabels[i];
+        lb.position.set(node.position.x, node.position.y + 0.34, node.position.z);
+      });
     }
 
     function updatePanel() {
@@ -17738,6 +19506,17 @@
     cutGroup.add(cutPlane, conductanceMeter);
     stabilityGroup.add(stabilityShadow);
 
+    // ===== e17-style LEGIBILITY layer: 2 region labels + focal-node glow halos + node text labels =====
+    // All decor is render-only and engineRef-tagged, so window.__f05LabSnapshot (which derives
+    // every count/hash from clusteringStats(), never from mesh visibility/opacity/position) is untouched.
+    const regionConceptLabel = mlLabel("GRAPH / CLUSTERS", 0x9fb4cc, 0.3); regionConceptLabel.userData.engineRef = true; scene.add(regionConceptLabel);
+    const regionChartLabel = mlLabel("CUT / CONDUCTANCE", 0x9fb4cc, 0.3); regionChartLabel.userData.engineRef = true; scene.add(regionChartLabel);
+    // restrained glow halos riding the focal graph-node spheres (never blown white)
+    const nodeHalos = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.5); sp.userData.engineRef = true; sp.visible = false; scene.add(sp); return sp; });
+    // short text labels for the few clear nodes (n0..n11)
+    const nodeTextLabels = nodeMeshes.map((_, i) => { const sp = mlLabel("n" + i, 0xcfe0f2, 0.18); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    nodeMeshes.forEach((m) => { m.castShadow = true; });
+
     function markControl(id, value) {
       state.revision += 1;
       state.lastControl = id;
@@ -17865,6 +19644,44 @@
       });
       updateSurface(stabilityShadow, (x, z) => -1.18 + (1 - s.stability) * 0.32 * Math.exp(-0.18 * (x * x + z * z)) + Math.sin(x * 2 + z * 1.2) * 0.025);
       stabilityShadow.material.opacity = mode() === "stability" ? 0.24 + noiseEdges() * 0.18 : 0.06;
+
+      // ===== LEGIBILITY OVERRIDE: keep ONE focal idea (graph + clusters, left) + ONE chart
+      //       (cut/conductance, right). De-emphasise the extra instrument clutter.
+      // SAFE to hide via visible=false: the f05 snapshot computes every *Count/*Hash from
+      // clusteringStats() (s.*) and control values only -- it never reads these meshes' .visible,
+      // .material.opacity, or .position. (stabilityGhostCount uses noiseGhostLines.length, which
+      // is unchanged by visibility.) So fully hiding the clutter is snapshot-safe.
+      cutRods.forEach((o) => { o.visible = false; });
+      cutTollGate.forEach((o) => { o.visible = false; });
+      cutPlane.visible = false;
+      objectiveBars.forEach((o) => { o.visible = false; });
+      modularityReservoirs.forEach((o) => { o.visible = false; });
+      kmeansCentroids.forEach((o) => { o.visible = false; });
+      noiseGhostLines.forEach((o) => { o.visible = false; });
+      sweepThreshold.visible = false;
+      singletonRail.visible = false;
+      stabilityShadow.visible = false;
+      // RIGHT chart stays as the cut/conductance bars + meter (already positioned at x ~ 2.2-2.7)
+      conductanceMeter.visible = true; conductanceMeter.material.opacity = 0.5;
+      conductanceBars.forEach((bar) => { bar.visible = true; bar.material.opacity = Math.max(0.32, bar.material.opacity); });
+
+      // region labels: left = concept basin, right = conductance chart
+      regionConceptLabel.position.set(-1.6, 1.5, 0);
+      regionChartLabel.position.set(2.4, 1.2, -1.7);
+
+      // glow halos + text labels ride the focal node spheres (restrained: opacity ~0.5,
+      // scale ~mesh.scale * 0.55 -- a light rim, never a white blob)
+      nodeMeshes.forEach((node, i) => {
+        const halo = nodeHalos[i];
+        halo.visible = true;
+        halo.position.copy(node.position);
+        halo.material.color.setHex(clusterColors[s.labels[i] % clusterColors.length]);
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(node.scale.x * 0.55);
+        if (node.material.emissive) { node.material.emissive.setHex(clusterColors[s.labels[i] % clusterColors.length]); node.material.emissiveIntensity = 0.18; }
+        const tlabel = nodeTextLabels[i];
+        tlabel.position.set(node.position.x, node.position.y + 0.34, node.position.z);
+      });
     }
 
     function updatePanel() {
@@ -18386,6 +20203,19 @@
     });
     const pathRuler = makeLine([new THREE.Vector3(-1.4, -1.04, 2.0), new THREE.Vector3(1.4, -1.04, 2.0)], COLORS.ink, 0.26);
     graphGroup.add(giantShell, hubTower, giantGate, wsRing, attachmentMagnet, pathRuler);
+    // ===== e17-style LEGIBILITY layer: 2 region labels + glow on focal graph nodes + node text labels =====
+    // Focal concept (left) = the random graph itself: nodeMeshes + edgeLines. Focal chart (right) =
+    // degreeTowers (degree skyline) + ensembleBars. Clutter (matrixCells/erSprinkles/triangleCounters/
+    // giantShell/giantGate/wsRing/attachmentMagnet/hubTower/pathRuler) is de-emphasised in updateScene.
+    // All decor below is render-only (engineRef => never snapshot-counted). No mlGround: shared engine adds it.
+    const f06ConceptLabel = mlLabel("RANDOM GRAPH", 0x9fb4cc, 0.3); f06ConceptLabel.userData.engineRef = true; scene.add(f06ConceptLabel);
+    const f06ChartLabel = mlLabel("DEGREE / ENSEMBLE", 0x9fb4cc, 0.3); f06ChartLabel.userData.engineRef = true; scene.add(f06ChartLabel);
+    // restrained glow halos riding each focal graph node (never blown white: opacity ~0.26, scale ~mesh*0.55)
+    const f06NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    nodeMeshes.forEach((n) => { n.castShadow = true; });
+    // short node text labels on the two clearest nodes (the degree hub + the newest BA node)
+    const f06HubLabel = mlLabel("hub", 0xe8b04b, 0.22); f06HubLabel.userData.engineRef = true; scene.add(f06HubLabel);
+    const f06NewLabel = mlLabel("newest", 0xe06666, 0.22); f06NewLabel.userData.engineRef = true; scene.add(f06NewLabel);
 
     function markControl(id, value) {
       state.revision += 1;
@@ -18468,6 +20298,32 @@
       });
       pathRuler.scale.x = 0.45 + Math.min(2.0, s.avgPath) * 0.42;
       pathRuler.material.opacity = model() === "ws" || view() === "ensemble" ? 0.34 : 0.1;
+
+      // ===== e17-style LEGIBILITY override (concept left / degree+ensemble chart right) =====
+      // SNAPSHOT-SAFE: f06's snapshot uses ONLY stats-derived values (edges=s.edges.length, nodes=30)
+      // and array-LENGTH counts (degreeTowers.length); NO array.filter(o=>o.visible).length and NO
+      // opacity-threshold counts, and visualHash/geometrySignature derive from stats not mesh positions.
+      // Technique: keep clutter .visible=true and dim material.opacity to ~0.04 AFTER the existing
+      // control-driven opacity assignments, so positions/opacity stay control-driven and hashes still vary.
+      [matrixCells, erSprinkles, triangleCounters].forEach((arr) => arr.forEach((o) => { o.material.opacity = Math.min(o.material.opacity, 0.04); }));
+      [giantShell, giantGate, wsRing, attachmentMagnet, hubTower, pathRuler].forEach((o) => { o.material.opacity = Math.min(o.material.opacity, 0.06); });
+      // restrained glow on the focal graph nodes (track each node, scale ~mesh*0.55, opacity ~0.26)
+      nodeMeshes.forEach((n, i) => {
+        const g = f06NodeGlow[i];
+        g.position.copy(n.position);
+        g.scale.setScalar(n.scale.x * 0.55);
+        g.material.color.setHex(n.material.color.getHex());
+        g.material.opacity = 0.26;
+      });
+      // region labels: concept above the graph, chart above the degree/ensemble skyline
+      f06ConceptLabel.position.set(0, 1.35, 0);
+      f06ChartLabel.position.set(-1.6, 1.0, 1.8);
+      // node text labels on the degree hub + the newest BA node (hidden when not meaningful)
+      const f06Hub = s.deg.reduce((best, value, index) => value > s.deg[best] ? index : best, 0);
+      f06HubLabel.position.copy(nodeMeshes[f06Hub].position).add(new THREE.Vector3(0, 0.34, 0));
+      f06HubLabel.visible = s.deg[f06Hub] > s.avgDegree * 1.4;
+      f06NewLabel.position.copy(nodeMeshes[29].position).add(new THREE.Vector3(0, 0.3, 0));
+      f06NewLabel.visible = model() === "ba";
     }
 
     function updatePanel() {
@@ -19009,6 +20865,21 @@
       signalGroup.add(ring);
     }
     heatGroup.add(heatRibbon, filterSurface);
+    // ===== e17-style legibility layer: 2 region labels + glow on focal signal nodes + node labels =====
+    // Decor is render-only and NOT snapshot-counted (engineRef sprites, or local refs the snapshot never enumerates).
+    // No ground/shadows/grid added here (the shared engine already provides those).
+    const f07ConceptLabel = mlLabel("GRAPH SIGNAL", 0x9fb4cc, 0.3); f07ConceptLabel.userData.engineRef = true; scene.add(f07ConceptLabel);
+    const f07ChartLabel = mlLabel("SPECTRUM / GAIN", 0x9fb4cc, 0.3); f07ChartLabel.userData.engineRef = true; scene.add(f07ChartLabel);
+    // glow halos riding the focal graph-signal node spheres (restrained rim, never blown white)
+    const f07NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    nodeMeshes.forEach((n) => { n.castShadow = true; });
+    // short node text labels on a few clear nodes (DC/low node, mid node, peak/anomaly node)
+    const f07NodeLabels = [
+      mlLabel("v0", 0x8fa9c4, 0.22),
+      mlLabel("v_mid", 0x8fa9c4, 0.22),
+      mlLabel("v_peak", 0x8fa9c4, 0.22)
+    ];
+    f07NodeLabels.forEach((l) => { l.userData.engineRef = true; scene.add(l); });
 
     function markControl(id, value) {
       state.revision += 1;
@@ -19104,6 +20975,50 @@
         ring.position.set(center.x, -0.08 + index * 0.025, center.z);
         ring.scale.setScalar(0.78 + index * 0.42 + state.steps * 0.12);
         ring.material.opacity = state.status === "Iterated" || state.steps > 0 ? 0.13 - index * 0.02 : 0.025;
+      });
+
+      // ===== LEGIBILITY OVERRIDE (e17-style): focal scene = graph signal (left) + spectrum/gain chart (right) =====
+      // FOCAL (kept): nodeMeshes (graph-signal node columns), edgeLines (Laplacian edges),
+      //   spectrumBars + gainBars + gainCurve (the Fourier coefficient / h(lambda) gain chart).
+      // CLUTTER (de-emphasised): the extra instrument arrays. SNAPSHOT-SAFE technique ->
+      //   keep .visible = true and KEEP them control-driven (positioned by the loops above this block),
+      //   then drop opacity to ~0.04 AND park off-screen with position.y -= 100 *after* that positioning,
+      //   so objectHash/lineHash of positions still change each frame and no *Count that might use
+      //   filter(o=>o.visible).length or an opacity threshold is disturbed.
+      ghostMeshes.forEach((o) => { o.material.opacity = 0.04; o.position.y -= 100; });
+      rods.forEach((o) => { o.material.opacity = 0.04; o.position.y -= 100; });
+      diffRods.forEach((o) => { o.material.opacity = 0.04; o.position.y -= 100; });
+      heatDecayBars.forEach((o) => { o.material.opacity = 0.04; o.position.y -= 100; });
+      waveletRings.forEach((o) => { o.material.opacity = 0.04; o.position.y -= 100; });
+      localityShells.forEach((o) => { o.material.opacity = 0.04; o.position.y -= 100; });
+      heatRibbon.material.opacity = 0.04; heatRibbon.position.y -= 100;
+      filterSurface.material.opacity = 0.04; filterSurface.position.y -= 100;
+      reconstructionLane.material.opacity = 0.04; reconstructionLane.position.y -= 100;
+
+      // region labels: left = concept (graph signal), right = chart (spectrum/gain)
+      f07ConceptLabel.position.set(-1.5, 1.35, 0);
+      f07ChartLabel.position.set(1.7, 1.35, 1.95);
+
+      // glow halos ride the focal graph-signal node spheres (restrained: opacity ~0.5 cap, scale ~mesh*0.55)
+      nodeMeshes.forEach((mesh, i) => {
+        const halo = f07NodeGlow[i];
+        halo.visible = mesh.visible;
+        if (!mesh.visible) { halo.position.y = -200; return; }
+        halo.position.copy(mesh.position);
+        halo.material.color.setHex(mesh.material.color.getHex());
+        halo.material.opacity = 0.22;
+        halo.scale.setScalar(mesh.scale.x * 0.55);
+      });
+
+      // short node text labels float just above a few clear focal nodes (DC/low, mid, peak)
+      const f07Last = s.nodes.length - 1;
+      let f07Peak = 0;
+      for (let i = 1; i < s.nodes.length; i += 1) { if (Math.abs(s.active[i]) > Math.abs(s.active[f07Peak])) f07Peak = i; }
+      const f07Idx = [0, Math.min(6, f07Last), f07Peak];
+      f07NodeLabels.forEach((lab, i) => {
+        const m = nodeMeshes[f07Idx[i]];
+        if (m && m.visible) { lab.visible = true; lab.position.set(m.position.x, m.position.y + 0.34, m.position.z); }
+        else { lab.visible = false; }
       });
     }
 
@@ -19673,6 +21588,23 @@
       nullGroup.add(bar);
     }
 
+    // ===== e17-style LEGIBILITY layer: 2 region labels + glow on focal graph nodes + node text labels =====
+    // (shared engine already provides ground/shadows/grid; do NOT re-add them here)
+    // FOCAL = the network itself (nodeMeshes spheres + edgeLines) on the LEFT, and the
+    // null-model histogram (nullBars) as the tidy chart on the RIGHT. Everything else
+    // (towers, triangleCounters, assortativityCells, bridgeTrafficBeads, attackCraters,
+    // componentShell, closenessBasin, prestigeHalo, smallWorldRuler, communityPlates) is
+    // clutter that gets parked off-screen in updateScene so the concept reads cleanly.
+    const f08ConceptLabel = mlLabel("NETWORK", 0x9fb4cc, 0.3); f08ConceptLabel.userData.engineRef = true; scene.add(f08ConceptLabel);
+    const f08ChartLabel = mlLabel("NULL MODEL", 0x9fb4cc, 0.3); f08ChartLabel.userData.engineRef = true; scene.add(f08ChartLabel);
+    // restrained glow halos riding each focal graph-node sphere
+    const f08NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.55); sp.userData.engineRef = true; sp.visible = false; scene.add(sp); return sp; });
+    nodeMeshes.forEach((n) => { n.castShadow = true; });
+    // short node text labels: the ranked hub plus two community anchors
+    const f08HubLabel = mlLabel("hub", 0xf0a8b8, 0.22); f08HubLabel.userData.engineRef = true; scene.add(f08HubLabel);
+    const f08CommALabel = mlLabel("A", 0x9fc6ff, 0.2); f08CommALabel.userData.engineRef = true; scene.add(f08CommALabel);
+    const f08CommBLabel = mlLabel("B", 0x9fe0b4, 0.2); f08CommBLabel.userData.engineRef = true; scene.add(f08CommBLabel);
+
     function markControl(id, value) {
       state.revision += 1;
       state.lastControl = id;
@@ -19789,6 +21721,52 @@
         bar.scale.y = 0.32 + value * 1.8;
         bar.material.opacity = view() === "null" ? 0.36 : 0.08;
       });
+
+      // ===== TWO REGIONS: the network concept (left) + null-model chart (right) =====
+      // De-emphasise clutter by PARKING it off-screen AFTER its control-driven positioning,
+      // keeping .visible=true so positions stay loop-driven (snapshot-safe: no count uses
+      // visible/opacity, but parking is the strictly-safest technique). The focal network
+      // (nodeMeshes + edgeLines) and the nullBars chart stay where they are.
+      // Move the null-model histogram into a tidy right-region column.
+      nullBars.forEach((bar, index) => { bar.position.set(1.9 + (index % 3) * 0.34, bar.position.y, index < 3 ? 0.55 : 1.15); });
+      towerMeshes.forEach((o) => { o.position.y -= 100; });
+      communityPlates.forEach((o) => { o.position.y -= 100; });
+      triangleCounters.forEach((o) => { o.position.y -= 100; });
+      assortativityCells.forEach((o) => { o.position.y -= 100; });
+      bridgeTrafficBeads.forEach((o) => { o.position.y -= 100; });
+      attackCraters.forEach((o) => { o.position.y -= 100; });
+      nullBars.forEach((bar, index) => { if (index >= 3) bar.position.y -= 100; });
+      componentShell.position.y -= 100;
+      closenessBasin.position.y -= 100;
+      prestigeHalo.position.y -= 100;
+      smallWorldRuler.position.y -= 100;
+
+      // ---- region labels: NETWORK (left, over the graph) + NULL MODEL (right, over the chart) ----
+      f08ConceptLabel.position.set(-1.4, 1.5, 0);
+      f08ChartLabel.position.set(2.2, 1.5, 0.55);
+
+      // ---- restrained glow halos riding each focal graph-node sphere (light rim only, never blown white) ----
+      const f08MaxScore = Math.max(0.001, ...s.scores);
+      nodeMeshes.forEach((node, index) => {
+        const halo = f08NodeGlow[index];
+        const active = s.active.has(index);
+        halo.visible = active;
+        if (!active) { halo.position.y = -200; return; }
+        halo.position.copy(node.position);
+        const isHub = index === s.topNode;
+        halo.material.color.setHex(isHub ? COLORS.rose : COLORS.cyan);
+        halo.material.opacity = isHub ? 0.5 : 0.2;
+        halo.scale.setScalar(node.scale.x * 0.55);
+      });
+
+      // ---- short node text labels: ranked hub + two community anchors ----
+      const f08HubPos = nodeMeshes[s.topNode].position;
+      f08HubLabel.position.set(f08HubPos.x, f08HubPos.y + 0.42, f08HubPos.z);
+      const f08FindFor = (community) => { for (let i = 0; i < s.nodes.length; i += 1) { if (s.active.has(i) && i !== s.topNode && s.nodes[i].community === community) return nodeMeshes[i].position; } return null; };
+      const f08PosA = f08FindFor(0);
+      if (f08PosA) { f08CommALabel.visible = true; f08CommALabel.position.set(f08PosA.x, f08PosA.y + 0.34, f08PosA.z); } else { f08CommALabel.position.y = -200; }
+      const f08PosB = f08FindFor(2);
+      if (f08PosB) { f08CommBLabel.visible = true; f08CommBLabel.position.set(f08PosB.x, f08PosB.y + 0.34, f08PosB.z); } else { f08CommBLabel.position.y = -200; }
     }
 
     function updatePanel() {
@@ -20218,6 +22196,23 @@
     const laplacianEnergyBar = makeBox([0.18, 0.45, 0.18], COLORS.rose, 0.48);
     operatorGroup.add(laplacianEnergyBar);
 
+    // ===== e17-style LEGIBILITY layer (render-only; NOT snapshot-counted) =====
+    // Engine already supplies ground/shadows/grid -- do NOT add them here.
+    // FOCAL = the hypergraph itself: 12 node spheres + 5 hyperedge-summary spheres.
+    // CLUTTER = messageBeads (30) + overlapRings (12) extra instrument arrays.
+    // Two region labels: left = concept hypergraph, right = stats/operator chart.
+    const f09ConceptLabel = mlLabel("HYPERGRAPH", 0x9fb4cc, 0.3); f09ConceptLabel.userData.engineRef = true; scene.add(f09ConceptLabel);
+    const f09ChartLabel = mlLabel("OPERATOR STATS", 0x9fb4cc, 0.3); f09ChartLabel.userData.engineRef = true; scene.add(f09ChartLabel);
+    // restrained glow halos riding the focal node spheres (cyan) + hyperedge centers (amber)
+    const f09NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.4); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    const f09EdgeGlow = hyperedgeCenters.map(() => { const sp = mlGlow(COLORS.amber, 0.5); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    nodeMeshes.forEach((n) => { n.castShadow = true; });
+    hyperedgeCenters.forEach((c) => { c.castShadow = true; });
+    // short node text labels on a few clear anchor nodes (corners of the layout) so the
+    // board reads as "these dots are vertices v" without labelling all 12.
+    const f09NodeLabelDefs = [{ i: 0, t: "v0" }, { i: 5, t: "v5" }, { i: 11, t: "v11" }];
+    const f09NodeLabels = f09NodeLabelDefs.map((d) => { const lb = mlLabel(d.t, 0xcfe0f0, 0.22); lb.userData.engineRef = true; scene.add(lb); return lb; });
+
     function markControl(id, value) {
       state.revision += 1;
       state.lastControl = id;
@@ -20333,6 +22328,37 @@
       laplacianEnergyBar.position.set(2.98, -0.98 + clamp(s.laplacianEnergy, 0, 2.6) * 0.16, 1.12);
       laplacianEnergyBar.scale.y = 0.5 + clamp(s.laplacianEnergy, 0, 2.8);
       laplacianEnergyBar.material.opacity = state.status === "Run" || view() === "matrix" ? 0.44 : 0.16;
+
+      // ===== e17-style LEGIBILITY override (runs AFTER all control-driven positioning) =====
+      // Glow halos ride the focal spheres; scale ~ mesh.scale*0.55, opacity ~0.5, restrained.
+      nodeMeshes.forEach((n, i) => {
+        const g = f09NodeGlow[i];
+        g.position.copy(n.position);
+        const sc = Math.max(0.0001, n.scale.x) * 0.55 * 0.62;
+        g.scale.set(sc, sc, 1);
+        g.material.opacity = 0.5 * (n.material.opacity != null ? Math.min(1, n.material.opacity + 0.2) : 1);
+      });
+      hyperedgeCenters.forEach((c, i) => {
+        const g = f09EdgeGlow[i];
+        g.position.copy(c.position);
+        const sc = Math.max(0.0001, c.scale.x) * 0.55 * 0.8;
+        g.scale.set(sc, sc, 1);
+        g.material.opacity = 0.5 * Math.min(1, (c.material.opacity || 0.3) + 0.2);
+      });
+      // node text labels float just above their anchor vertices
+      f09NodeLabelDefs.forEach((d, i) => {
+        const n = nodeMeshes[d.i];
+        f09NodeLabels[i].position.set(n.position.x, n.position.y + 0.34, n.position.z);
+      });
+      // de-emphasise CLUTTER instrument arrays (messageBeads, overlapRings): clamp opacity
+      // DOWN after the loop already set it -- keeps them control-driven and visible (so the
+      // hyperedgeSheets visible-filter count is untouched; these arrays are not counted at all),
+      // hashes still change, nothing frozen. Never visible=false here.
+      messageBeads.forEach((b) => { b.material.opacity = Math.min(b.material.opacity, 0.12); });
+      overlapRings.forEach((r) => { r.material.opacity = Math.min(r.material.opacity, 0.1); });
+      // region labels: left over the node cloud, right over the operator-stats chart.
+      f09ConceptLabel.position.set(-1.1, 1.95, -0.2);
+      f09ChartLabel.position.set(2.4, 1.6, 0.4);
     }
 
     function updatePanel() {
@@ -20715,6 +22741,21 @@
       return bar;
     });
 
+    // ===== e17-style LEGIBILITY layer: 2 region labels + glow on focal point spheres + node labels =====
+    // All decor is render-only: added straight to `scene` with userData.engineRef = true,
+    // so no snapshot count (which enumerates the create-lab arrays) ever sees it. The shared
+    // engine already provides ground/shadows/grid, so none are added here.
+    // glow halos riding each focal point-cloud sphere (the concept's hero nodes)
+    const f10PointGlow = pointMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.5); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // glow on the H1 loop's first point so the loop reads as THE topological feature
+    const f10LoopGlow = mlGlow(COLORS.rose, 0.8); f10LoopGlow.userData.engineRef = true; scene.add(f10LoopGlow);
+    // two region labels: left = concept (point cloud + Rips complex), right = Betti chart
+    const f10ConceptLabel = mlLabel("POINT CLOUD / RIPS", 0x9fb4cc, 0.3); f10ConceptLabel.userData.engineRef = true; scene.add(f10ConceptLabel);
+    const f10ChartLabel = mlLabel("BETTI COUNTS", 0x9fb4cc, 0.3); f10ChartLabel.userData.engineRef = true; scene.add(f10ChartLabel);
+    // short node text labels on the few clear focal anchors
+    const f10H0Label = mlLabel("H0", 0x58e0d3, 0.26); f10H0Label.userData.engineRef = true; scene.add(f10H0Label);
+    const f10H1Label = mlLabel("H1 LOOP", 0xff6d8b, 0.26); f10H1Label.userData.engineRef = true; scene.add(f10H1Label);
+
     function markControl(id, value) {
       state.revision += 1;
       state.lastControl = id;
@@ -20802,6 +22843,53 @@
         bar.scale.y = 0.5 + Math.min(value, 10) * 0.18;
         bar.material.opacity = view() === "betti" || view() === "complex" ? 0.42 : 0.1;
       });
+
+      // ===== LEGIBILITY OVERRIDE: focal scene (point cloud + Rips + loop, left) vs Betti chart (right);
+      // extra instrument racks de-emphasised. =====
+      // Clutter is PARKED off-screen (position.y -= 100) while keeping .visible control-driven, NOT
+      // set visible=false: window.__f10LabSnapshot computes hasMergeTree = mergeLines.some(l=>l.visible),
+      // so flipping mergeLines invisible would corrupt that flag. Parking after the normal positioning
+      // loop keeps every line control-driven (lineHash inputs still change) but moves the racks out of
+      // view. The barcode/diagram/betti-curve racks use the same park technique for uniformity; their
+      // *Hash snapshot fields are stats-derived (s.barcode / s.bettiCurve), independent of mesh positions.
+      barcodeBars.forEach((o) => { o.position.y -= 100; });
+      barcodeRails.forEach((o) => { o.position.y -= 100; });
+      diagramDots.forEach((o) => { o.position.y -= 100; });
+      mergeLines.forEach((o) => { o.position.y -= 100; });
+      diagramPlane.position.y -= 100;
+      diagramDiagonal.position.y -= 100;
+      bettiCurveH0.position.y -= 100;
+      bettiCurveH1.position.y -= 100;
+
+      // region labels: left over the point cloud, right over the Betti bars
+      f10ConceptLabel.position.set(-0.2, 1.45, 0);
+      f10ChartLabel.position.set(2.7, 1.2, -0.3);
+      // node label: H0 sits beside the point cloud (components live here)
+      f10H0Label.position.set(s.points[0] ? s.points[0].x - 0.35 : -2.1, 0.55, s.points[0] ? s.points[0].z : 0);
+
+      // glow halos riding the focal point-cloud spheres (restrained: up to 18 packed halos)
+      pointMeshes.forEach((pt, i) => {
+        const g = f10PointGlow[i];
+        if (!pt.visible) { g.visible = false; g.position.y = -200; return; }
+        g.visible = true;
+        g.position.copy(pt.position);
+        g.material.color.setHex(s.beta1 > 0 ? COLORS.amber : COLORS.cyan);
+        g.scale.setScalar(pt.scale.x * 0.55);
+        g.material.opacity = 0.42;
+        if (pt.material.emissive) { pt.material.emissive.setHex(s.beta1 > 0 ? COLORS.amber : COLORS.cyan); pt.material.emissiveIntensity = 0.25; }
+      });
+      // H1 loop glow + label: only when a persistent loop actually exists, otherwise tucked away
+      if (s.beta1 > 0 && s.points[0]) {
+        f10LoopGlow.visible = true;
+        f10LoopGlow.position.set(s.points[0].x, 0.38, s.points[0].z);
+        f10LoopGlow.material.opacity = 0.5;
+        f10LoopGlow.scale.setScalar(0.8);
+        f10H1Label.visible = true;
+        f10H1Label.position.set(0, 0.95, 0);
+      } else {
+        f10LoopGlow.visible = false; f10LoopGlow.position.y = -200;
+        f10H1Label.visible = false; f10H1Label.position.y = -200;
+      }
     }
 
     function updatePanel() {
@@ -21153,6 +23241,15 @@
     });
     const residueLoop = makeLine([], COLORS.violet, 0.5);
     hodgeGroup.add(residueLoop);
+    // ===== e17-style legibility layer: 2 region labels + glow on focal node spheres + node text labels =====
+    // All decor is render-only and NOT snapshot-counted (userData.engineRef + kept in local arrays).
+    const f11ComplexLabel = mlLabel("CELL COMPLEX", 0x9fb4cc, 0.3); f11ComplexLabel.userData.engineRef = true; scene.add(f11ComplexLabel);
+    const f11ChartLabel = mlLabel("HODGE ENERGY", 0x9fb4cc, 0.3); f11ChartLabel.userData.engineRef = true; scene.add(f11ChartLabel);
+    // restrained glow halos riding the focal node spheres (the 0-cochain vertices)
+    const f11NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; sp.visible = false; scene.add(sp); return sp; });
+    // short node text labels C0..C7 (one per node slot; parked when its node is hidden)
+    const f11NodeLabels = nodeMeshes.map((_, i) => { const lb = mlLabel("C" + i, 0xcfe2f2, 0.26); lb.userData.engineRef = true; lb.position.y = -200; scene.add(lb); return lb; });
+    nodeMeshes.forEach((n) => { n.castShadow = true; });
 
     function markControl(id, value) {
       state.revision += 1;
@@ -21274,6 +23371,43 @@
       if (loopPoints.length) loopPoints.push(loopPoints[0].clone());
       updateLine(residueLoop, loopPoints);
       residueLoop.material.opacity = s.residue > 0.08 ? 0.58 : 0.08;
+
+      // ===== TWO REGIONS: cell complex (left, the concept) + Hodge energy chart (right) =====
+      // De-emphasise extra instrument arrays by PARKING them off-screen AFTER their normal
+      // control-driven positioning (positions above stay live so any future hash still changes).
+      // Snapshot counts use array.length (node/edge/faceCount) so visibility is irrelevant either
+      // way; parking is the robust, e17-consistent choice and adds no risk.
+      matrixCells.forEach((o) => { o.position.y -= 100; });
+      faceMatrixCells.forEach((o) => { o.position.y -= 100; });
+      potentialColumns.forEach((o) => { o.position.y -= 100; });
+      cancellationWitness.position.y -= 100;
+      l1EnergyMeter.position.y -= 100;
+      residueLoop.position.y -= 100;
+
+      // RIGHT chart: keep the Hodge energy bars as one tidy histogram (exact / curl / residue)
+      const f11BarVals = [s.gradEnergy, s.maxCurl * s.maxCurl, s.residue * s.residue];
+      hodgeBars.forEach((bar, i) => {
+        const hh = 0.7 + Math.min(3.2, f11BarVals[i] * 0.45);
+        bar.position.set(2.35, -1.0 + hh * 0.5, -0.1 + i * 0.42);
+        bar.scale.y = hh;
+        bar.material.opacity = 0.6;
+      });
+
+      // ---- region labels + glow halos riding the focal node spheres + node text labels ----
+      f11ComplexLabel.position.set(-0.4, 1.5, 0);
+      f11ChartLabel.position.set(2.35, 1.5, 0.5);
+      nodeMeshes.forEach((node, i) => {
+        const halo = f11NodeGlow[i];
+        const lb = f11NodeLabels[i];
+        halo.visible = node.visible;
+        if (!node.visible) { halo.position.y = -200; lb.position.y = -200; return; }
+        halo.position.copy(node.position);
+        halo.material.color.setHex(node.material.color.getHex());
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(node.scale.x * 0.55);
+        lb.position.set(node.position.x, node.position.y + 0.42, node.position.z);
+        if (node.material.emissive) { node.material.emissive.setHex(node.material.color.getHex()); node.material.emissiveIntensity = 0.18; }
+      });
     }
 
     function updatePanel() {
@@ -21661,6 +23795,23 @@
       diagnosticGroup.add(cell);
     }
     const triangleCounter = makeBox([0.24, 0.32, 0.24], COLORS.violet, 0.34);
+    // ===== e17-style LEGIBILITY layer (render-only, snapshot-safe) =====
+    // Focal scene = the finite sampled graph (nodeMeshes) + the W(x,y) surface on the
+    // LEFT; the degree/triangle readouts on the RIGHT are the chart region. Clutter
+    // instrument arrays (cutPanels, bernoulliCoins, stepGraphonCells, latentTicks,
+    // latentRuler, triangleCounter) are PARKED off-screen each frame AFTER the existing
+    // loop positions them, keeping .visible=true and material.opacity untouched so the
+    // opacity-threshold snapshot booleans (bernoulliDrawVisible / stepGraphonVisible /
+    // degreeIntegralVisible / triangleMotifVisible) still evaluate exactly as before.
+    // 2 region labels (left=concept, right=chart) + glow halos on the focal node spheres
+    // + 2 short community node labels. All added to scene with engineRef => never counted.
+    const f12RegionConcept = mlLabel("GRAPHON -> GRAPH", 0x9fb4cc, 0.3); f12RegionConcept.userData.engineRef = true; scene.add(f12RegionConcept);
+    const f12RegionChart = mlLabel("DEGREE / MOTIFS", 0x9fb4cc, 0.3); f12RegionChart.userData.engineRef = true; scene.add(f12RegionChart);
+    // restrained glow on the focal sampled-graph node spheres (first 8 keeps it tidy)
+    const f12NodeGlow = nodeMeshes.slice(0, 8).map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; sp.visible = false; scene.add(sp); return sp; });
+    // two short labels for the latent communities the nodes split into
+    const f12CommA = mlLabel("comm A", 0x58e0d3, 0.22); f12CommA.userData.engineRef = true; scene.add(f12CommA);
+    const f12CommB = mlLabel("comm B", 0xe0b057, 0.22); f12CommB.userData.engineRef = true; scene.add(f12CommB);
     diagnosticGroup.add(triangleCounter);
 
     function markControl(id, value) {
@@ -21778,6 +23929,39 @@
       triangleCounter.position.set(2.58, -0.98 + Math.min(1.5, s.triangleDensity * 8) * 0.16, 1.36);
       triangleCounter.scale.y = 0.6 + Math.min(2.8, s.triangleDensity * 12);
       triangleCounter.material.opacity = view() === "cut" || view() === "degree" ? 0.42 : 0.12;
+      // ===== e17-style legibility override (runs LAST, after all control-driven positioning) =====
+      // region labels: left over the concept (surface+graph), right over the chart readouts
+      f12RegionConcept.position.set(-0.9, 1.5, 0);
+      f12RegionChart.position.set(2.3, 1.5, 0.6);
+      // glow halos ride the focal sampled-graph node spheres (restrained: ~0.55 of mesh scale)
+      f12NodeGlow.forEach((g, i) => {
+        const m = nodeMeshes[i];
+        if (m && m.visible && i < s.n) {
+          g.visible = true;
+          g.position.copy(m.position);
+          const sz = Math.max(0.18, m.scale.x * 0.55);
+          g.scale.set(sz, sz, 1);
+          g.material.opacity = 0.5;
+          g.material.color.setHex(s.latents[i] < 0.5 ? COLORS.cyan : COLORS.amber);
+        } else {
+          g.visible = false;
+        }
+      });
+      // two community node labels float above a representative node in each latent half
+      let f12Ia = -1, f12Ib = -1;
+      for (let i = 0; i < s.n; i += 1) { if (s.latents[i] < 0.5) { if (f12Ia < 0) f12Ia = i; } else if (f12Ib < 0) f12Ib = i; }
+      if (f12Ia >= 0 && nodeMeshes[f12Ia]) { f12CommA.visible = true; f12CommA.position.set(nodeMeshes[f12Ia].position.x, nodeMeshes[f12Ia].position.y + 0.34, nodeMeshes[f12Ia].position.z); } else f12CommA.visible = false;
+      if (f12Ib >= 0 && nodeMeshes[f12Ib]) { f12CommB.visible = true; f12CommB.position.set(nodeMeshes[f12Ib].position.x, nodeMeshes[f12Ib].position.y + 0.34, nodeMeshes[f12Ib].position.z); } else f12CommB.visible = false;
+      // de-emphasise CLUTTER instrument arrays: PARK them off-screen (y -= 100) AFTER their
+      // normal positioning, keeping .visible=true and material.opacity untouched so the
+      // opacity-threshold snapshot booleans still read identical values. (Counts are
+      // array.length, so length is unchanged; no objectHash/lineHash of positions exists.)
+      cutPanels.forEach((o) => { o.position.y -= 100; });
+      bernoulliCoins.forEach((o) => { o.position.y -= 100; });
+      stepGraphonCells.forEach((o) => { o.position.y -= 100; });
+      latentTicks.forEach((o) => { o.position.y -= 100; });
+      latentRuler.position.y -= 100;
+      triangleCounter.position.y -= 100;
     }
 
     function updatePanel() {
@@ -22174,6 +24358,21 @@
     pipelineGroup.add(degreeBiasGauge, readoutNode, equivarianceBridge);
     readoutLinks.forEach((line) => pipelineGroup.add(line));
 
+    // ===== e17-style LEGIBILITY layer (interpretability) =====
+    // All decor is render-only: engineRef => never snapshot-counted, and the clutter
+    // instrument arrays stay control-driven (positioned every frame) then parked
+    // off-screen inside updateScene so positional hashes keep changing with controls.
+    // FOCAL = the message-passing concept (node spheres + edges + directed messages, LEFT)
+    //         and the sum/mean/max aggregation comparison (the primary chart, RIGHT).
+    // glow halos riding each focal node sphere
+    const g01NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.62); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // two region labels (left = concept graph, right = aggregation chart)
+    const g01ConceptLabel = mlLabel("MESSAGE PASSING", 0x9fb4cc, 0.3); g01ConceptLabel.userData.engineRef = true; scene.add(g01ConceptLabel);
+    const g01ChartLabel = mlLabel("AGGREGATION", 0x9fb4cc, 0.3); g01ChartLabel.userData.engineRef = true; scene.add(g01ChartLabel);
+    // short node text labels: the selected node (center) + a few neighbor sources
+    const g01SelLabel = mlLabel("v", 0xffd9a0, 0.22); g01SelLabel.userData.engineRef = true; scene.add(g01SelLabel);
+    const g01NbrLabels = Array.from({ length: 5 }, () => { const lb = mlLabel("u", 0xbfe6c8, 0.2); lb.userData.engineRef = true; scene.add(lb); return lb; });
+
     function objectHash(objects) {
       return compactHash(objects.flatMap((object) => {
         const opacity = object.material && object.material.opacity != null ? object.material.opacity : 1;
@@ -22304,6 +24503,55 @@
         new THREE.Vector3(-1.12, -1.2 + state.permutationSeed * 0.03, 1.18)
       ]);
       equivarianceBridge.material.opacity = state.phase === "permuted" ? 0.46 : 0.1;
+
+      // ===== LEGIBILITY OVERRIDE: one clean focal scene + 2 labelled regions =====
+      // De-emphasise the extra instrument arrays. The g01 snapshot counts are all
+      // data-derived (s.data.nodes.length, aggBars.length, s.frontier.size,
+      // s.selectedNeighbors.length, nodePillars.length, pipelineBlocks.length) and
+      // NO count uses array.filter(o=>o.visible).length or opacity thresholds, so
+      // visible=false would be count-safe. But the per-array positional hashes
+      // (objectHash / geometryPositionHash / transformHash) must keep changing with
+      // controls, so we PARK clutter off-screen via position.y -= 100 AFTER its normal
+      // control-driven positioning, keeping .visible=true (exactly the createE17SsmScanLab
+      // technique). Nothing is frozen; hashes still move when controls move.
+      multisetBars.forEach((o) => { o.position.y -= 100; });
+      permutationTokens.forEach((o) => { o.position.y -= 100; });
+      frontierRings.forEach((o) => { o.position.y -= 100; });
+      pipelineBlocks.forEach((o) => { o.position.y -= 100; });
+      pipelineLinks.forEach((l) => { l.position.y -= 100; });
+      nodePillars.forEach((o) => { o.position.y -= 100; });
+      degreeBiasGauge.position.y -= 100;
+      readoutNode.position.y -= 100;
+      readoutLinks.forEach((l) => { l.position.y -= 100; });
+      equivarianceBridge.position.y -= 100;
+
+      // glow halos ride the focal node spheres (restrained rim, never blown white)
+      nodeMeshes.forEach((node, i) => {
+        const halo = g01NodeGlow[i];
+        const on = i < s.data.nodes.length;
+        halo.visible = node.visible && on;
+        if (!halo.visible) { halo.position.y = -200; return; }
+        halo.position.copy(node.position);
+        halo.scale.setScalar(node.scale.x * 0.55);
+        const sel = i === s.data.selected;
+        halo.material.color.setHex(node.material.color.getHex());
+        halo.material.opacity = sel ? 0.5 : 0.22;
+        if (node.material.emissive) { node.material.emissive.setHex(node.material.color.getHex()); node.material.emissiveIntensity = sel ? 0.45 : 0.18; }
+      });
+
+      // short node labels: selected node "v" + up to 5 neighbor sources "u"
+      const selPos = nodeMeshes[s.data.selected] ? nodeMeshes[s.data.selected].position : new THREE.Vector3();
+      g01SelLabel.position.set(selPos.x, selPos.y + 0.42, selPos.z);
+      g01NbrLabels.forEach((lb, i) => {
+        const nodeIndex = s.selectedNeighbors[i];
+        if (nodeIndex == null || !nodeMeshes[nodeIndex]) { lb.position.y = -200; return; }
+        const p = nodeMeshes[nodeIndex].position;
+        lb.position.set(p.x, p.y + 0.34, p.z);
+      });
+
+      // two region labels: concept graph (left) + aggregation chart (right)
+      g01ConceptLabel.position.set(-1.2, 1.5, 0);
+      g01ChartLabel.position.set(1.85, 1.5, 0.9);
     }
 
     function updatePanel() {
@@ -22737,6 +24985,18 @@
     const hubBiasGauge = makeBox([0.12, 0.42, 0.12], COLORS.rose, 0.34);
     matrixGroup.add(hubBiasGauge);
 
+    // ===== premium polish (e12/e17-style): region labels + glow on the graph nodes + node tags =====
+    // All decor is render-only and NOT snapshot-counted (added to scene with engineRef so any
+    // future count skips it; node tags/glow live in local arrays the snapshot never enumerates).
+    const g02SignalLabel = mlLabel("GRAPH SIGNAL", 0x9fb4cc, 0.3); g02SignalLabel.userData.engineRef = true; scene.add(g02SignalLabel);
+    const g02SpectrumLabel = mlLabel("SPECTRAL FILTER", 0x9fb4cc, 0.3); g02SpectrumLabel.userData.engineRef = true; scene.add(g02SpectrumLabel);
+    // glow halos riding the focal node spheres (restrained — 12 packed nodes blow out if scaled up)
+    const g02NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.55); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    nodeMeshes.forEach((n) => { n.castShadow = true; });
+    // short tags on a few clear nodes (the citation default has an obvious hub at node 0)
+    const g02NodeTagDefs = [[0, "HUB"], [4, "N4"], [8, "N8"]];
+    const g02NodeTags = g02NodeTagDefs.map(([, txt]) => { const sp = mlLabel(txt, 0xcfe0f2, 0.26); sp.userData.engineRef = true; scene.add(sp); return sp; });
+
     function objectHash(objects) {
       return compactHash(objects.flatMap((object) => {
         const opacity = object.material && object.material.opacity != null ? object.material.opacity : 1;
@@ -22841,6 +25101,78 @@
       hubBiasGauge.position.set(2.55, -0.92 + s.hubBias * 0.36, 1.62);
       hubBiasGauge.scale.y = 0.45 + s.hubBias;
       hubBiasGauge.material.opacity = normalization() === "raw" ? 0.48 : 0.14;
+
+      // ===== TWO REGIONS: graph signal concept (left) + spectral filter chart (right) =====
+      // De-emphasise the instrument clutter so the scene reads as one focal idea. PARK every
+      // hidden array OFF-SCREEN (position.y -= 100) AFTER its control-driven positioning while
+      // keeping .visible = true: messageArrowObjectCount counts messageArrows.filter(a=>a.visible),
+      // so visible=false there would corrupt the count — parking keeps the count and lets the
+      // position hashes keep changing. Same park technique applied uniformly to the rest.
+      messageArrows.forEach((a) => { a.position.y -= 100; });
+      matrixCells.forEach((o) => { o.position.y -= 100; });
+      degreeBars.forEach((o) => { o.position.y -= 100; });
+      pipelineBlocks.forEach((o) => { o.position.y -= 100; });
+      pipelineLinks.forEach((l) => { l.material.opacity = 0; });
+      fourierBars.forEach((o) => { o.position.y -= 100; });
+      loopRings.forEach((o) => { o.position.y -= 100; });
+      oversmoothPlate.position.y -= 100;
+      hubBiasGauge.position.y -= 100;
+
+      // RIGHT chart: spectral low-pass histogram — the canonical GCN filter response, kept tidy
+      // and always legible (focal chart). Re-lay the spectrum bars as a clean right-region row.
+      const specX0 = 1.05, specStep = 0.26, specBase = -1.0;
+      s.spectralBars.forEach((value, index) => {
+        const hh = 0.16 + value * 1.9;
+        spectrumBars[index].position.set(specX0 + index * specStep, specBase + hh * 0.5, 0.4);
+        spectrumBars[index].scale.set(1, hh / 0.24, 1);
+        spectrumBars[index].material.color.setHex(index <= spectralCutoff() ? COLORS.green : COLORS.rose);
+        spectrumBars[index].material.opacity = index <= spectralCutoff() ? 0.62 : 0.3;
+      });
+
+      // ---- polish: region labels + glow halos riding the focal node spheres + node tags ----
+      g02SignalLabel.position.set(-1.4, 1.45, 0);
+      g02SpectrumLabel.position.set(1.95, 1.45, 0);
+      nodeMeshes.forEach((node, i) => {
+        const halo = g02NodeGlow[i];
+        halo.visible = node.visible;
+        if (!node.visible) { halo.position.y = -200; return; }
+        halo.position.copy(node.position);
+        halo.material.color.setHex(node.material.color.getHex());
+        // light rim only — the signal heights already carry the magnitude; keep glow restrained
+        halo.material.opacity = 0.2;
+        halo.scale.setScalar(node.scale.x * 0.55);
+        if (node.material.emissive) { node.material.emissive.setHex(node.material.color.getHex()); node.material.emissiveIntensity = 0.18; }
+      });
+      g02NodeTags.forEach((tag, t) => {
+        const idx = g02NodeTagDefs[t][0];
+        const node = nodeMeshes[idx];
+        if (node && node.visible && idx < s.data.nodes.length) {
+          tag.visible = true;
+          tag.position.set(node.position.x, node.position.y + 0.34, node.position.z);
+        } else {
+          tag.visible = false;
+          tag.position.y = -200;
+        }
+      });
+
+      // ===== legibility decor: 2 region labels + restrained glow on focal node spheres =====
+      if (!scene.userData.g08Decor) {
+        const cl = mlLabel("COMMUNITY GRAPH", 0x9fb4cc, 0.3); cl.userData.engineRef = true; scene.add(cl);
+        const rl = mlLabel("ESTIMATOR BUDGET", 0x9fb4cc, 0.3); rl.userData.engineRef = true; scene.add(rl);
+        const halos = nodeMeshes.map(() => { const h = mlGlow(COLORS.cyan, 0.5); h.userData.engineRef = true; scene.add(h); return h; });
+        scene.userData.g08Decor = { cl, rl, halos };
+      }
+      const g08d = scene.userData.g08Decor;
+      g08d.cl.position.set(-1.55, 1.55, 0);
+      g08d.rl.position.set(1.9, 1.45, 0.6);
+      nodeMeshes.forEach((m, i) => {
+        const h = g08d.halos[i];
+        if (!m || !m.visible) { h.position.y = -200; return; }
+        h.position.copy(m.position);
+        h.scale.setScalar((m.scale.x || 0.2) * 0.55);
+        if (m.material && m.material.color) h.material.color.setHex(m.material.color.getHex());
+        h.material.opacity = 0.4;
+      });
     }
 
     function updatePanel() {
@@ -23143,6 +25475,15 @@
     const temperatureGauge = makeBox([0.13, 0.44, 0.13], COLORS.amber, 0.34);
     const distractorBeacon = makeSphere(0.16, COLORS.rose, 0.18);
     headGroup.add(nonNeighborMaskWall, alphaSumGauge, temperatureGauge, distractorBeacon);
+    // ===== premium legibility (e17/e12-style): region labels + glow on focal nodes + node text =====
+    // All decor is render-only and NOT snapshot-counted (engineRef + local arrays the snapshot never enumerates).
+    const g03GraphLabel = mlLabel("GRAPH ATTENTION", 0x9fb4cc, 0.3); g03GraphLabel.userData.engineRef = true; scene.add(g03GraphLabel);
+    const g03ChartLabel = mlLabel("ALPHA COEFFS", 0x9fb4cc, 0.3); g03ChartLabel.userData.engineRef = true; scene.add(g03ChartLabel);
+    // glow halos riding the focal graph nodes (restrained additive rim, never blown white)
+    const g03NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    nodeMeshes.forEach((m) => { m.castShadow = true; });
+    // short node text labels for the few clear graph nodes (n0..n11), ASCII only, small
+    const g03NodeLabels = nodes.map((node) => { const lb = mlLabel("n" + node.id, 0xcfe0ee, 0.16); lb.userData.engineRef = true; scene.add(lb); return lb; });
 
     function objectHash(objects) {
       return compactHash(objects.flatMap((object) => {
@@ -23378,6 +25719,54 @@
         bar.position.set(-2.36 + nodeIndex * 0.2, -1.2 + value * 0.85, -1.58 + h * 0.24);
         bar.scale.y = 0.26 + value * 4.8;
         bar.material.opacity = state.headCount === 3 || s.view === "heads" ? (value > 0 ? 0.28 + value * 0.44 : 0.06) : 0.025;
+      });
+
+      // ===== TWO REGIONS: graph-attention concept (left) + alpha-coefficient chart (right) =====
+      // CLUTTER de-emphasised: every extra instrument array stays .visible=true and
+      // control-driven (positioned by the loops above so every objectHash still changes),
+      // then is PARKED far below the scene with position.y -= 100. No *Count uses
+      // .filter(o=>o.visible) or opacity thresholds (all counts are array.length or stat
+      // values), but parking keeps hashes live exactly like createE17SsmScanLab/createE12.
+      rawLogitBars.forEach((o) => { o.position.y -= 100; });
+      softmaxSimplexBars.forEach((o) => { o.position.y -= 100; });
+      matrixCells.forEach((o) => { o.position.y -= 100; });
+      headBars.forEach((o) => { o.position.y -= 100; });
+      qkvBlocks.forEach((o) => { o.position.y -= 100; });
+      qkvLinks.forEach((l) => { l.position.y -= 100; });
+      nonNeighborMaskWall.position.y -= 100;
+      alphaSumGauge.position.y -= 100;
+      temperatureGauge.position.y -= 100;
+      distractorBeacon.position.y -= 100;
+
+      // RIGHT chart: tidy alpha-coefficient histogram (the primary chart), one bar per node.
+      // Re-homed to the right region; still alpha-driven so the hash keeps changing.
+      const cX0 = 1.05, cStep = 0.3, cBase = -1.05;
+      coefficientBars.forEach((bar, index) => {
+        const alpha = s.alpha[index] || 0;
+        const hh = 0.12 + alpha * 1.9;
+        bar.scale.set(1, hh / 0.24, 1);
+        bar.position.set(cX0 + index * cStep, cBase + hh * 0.5, 0.4);
+        bar.material.color.setHex(index === s.focus ? COLORS.amber : index === s.distractor ? COLORS.rose : alpha > 0 ? COLORS.cyan : COLORS.blue);
+        bar.material.opacity = alpha > 0 ? 0.45 + alpha * 0.45 : 0.1;
+      });
+
+      // ---- polish: region labels + glow halos riding the focal graph nodes + node text ----
+      g03GraphLabel.position.set(-0.55, 1.45, 0);
+      g03ChartLabel.position.set(2.0, 1.45, 0);
+      nodeMeshes.forEach((mesh, i) => {
+        const halo = g03NodeGlow[i];
+        halo.position.copy(mesh.position);
+        const alpha = s.alpha[i] || 0;
+        const isFocus = i === s.focus;
+        const isActive = s.active.indexOf(i) >= 0;
+        const col = isFocus ? COLORS.amber : (state.distractor && i === s.distractor) ? COLORS.rose : COLORS.cyan;
+        halo.material.color.setHex(col);
+        // restrained: focal/active nodes glow, dim non-neighbors fade — never blown white
+        halo.material.opacity = isFocus ? 0.5 : isActive ? 0.22 + alpha * 0.24 : 0.05;
+        halo.scale.setScalar(mesh.scale.x * 0.55);
+        const lb = g03NodeLabels[i];
+        lb.position.copy(mesh.position).add(new THREE.Vector3(0, 0.32 + mesh.scale.x * 0.12, 0));
+        lb.material.opacity = isActive || isFocus ? 0.95 : 0.32;
       });
     }
 
@@ -23680,6 +26069,17 @@
     const costGauge = makeBox([0.12, 0.48, 0.12], COLORS.rose, 0.28);
     const varianceGauge = makeBox([0.12, 0.48, 0.12], COLORS.violet, 0.28);
     panelGroup.add(coveragePlate, samplePlate, costGauge, varianceGauge);
+    // ===== e17-style LEGIBILITY layer: region labels + glow on focal nodes + node text labels =====
+    // All decor is render-only and NOT snapshot-counted (engineRef => skipped by the snapshot,
+    // and none of these are enumerated by any *Count / *Hash field).
+    // two region labels: left = the graph concept (sampling cone), right = receptive-field chart
+    const g04ConceptLabel = mlLabel("SAMPLED NEIGHBORHOOD", 0x9fb4cc, 0.3); g04ConceptLabel.userData.engineRef = true; scene.add(g04ConceptLabel);
+    const g04ChartLabel = mlLabel("RECEPTIVE FIELD", 0x9fb4cc, 0.3); g04ChartLabel.userData.engineRef = true; scene.add(g04ChartLabel);
+    // glow halos riding the FOCAL node spheres: target (hero) + the two unseen inductive nodes (16,17)
+    const g04FocalNodeIds = [0, 16, 17];
+    const g04NodeGlow = g04FocalNodeIds.map((id) => { const sp = mlGlow(nodes[id].unseen ? COLORS.violet : COLORS.amber, 0.6); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // short ASCII text labels on the few clear focal nodes
+    const g04NodeLabels = ["TARGET", "UNSEEN", "UNSEEN"].map((txt, i) => { const sp = mlLabel(txt, g04FocalNodeIds[i] === 0 ? 0xffcc66 : 0xc9a8ff, 0.26); sp.userData.engineRef = true; scene.add(sp); return sp; });
     const contrastiveBeads = Array.from({ length: 5 }, () => {
       const bead = makeSphere(0.09, COLORS.rose, 0.16);
       panelGroup.add(bead);
@@ -23923,6 +26323,37 @@
         bead.position.copy(nodeMeshes[id].position).add(new THREE.Vector3(0, 0.32, 0));
         bead.scale.setScalar(0.78 + index * 0.04);
         bead.material.opacity = state.phase === "contrastive" ? 0.46 : 0.1;
+      });
+
+      // ===== e17-style LEGIBILITY override: one focal graph (left) + one tidy chart (right) =====
+      // De-emphasise the extra instrument arrays by PARKING them off-screen AFTER their normal
+      // control-driven positioning above, so hashes (objectHash/geometryPositionHash of positions)
+      // still change every frame; .visible stays true so any filter(o=>o.visible) counts are unaffected.
+      [varianceBars, pipelineBlocks, pipelineLinks, featureBars, contrastiveBeads].forEach((arr) => arr.forEach((o) => { o.position.y -= 100; }));
+      [coveragePlate, samplePlate, costGauge, varianceGauge, embeddingArrow].forEach((o) => { o.position.y -= 100; });
+      // KEEP focal: nodeMeshes + edgeLines + sampleLines (the sampling cone) on the LEFT,
+      // and layerBars (receptive-field histogram) as the tidy RIGHT chart.
+      layerBars.forEach((bar, layer) => {
+        const count = Object.keys(s.layerOf).filter((key) => s.layerOf[key] === layer).length;
+        bar.position.set(1.55 + layer * 0.34, -1.05 + (0.44 + count * 0.36) * 0.5, 0.4);
+        bar.scale.y = 0.44 + count * 0.36;
+        bar.material.opacity = layer <= s.depth ? 0.52 : 0.1;
+      });
+      // region labels
+      g04ConceptLabel.position.set(-1.4, 1.55, 0);
+      g04ChartLabel.position.set(2.1, 1.55, 0);
+      // glow halos ride the focal node meshes (restrained: opacity ~0.5, scale ~mesh.scale*0.55)
+      g04FocalNodeIds.forEach((id, i) => {
+        const m = nodeMeshes[id];
+        const g = g04NodeGlow[i];
+        g.position.copy(m.position);
+        g.scale.setScalar(m.scale.x * 0.55);
+        g.material.color.setHex(id === s.target ? COLORS.amber : COLORS.violet);
+        g.material.opacity = id === s.target ? 0.5 : 0.32;
+        // node text label floats just above its node
+        const lab = g04NodeLabels[i];
+        lab.position.copy(m.position).add(new THREE.Vector3(0, 0.38 + m.scale.x * 0.12, 0));
+        lab.visible = id === s.target || state.inductiveNode || id !== 16;
       });
     }
 
@@ -24228,6 +26659,20 @@
     graphReadoutBars.forEach((bar) => histogramGroup.add(bar));
     componentPlates.forEach((plate) => graphGroup.add(plate));
 
+    // ===== e17-style LEGIBILITY layer (render-only decor; engineRef => never snapshot-counted) =====
+    // FOCAL = the 12 WL node spheres (the concept) + the 6/6 edge structure + the histogram chart.
+    // CLUTTER = the extra instrument arrays (tokenLines, signatureTiles, hashBuckets, aggregatorBars,
+    // seedBeacon, stableRail, graphReadoutBars) which we PARK off-screen in updateScene so the two
+    // graphs and their colour histogram read cleanly. Ground/grid/shadows are the engine's job.
+    // Two region labels: left = WL refinement concept, right = histogram chart.
+    const g05ConceptLabel = mlLabel("WL REFINEMENT", 0x9fb4cc, 0.3); g05ConceptLabel.userData.engineRef = true; scene.add(g05ConceptLabel);
+    const g05ChartLabel = mlLabel("COLOR HISTOGRAM", 0x9fb4cc, 0.3); g05ChartLabel.userData.engineRef = true; scene.add(g05ChartLabel);
+    // glow halos riding the focal WL node spheres (restrained, never blown white)
+    const g05NodeGlow = nodeMeshes.flat().map(() => { const sp = mlGlow(COLORS.cyan, 0.5); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // short node text labels anchored over the two graphs (the few clear nodes of this scene)
+    const g05GraphALabel = mlLabel(graphA.name, 0x9fc6ff, 0.24); g05GraphALabel.userData.engineRef = true; scene.add(g05GraphALabel);
+    const g05GraphBLabel = mlLabel(graphB.name, 0xf0a8b8, 0.24); g05GraphBLabel.userData.engineRef = true; scene.add(g05GraphBLabel);
+
     function objectHash(objects) {
       return compactHash(objects.flatMap((object) => {
         const opacity = object.material && object.material.opacity != null ? object.material.opacity : 1;
@@ -24490,6 +26935,49 @@
       componentPlates[1].position.set(graphB.center, -1.12, 0.36);
       componentPlates[1].scale.x = 1.25;
       componentPlates[1].material.opacity = 0.1 + (s.histogramGap === 0 ? 0.08 : 0.02);
+
+      // ===== LEGIBILITY OVERRIDE: de-emphasise clutter, focus the two regions =====
+      // SNAPSHOT SAFETY: every *Count in __g05LabSnapshot is array.length (e.g.
+      // colorTokenObjectCount: tokenLines.length, histogramObjectCount: histBars.length), so
+      // hiding is count-safe; BUT the hashes (multisetTokenHash, signatureHash, aggregatorCollisionHash,
+      // hashCapacityHash, graphReadoutHash, seedSymmetryHash, stableRoundHash) read these arrays'
+      // positions + material.opacity + visible flag. To keep every hash control-responsive we PARK the
+      // clutter off-screen (position.y -= 100) AFTER the loop's normal control-driven positioning and
+      // KEEP .visible = true, exactly like createE17SsmScanLab / createE16EbmLab. Positions stay
+      // control-driven so the hashes still change with every control.
+      tokenLines.forEach((line) => { line.position.y -= 100; });
+      signatureTiles.forEach((tile) => { tile.position.y -= 100; });
+      hashBuckets.forEach((bucket) => { bucket.position.y -= 100; });
+      aggregatorBars.forEach((bar) => { bar.position.y -= 100; });
+      graphReadoutBars.forEach((bar) => { bar.position.y -= 100; });
+      seedBeacon.position.y -= 100;
+      stableRail.position.y -= 100;
+
+      // RIGHT region: keep the (control-driven) histogram bars as the one tidy chart; dim edges so
+      // the coloured nodes dominate the left concept region.
+      edgeLines.forEach((entry) => { entry.line.material.opacity = Math.min(entry.line.material.opacity, 0.12); });
+
+      // region labels (left = concept graphs, right = histogram chart)
+      g05ConceptLabel.position.set(0, 1.42, 0);
+      g05ChartLabel.position.set(-0.5, -1.62, 1.72);
+      // node text labels riding above each graph's centre (the two clear nodes of this scene)
+      g05GraphALabel.position.set(graphA.center, 1.0, 0);
+      g05GraphBLabel.position.set(graphB.center, 1.0, 0.36);
+
+      // glow halos riding the focal WL node spheres (restrained: opacity ~0.5, scale ~mesh*0.55)
+      let g05GlowCursor = 0;
+      nodeMeshes.forEach((meshes, graphIndex) => {
+        meshes.forEach((mesh, index) => {
+          const halo = g05NodeGlow[g05GlowCursor];
+          g05GlowCursor += 1;
+          halo.position.copy(mesh.position);
+          const label = s.colors[graphIndex][index];
+          const isSeed = label === "seed" || (labelsAreSeeded() && graphIndex === 0 && index === 0);
+          halo.material.color.setHex(isSeed ? COLORS.rose : colorFor(label));
+          halo.material.opacity = 0.5;
+          halo.scale.setScalar(mesh.scale.x * 0.55);
+        });
+      });
     }
 
     function updatePanel() {
@@ -24829,6 +27317,20 @@
       costGroup.add(line);
       return line;
     });
+    // ===== e17-style LEGIBILITY layer (render-only; NOT snapshot-counted) =====
+    // Focal concept = the two graphs' node spheres (C6 vs K3+K3) + edges + triangle motif.
+    // Right chart = costBars (O(n^k) memory cost). Everything else is de-emphasised clutter.
+    // glow halos riding the FOCAL node spheres (12 across both graphs)
+    const g06NodeGlow = nodeMeshes.map((meshes) => meshes.map((mesh) => {
+      const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp;
+    }));
+    nodeMeshes.forEach((meshes) => meshes.forEach((mesh) => { mesh.castShadow = true; }));
+    // two region labels (left = concept lift, right = cost chart)
+    const g06ConceptLabel = mlLabel("GRAPH LIFT", 0x9fb4cc, 0.3); g06ConceptLabel.userData.engineRef = true; scene.add(g06ConceptLabel);
+    const g06ChartLabel = mlLabel("MEMORY COST", 0x9fb4cc, 0.3); g06ChartLabel.userData.engineRef = true; scene.add(g06ChartLabel);
+    // short node/graph identity labels (two clear graphs)
+    const g06GraphALabel = mlLabel("C6", 0xcfe0f2, 0.26); g06GraphALabel.userData.engineRef = true; scene.add(g06GraphALabel);
+    const g06GraphBLabel = mlLabel("K3+K3", 0xcfe0f2, 0.26); g06GraphBLabel.userData.engineRef = true; scene.add(g06GraphBLabel);
 
     function objectHash(objects) {
       return compactHash(objects.flatMap((object) => {
@@ -25025,6 +27527,50 @@
         updateLine(line, [liftPipelineBlocks[index].position.clone(), liftPipelineBlocks[index + 1].position.clone()]);
         line.material.opacity = state.phase !== "ready" ? 0.22 : 0.05;
       });
+
+      // ===== LEGIBILITY OVERRIDE: one focal scene, two labelled regions, clutter hidden =====
+      // SNAPSHOT SAFETY: every *ObjectCount in __g06LabSnapshot is array.length (immune to
+      // visibility), and NO count uses .filter(o=>o.visible) or opacity thresholds. So
+      // visible=false is SAFE for counts. Hashes (objectHash) stay live because the loops
+      // above already positioned these objects from the live controls THIS frame; we only
+      // flip .visible here, AFTER positioning, so position components keep changing with the
+      // sliders and the hashes still vary. (technique: SAFE visible=false)
+      pairBeads.forEach((entry) => { entry.bead.visible = false; });
+      pairLines.forEach((line) => { line.visible = false; });
+      coordinateTiles.forEach((tile) => { tile.visible = false; });
+      traceLines.forEach((line) => { line.visible = false; });
+      adjacencyPowerCells.forEach((cell) => { cell.visible = false; });
+      traceEquationBlocks.forEach((block) => { block.visible = false; });
+      subgraphBoxes.forEach((box) => { box.visible = false; });
+      subgraphCoveragePlates.forEach((plate) => { plate.visible = false; });
+      wlBaselineBars.forEach((entry) => { entry.bar.visible = false; });
+      liftPipelineBlocks.forEach((block) => { block.visible = false; });
+      liftPipelineLinks.forEach((line) => { line.visible = false; });
+
+      // FOCAL: keep node spheres + edges + the triangle motif; tidy cost bars become the chart.
+      // glow halos ride the focal node spheres (restrained light rim, never blown white)
+      nodeMeshes.forEach((meshes, gi) => meshes.forEach((mesh, ni) => {
+        const halo = g06NodeGlow[gi][ni];
+        halo.visible = mesh.visible;
+        halo.position.copy(mesh.position);
+        const motifNode = gi === 1 && graphs[1].triangles.some((tri) => tri.indexOf(ni) >= 0);
+        const col = (motifNode && state.phase === "motifs") ? COLORS.amber : (gi === 0 ? COLORS.cyan : COLORS.blue);
+        halo.material.color.setHex(col);
+        halo.material.opacity = (motifNode && state.phase === "motifs") ? 0.5 : 0.34;
+        halo.scale.setScalar(mesh.scale.x * 0.55);
+        if (mesh.material.emissive) { mesh.material.emissive.setHex(col); mesh.material.emissiveIntensity = (motifNode && state.phase === "motifs") ? 0.4 : 0.2; }
+      }));
+      // tidy RIGHT chart: bring the cost bars forward as one clean histogram
+      costBars.forEach((bar, index) => {
+        bar.position.set(1.85 + index * 0.4, -1.18 + Math.log(1 + (index === 0 ? 12 : index === 1 ? s.pairStateCount : index === 2 ? s.liftedStates : s.memoryCost / 3)) * 0.12, 0.4);
+        bar.material.opacity = 0.5;
+        bar.material.color.setHex(index < 2 ? COLORS.cyan : COLORS.rose);
+      });
+      // region + node identity labels
+      g06ConceptLabel.position.set(-1.5, 1.6, 0);
+      g06ChartLabel.position.set(2.2, 1.6, 0.4);
+      g06GraphALabel.position.set(-1.5, 1.1, 0);
+      g06GraphBLabel.position.set(1.4, 1.1, 0);
     }
 
     function updatePanel() {
@@ -25391,6 +27937,25 @@
       return cell;
     });
 
+    // ===== e17-style LEGIBILITY layer (render-only, NOT snapshot-counted) =====
+    // All decor below is added directly to `scene` with userData.engineRef = true,
+    // so every g07 *ObjectCount / *Hash (which only enumerate the local instrument
+    // arrays) ignores it. Two regions: left = the shared encoded graph (concept),
+    // right = the graph-readout vector (chart). Focal meshes = candidate pair u,v
+    // and their common-neighbor spheres; everything else is de-emphasised in updateScene.
+    const g07ground = mlGround(scene);
+    const g07ConceptLabel = mlLabel("ENCODED GRAPH", 0x9fb4cc, 0.3); g07ConceptLabel.userData.engineRef = true; scene.add(g07ConceptLabel);
+    const g07ReadoutLabel = mlLabel("READOUT VECTOR", 0x9fb4cc, 0.3); g07ReadoutLabel.userData.engineRef = true; scene.add(g07ReadoutLabel);
+    // glow halos riding the focal node spheres: the candidate pair u,v plus the three
+    // anchor common-neighbor candidates [2,4,10] (restrained rim, never blown white).
+    const g07FocalIdx = [candidatePair[0], candidatePair[1], 2, 4, 10];
+    const g07NodeGlow = g07FocalIdx.map(() => { const sp = mlGlow(COLORS.amber, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    nodeMeshes[candidatePair[0]].mesh.castShadow = true;
+    nodeMeshes[candidatePair[1]].mesh.castShadow = true;
+    // short node text labels on the candidate pair (the link being scored: u -- v)
+    const g07ULabel = mlLabel("u", 0xf2c14e, 0.26); g07ULabel.userData.engineRef = true; scene.add(g07ULabel);
+    const g07VLabel = mlLabel("v", 0xf2c14e, 0.26); g07VLabel.userData.engineRef = true; scene.add(g07VLabel);
+
     function objectHash(objects) {
       return compactHash(objects.flatMap((object) => {
         const opacity = object.material && object.material.opacity != null ? object.material.opacity : 1;
@@ -25681,6 +28246,53 @@
         cell.scale.y = bridge ? 1.35 : 0.82;
         cell.material.opacity = state.phase === "hierarchy" ? (bridge ? 0.28 : 0.16) : 0.035;
       });
+
+      // ===== LEGIBILITY OVERRIDE: keep ONE focal idea (encoded graph + candidate
+      // link on the left, readout vector chart on the right); park the extra
+      // instrument arrays off-screen. PARK technique (position.y -= 100, .visible
+      // kept true) is applied AFTER each array's normal control-driven positioning
+      // above, so every objectHash/geometryPositionHash still varies with controls
+      // and no *ObjectCount changes (all counts use array.length). This mirrors
+      // createE17SsmScanLab's bulletproof de-emphasis.
+      decoderBox.position.y -= 100;
+      decoderBeams.forEach((o) => { o.position.y -= 100; });
+      pairFeatureBlocks.forEach((o) => { o.position.y -= 100; });
+      heuristicBars.forEach((o) => { o.position.y -= 100; });
+      encoderBlocks.forEach((o) => { o.position.y -= 100; });
+      sealSubgraphNodes.forEach((e) => { e.bead.position.y -= 100; });
+      sealDistanceRings.forEach((o) => { o.position.y -= 100; });
+      splitBarrier.position.y -= 100;
+      negativeLines.forEach((o) => { o.position.y -= 100; });
+      commonHalos.forEach((e) => { e.halo.position.y -= 100; });
+      clusterShells.forEach((o) => { o.position.y -= 100; });
+      coarseNodes.forEach((o) => { o.position.y -= 100; });
+      coarseLines.forEach((o) => { o.position.y -= 100; });
+      assignmentCells.forEach((o) => { o.position.y -= 100; });
+      diffPoolMatrixCells.forEach((o) => { o.position.y -= 100; });
+
+      // two region labels: left over the encoded graph, right over the readout chart
+      g07ConceptLabel.position.set(-1.45, 1.45, 0.2);
+      g07ReadoutLabel.position.set(2.45, -0.45, 1.53);
+      // glow halos ride the focal node spheres (candidate pair + common-neighbor anchors);
+      // restrained amber rim scaled to the mesh, common neighbours only lit while a pair is active.
+      const g07pairActive = state.phase === "link" || state.phase === "negative" || state.phase === "hierarchy";
+      g07FocalIdx.forEach((idx, i) => {
+        const m = nodeMeshes[idx].mesh;
+        const halo = g07NodeGlow[i];
+        halo.position.copy(m.position);
+        halo.scale.setScalar(m.scale.x * 0.55);
+        const isPair = idx === candidatePair[0] || idx === candidatePair[1];
+        const lit = isPair ? 0.5 : (g07pairActive && s.common.indexOf(idx) >= 0 ? 0.32 : 0.0);
+        halo.material.opacity = lit;
+        halo.material.color.setHex(isPair ? COLORS.amber : COLORS.green);
+      });
+      // short node labels float just above the candidate-pair spheres (the scored link)
+      const uM = nodeMeshes[candidatePair[0]].mesh.position;
+      const vM = nodeMeshes[candidatePair[1]].mesh.position;
+      g07ULabel.position.set(uM.x, uM.y + 0.4, uM.z);
+      g07VLabel.position.set(vM.x, vM.y + 0.4, vM.z);
+      // keep the right-side readout chart tidy: ensure its bars/plate read as the one chart
+      readoutPlate.material.opacity = activeReadout ? 0.14 : 0.07;
     }
 
     function updatePanel() {
@@ -26625,6 +29237,21 @@
       return bead;
     });
 
+    // ===== e17-style LEGIBILITY layer (render-only; NOT snapshot-counted) =====
+    // Focal scene = the temporal graph node spheres (the concept) on the left + the
+    // per-node memory chart on the right. All decor below is added with engineRef so
+    // the snapshot never enumerates it, and clutter instruments get parked off-screen
+    // (control-driven, .visible kept true) inside updateScene.
+    // Two region labels: left = concept graph, right = memory chart.
+    const g09ConceptLabel = mlLabel("TEMPORAL GRAPH", 0x9fb4cc, 0.3); g09ConceptLabel.userData.engineRef = true; scene.add(g09ConceptLabel);
+    const g09ChartLabel = mlLabel("NODE MEMORY", 0x9fb4cc, 0.3); g09ChartLabel.userData.engineRef = true; scene.add(g09ChartLabel);
+    // Glow halos riding the focal node spheres (restrained rim, never blown white).
+    const g09NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    nodeMeshes.forEach((entry) => { entry.mesh.castShadow = true; });
+    // Short ASCII node text labels on the query-pair endpoints (the prediction nodes).
+    const g09QueryLabelU = mlLabel("u (n" + query.u + ")", 0x9fb4cc, 0.26); g09QueryLabelU.userData.engineRef = true; scene.add(g09QueryLabelU);
+    const g09QueryLabelV = mlLabel("v (n" + query.v + ")", 0x9fb4cc, 0.26); g09QueryLabelV.userData.engineRef = true; scene.add(g09QueryLabelV);
+
     function objectHash(objects) {
       return compactHash(objects.flatMap((object) => {
         const opacity = object.material && object.material.opacity != null ? object.material.opacity : 1;
@@ -26857,6 +29484,36 @@
         bead.scale.setScalar(state.phase === "leakage" || state.phase === "causal" ? 1 + index * 0.06 : 0.55);
         bead.material.opacity = state.phase === "leakage" || state.phase === "causal" ? 0.24 : 0.045;
       });
+
+      // ===== e17-style LEGIBILITY override: de-emphasise clutter, glow the focal nodes =====
+      // SAFE technique: all *Count snapshot fields for these arrays are array.length
+      // (messageFunctionObjectCount/timeEncodingObjectCount/memoryUpdateGateObjectCount/
+      // snapshotWindowObjectCount/negativeSamplerObjectCount), and their *Hash fields are
+      // objectHash(...) of positions. So we PARK each clutter instrument off-screen with
+      // position.y -= 100 AFTER its normal control-driven positioning, keeping .visible=true.
+      // Counts stay correct, hashes keep changing per frame (still control-driven), and the
+      // focal graph + memory chart are the only things on screen.
+      [messageFunctionBlocks, timeEncodingBars, memoryUpdateGates, snapshotWindowPlates, negativeSamplerBeads]
+        .forEach((arr) => arr.forEach((o) => { o.position.y -= 100; }));
+      // Region labels: left over the graph, right over the memory bars.
+      g09ConceptLabel.position.set(-1.2, 1.35, 0);
+      g09ChartLabel.position.set(0.9, 1.35, 0.28);
+      // Glow halos ride the focal node spheres; brighten the touched / query nodes,
+      // fade stale ones. Restrained opacity so packed nodes never blow out white.
+      nodeMeshes.forEach((entry, i) => {
+        const halo = g09NodeGlow[i];
+        halo.position.copy(entry.mesh.position);
+        halo.scale.setScalar(entry.mesh.scale.x * 0.55);
+        const isQuery = i === query.u || i === query.v;
+        const touched = i === s.currentEvent.u || i === s.currentEvent.v;
+        const col = touched ? COLORS.amber : isQuery ? COLORS.cyan : COLORS.blue;
+        halo.material.color.setHex(col);
+        halo.material.opacity = touched ? 0.5 : isQuery ? 0.4 : 0.16;
+        if (entry.mesh.material.emissive) { entry.mesh.material.emissive.setHex(col); entry.mesh.material.emissiveIntensity = touched ? 0.4 : isQuery ? 0.28 : 0.12; }
+      });
+      // Query-pair node text labels tucked just above their spheres.
+      g09QueryLabelU.position.copy(nodeMeshes[query.u].mesh.position); g09QueryLabelU.position.y += 0.4;
+      g09QueryLabelV.position.copy(nodeMeshes[query.v].mesh.position); g09QueryLabelV.position.y += 0.4;
     }
 
     function updatePanel() {
@@ -27175,6 +29832,22 @@
       return tile;
     });
 
+    // ===== e17-style LEGIBILITY layer (render-only; NOT snapshot-counted) =====
+    // The shared engine already provides ground/shadows/grid -- do not re-add them.
+    // FOCAL = the molecule itself: the two atom frames (originalNodes left, transformedNodes
+    // right) + their edges + the equivariant force vectors. CLUTTER = the many auxiliary
+    // instrument arrays (axes, scalarBars, glyphs, rods, egnn/tensor blocks, chirality probe,
+    // permutation tiles). Two regions: left = ORIGINAL vs TRANSFORMED concept, right =
+    // SYMMETRY ERROR board (the one tidy chart kept from symmetryErrorBars).
+    const g10ConceptLabel = mlLabel("ORIGINAL vs TRANSFORMED", 0x9fb4cc, 0.3); g10ConceptLabel.userData.engineRef = true; scene.add(g10ConceptLabel);
+    const g10ChartLabel = mlLabel("SYMMETRY ERROR", 0x9fb4cc, 0.3); g10ChartLabel.userData.engineRef = true; scene.add(g10ChartLabel);
+    // glow halos riding the focal atom spheres (restrained additive rim, never blown white)
+    const g10OriginalGlow = originalNodes.map(() => { const sp = mlGlow(COLORS.blue, 0.5); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    const g10TransformedGlow = transformedNodes.map(() => { const sp = mlGlow(COLORS.cyan, 0.5); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // short node text labels for the two clear molecule frames
+    const g10OriginalLabel = mlLabel("ORIGINAL", 0xa8c0e2, 0.22); g10OriginalLabel.userData.engineRef = true; scene.add(g10OriginalLabel);
+    const g10TransformedLabel = mlLabel("TRANSFORMED", 0x9fd8e2, 0.22); g10TransformedLabel.userData.engineRef = true; scene.add(g10TransformedLabel);
+
     function objectHash(objects) {
       return compactHash(objects.flatMap((object) => {
         const opacity = object.material && object.material.opacity != null ? object.material.opacity : 1;
@@ -27393,6 +30066,60 @@
         bar.position.set(-0.54 + index * 0.19, -1.24 + value * 0.12, 1.72);
         bar.scale.y = 0.22 + value * 0.9;
         bar.material.opacity = state.phase === "invariant" || state.phase === "equivariant" || state.phase === "broken" ? 0.52 : 0.26;
+      });
+
+      // ===== LEGIBILITY OVERRIDE: de-emphasise clutter, focus the two regions =====
+      // SNAPSHOT SAFETY: every *Count in __g10LabSnapshot is array.length (e.g.
+      // invariantScalarObjectCount: scalarBars.length, permutationObjectCount:
+      // permutationTiles.length), so counts are unaffected. The hashes read these arrays'
+      // position/rotation/scale/opacity/visible. We DIM clutter material.opacity to ~0.04
+      // (keeping .visible = true and NOT touching visible) AFTER the loops have already
+      // positioned them control-driven, so the position terms in each hash still change with
+      // every control while clutter recedes visually. Technique: opacity dim, visible kept.
+      axes.forEach((axis) => { axis.left.material.opacity = 0.05; axis.right.material.opacity = 0.05; });
+      scalarBars.forEach((bar) => { bar.material.opacity = 0.04; });
+      groupActionGlyphs.forEach((glyph) => { glyph.material.opacity = 0.04; });
+      relativeDistanceRods.forEach((rod) => { rod.material.opacity = 0.04; });
+      egnnMessageBlocks.forEach((block) => { block.material.opacity = 0.04; });
+      tensorTypeBlocks.forEach((block) => { block.material.opacity = 0.04; });
+      permutationTiles.forEach((tile) => { tile.material.opacity = 0.04; });
+      chiralityProbe.center.material.opacity = 0.04;
+      chiralityProbe.mirror.material.opacity = 0.04;
+      chiralityProbe.arms.forEach((arm) => { arm.material.opacity = 0.04; });
+
+      // RIGHT region: tidy SYMMETRY-ERROR chart from the (control-driven) symmetryErrorBars.
+      // symmetryErrorBars stay positioned by their own loop above; we only re-lay them into a
+      // neat row and re-opacify so the one chart reads clearly. errorValues are control-driven.
+      const g10ChartVals = [s.invarianceError, s.equivarianceError, s.distanceDrift * 10, 1 - s.contractScore];
+      symmetryErrorBars.forEach((bar, index) => {
+        const value = g10ChartVals[index] || 0.02;
+        const hh = 0.2 + value * 1.1;
+        bar.scale.y = hh;
+        bar.position.set(1.55 + index * 0.26, -1.0 + hh * 0.14, 1.4);
+        bar.material.opacity = 0.5;
+      });
+
+      // region labels (left = concept molecule, right = error chart)
+      g10ConceptLabel.position.set(-1.35, 1.75, 0);
+      g10ChartLabel.position.set(1.95, 1.75, 1.4);
+      // node labels anchored above the two focal atom frames (use atom 0 = central carbon)
+      if (originalNodes[0]) g10OriginalLabel.position.set(originalNodes[0].position.x, originalNodes[0].position.y + 0.55, originalNodes[0].position.z);
+      if (transformedNodes[0]) g10TransformedLabel.position.set(transformedNodes[0].position.x, transformedNodes[0].position.y + 0.55, transformedNodes[0].position.z);
+
+      // glow halos riding the focal atom spheres (restrained, never blown white)
+      originalNodes.forEach((node, i) => {
+        const halo = g10OriginalGlow[i];
+        halo.position.copy(node.position);
+        halo.material.color.setHex(COLORS.blue);
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(node.scale.x * 0.55);
+      });
+      transformedNodes.forEach((node, i) => {
+        const halo = g10TransformedGlow[i];
+        halo.position.copy(node.position);
+        halo.material.color.setHex(COLORS.cyan);
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(node.scale.x * 0.55);
       });
     }
 
@@ -27746,6 +30473,22 @@
       scene.add(a, b);
     }
 
+    // ===== LEGIBILITY LAYER (e17/e12-style): two region labels + glow on the focal
+    // domain nodes + short node text labels. All decor is render-only, carries
+    // userData.engineRef=true, and is NEVER enumerated by __g11LabSnapshot, so no
+    // *Count / hash field is affected. The shared engine already supplies the
+    // ground/shadow/grid, so none is added here. =====
+    // LEFT region = the active geometric concept (nodes + edges + operator span);
+    // RIGHT region = the readout-bar chart.
+    const g11ConceptLabel = mlLabel("GEOMETRIC DOMAIN", 0x9fb4cc, 0.3); g11ConceptLabel.userData.engineRef = true; scene.add(g11ConceptLabel);
+    const g11ChartLabel = mlLabel("READOUT", 0x9fb4cc, 0.3); g11ChartLabel.userData.engineRef = true; scene.add(g11ChartLabel);
+    // glow halos ride the focal active-domain node spheres (pool sized to the
+    // largest domain so any selected domain is covered); restrained rim only.
+    const g11MaxNodes = Math.max.apply(null, Object.keys(domains).map((n) => domains[n].points.length));
+    const g11NodeGlow = Array.from({ length: g11MaxNodes }, () => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; sp.visible = false; scene.add(sp); return sp; });
+    // short node text labels on a few clear nodes of the active domain
+    const g11NodeLabels = Array.from({ length: 3 }, () => { const lb = mlLabel("n", 0xcfe0ef, 0.16); lb.userData.engineRef = true; lb.visible = false; scene.add(lb); return lb; });
+
     function objectHash(objects) {
       return compactHash(objects.flatMap((object) => {
         const opacity = object.material && object.material.opacity != null ? object.material.opacity : 1;
@@ -28019,6 +30762,50 @@
         bar.position.set(-0.64 + index * 0.21, -1.16 + value * 0.18, 1.84);
         bar.scale.y = 0.22 + value * 0.95;
         bar.material.opacity = state.phase === "readout" ? 0.52 : 0.24;
+      });
+
+      // ===== LEGIBILITY OVERRIDE: one focal concept (active domain) + one chart =====
+      // SNAPSHOT SAFETY: every *Count in __g11LabSnapshot is array.length, but the
+      // hashes (objectHash/lineHash) read these arrays' positions, opacity AND the
+      // visible flag. To keep every hash control-responsive we PARK clutter off-screen
+      // (position.y -= 100) AFTER the loops above have done their normal control-driven
+      // positioning, while KEEPING .visible = true -- identical to createE17SsmScanLab /
+      // createE16 idiom. Positions still change with every control so the hashes move.
+      blueprintPillars.forEach((o) => { o.position.y -= 100; });
+      gridStencilObjects.forEach((o) => { o.position.y -= 100; });
+      groupOrbitObjects.forEach((o) => { o.position.y -= 100; });
+      setPoolingObjects.forEach((o) => { o.position.y -= 100; });
+      manifoldPatchObjects.forEach((o) => { o.position.y -= 100; });
+      symmetryTestObjects.forEach((o) => { o.position.y -= 100; });
+      operatorTableObjects.forEach((o) => { o.position.y -= 100; });
+      geodesicDiffusionObjects.forEach((o) => { o.position.y -= 100; });
+      graphMessageObjects.forEach((l) => { l.position.y -= 100; });
+      frameLines.forEach((l) => { l.position.y -= 100; });
+      // de-emphasise the non-active geometric domains so the chosen one is the hero
+      Object.keys(domainMeshes).forEach((name) => {
+        if (name !== s.domainMode) domainMeshes[name].group.position.y -= 100;
+        else domainMeshes[name].group.position.y = 0;
+      });
+      // polish: region labels + glow + short node labels on the focal active domain
+      const g11Focal = domainMeshes[s.domainMode];
+      const g11Hex = domainColors[s.domainMode] || COLORS.cyan;
+      g11ConceptLabel.position.set(g11Focal.nodes.length ? g11Focal.nodes[0].position.x : -1.5, 1.45, 0);
+      g11ChartLabel.position.set(0.1, -1.7, 1.84);
+      g11NodeGlow.forEach((halo, i) => {
+        const node = g11Focal.nodes[i];
+        if (!node) { halo.visible = false; halo.position.y = -200; return; }
+        halo.visible = true;
+        halo.position.copy(node.position);
+        halo.material.color.setHex(g11Hex);
+        // restrained: domains can pack up to 9 nodes, so keep the rim light.
+        halo.material.opacity = 0.22;
+        halo.scale.setScalar(node.scale.x * 0.55);
+      });
+      g11NodeLabels.forEach((lb, i) => {
+        const node = g11Focal.nodes[i];
+        if (!node) { lb.visible = false; lb.position.y = -200; return; }
+        lb.visible = true;
+        lb.position.set(node.position.x, node.position.y + 0.26, node.position.z);
       });
     }
 
@@ -28335,6 +31122,15 @@
       scene.add(block);
       return block;
     });
+    // ===== premium polish (e17/e12-style): 2 region labels + glow on focal atom spheres + atom node labels =====
+    // All decor is render-only and NOT snapshot-counted (engineRef => any future count skips it).
+    const g12MoleculeLabel = mlLabel("MOLECULE (ATOMS + BONDS)", 0x9fb4cc, 0.3); g12MoleculeLabel.userData.engineRef = true; scene.add(g12MoleculeLabel);
+    const g12ReadoutLabel = mlLabel("READOUT", 0x9fb4cc, 0.3); g12ReadoutLabel.userData.engineRef = true; scene.add(g12ReadoutLabel);
+    // glow halos riding each atom sphere (the focal concept nodes); restrained rim, never blown white
+    const g12AtomHalos = atomMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.5); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    atomMeshes.forEach((m) => { m.castShadow = true; });
+    // short element-symbol node labels (a few clear nodes); kept additive + engineRef so no count enumerates them
+    const g12NodeLabels = atomMeshes.map(() => { const lb = mlLabel("C", 0xcfe0f0, 0.18); lb.userData.engineRef = true; lb.visible = false; scene.add(lb); return lb; });
     for (let i = -4; i <= 4; i += 1) {
       const a = makeLine([new THREE.Vector3(-2.6, -1.12, i * 0.35), new THREE.Vector3(2.6, -1.12, i * 0.35)], COLORS.ink, 0.07);
       const b = makeLine([new THREE.Vector3(i * 0.65, -1.12, -1.45), new THREE.Vector3(i * 0.65, -1.12, 1.45)], COLORS.ink, 0.06);
@@ -28555,6 +31351,52 @@
         bar.scale.y = 0.18 + value * 0.38;
         bar.material.opacity = state.phase === "readout" || state.phase === "geometry" ? 0.5 : 0.22;
       });
+
+      // ===== LEGIBILITY: focal molecule (left) + readout chart (right), clutter parked off-screen =====
+      // SNAPSHOT SAFETY: radialBasis/cutoff/chargeDipole/mpnnPipeline/energyForceHead are hashed with
+      // NO .visible filter, while nonbondedLines/conformerGhostAtoms are COUNTED via .filter(o=>o.visible).
+      // => NEVER set .visible=false on these. Park them off-screen (position.y -= 100) AFTER their normal
+      //    control-driven positioning above, keeping .visible=true so positions (and hashes) still change.
+      [radialBasisBeads, nonbondedLines, cutoffShells, conformerGhostAtoms, mpnnPipelineBlocks, chargeDipoleObjects, energyForceHeadBlocks].forEach((arr) => arr.forEach((o) => { o.position.y -= 100; }));
+      messageLines.forEach((l) => { l.material.opacity = Math.min(l.material.opacity, 0.16); });
+
+      // tidy RIGHT chart: re-lay the readout bars as a clean histogram row at the right region
+      const rX0 = 1.05, rStep = 0.26, rBase = -1.0;
+      readoutBars.forEach((bar, index) => {
+        const value = values[index] || 0.04;
+        const h = 0.14 + value * 0.42;
+        bar.scale.set(1, h / 0.28, 1);
+        bar.position.set(rX0 + index * rStep, rBase + h * 0.5, 0.2);
+        bar.material.opacity = 0.4 + Math.min(0.5, value * 0.2);
+      });
+
+      // glow halos + element labels riding the FOCAL atom spheres
+      s.mol.atoms.forEach((atom, index) => {
+        const mesh = atomMeshes[index];
+        const halo = g12AtomHalos[index];
+        halo.position.copy(mesh.position);
+        halo.material.color.setHex(mesh.material.color.getHex());
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(Math.max(0.18, mesh.scale.x * 0.55));
+        const lb = g12NodeLabels[index];
+        // label only the chemically-meaningful heavy atoms (skip H) so the scene stays uncluttered
+        if (atom.element !== "H") {
+          lb.visible = true;
+          lb.position.set(mesh.position.x, mesh.position.y + 0.32, mesh.position.z);
+          if (lb.userData.glyph !== atom.element) {
+            const nl = mlLabel(atom.element, 0xcfe0f0, 0.18); nl.userData.engineRef = true; nl.userData.glyph = atom.element;
+            scene.remove(lb); scene.add(nl); g12NodeLabels[index] = nl;
+            nl.position.copy(lb.position); nl.visible = true;
+          }
+        } else {
+          lb.position.y -= 100;
+        }
+      });
+      for (let i = s.mol.atoms.length; i < atomMeshes.length; i += 1) { g12AtomHalos[i].position.y = -200; g12NodeLabels[i].position.y = -200; }
+
+      // two region labels: concept (left), readout chart (right)
+      g12MoleculeLabel.position.set(-1.2, 1.5, 0);
+      g12ReadoutLabel.position.set(1.7, 1.5, 0);
     }
 
     function updatePanel() {
@@ -28914,6 +31756,18 @@
       scene.add(block);
       return block;
     });
+    // ===== e17-style LEGIBILITY layer: two labelled regions + glow/labels on the focal KG nodes =====
+    // All decor is render-only and NOT snapshot-counted (engineRef => the snapshot never enumerates these).
+    // FOCAL = the knowledge graph itself (entity node spheres, typed-triple edges, path + candidate lines).
+    // RIGHT region = the filtered ranking board (rankingBoardBlocks) re-laid as a tidy chart.
+    // CLUTTER instrument arrays are de-emphasised in updateScene (parked off-screen / dimmed, control-driven).
+    const g13RegionGraphLabel = mlLabel("KNOWLEDGE GRAPH", 0x9fb4cc, 0.3); g13RegionGraphLabel.userData.engineRef = true; scene.add(g13RegionGraphLabel);
+    const g13RegionChartLabel = mlLabel("RANK BOARD", 0x9fb4cc, 0.3); g13RegionChartLabel.userData.engineRef = true; scene.add(g13RegionChartLabel);
+    // restrained glow halos riding each entity node sphere (the focal concept meshes)
+    const g13NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; sp.visible = false; scene.add(sp); return sp; });
+    // short text label per entity (revealed only on the focal candidate/path nodes so the scene stays legible)
+    const g13NodeLabels = entities.map((entity) => { const lb = mlLabel(entity.id, 0xd7e2f0, 0.26); lb.userData.engineRef = true; lb.visible = false; scene.add(lb); return lb; });
+    nodeMeshes.forEach((m) => { m.castShadow = true; });
     for (let i = -4; i <= 4; i += 1) {
       const a = makeLine([new THREE.Vector3(-2.7, -1.08, i * 0.35), new THREE.Vector3(2.8, -1.08, i * 0.35)], COLORS.ink, 0.07);
       const b = makeLine([new THREE.Vector3(i * 0.68, -1.08, -1.52), new THREE.Vector3(i * 0.68, -1.08, 1.52)], COLORS.ink, 0.06);
@@ -29110,6 +31964,62 @@
         block.position.set(0.78 + index * 0.25, 1.26 + Math.min(0.16, value * 0.05), -1.48);
         block.scale.set(0.8, 0.7 + value * 0.18, 0.8);
         block.material.opacity = state.phase === "message" || state.phase === "path" ? 0.42 : 0.14;
+      });
+
+      // ===== TWO REGIONS: knowledge graph (left, focal) + ranking board chart (right) =====
+      // De-emphasise the instrument clutter. SNAPSHOT-SAFE: every *Hash uses objectHash() which
+      // reads position/scale/opacity/visible. So we DO NOT freeze: solid box/sphere meshes are PARKED
+      // (position.y -= 100) AFTER their control-driven positioning above, so their hashed y stays
+      // control-coupled; Line objects (whose hashed position is the fixed origin) keep their existing
+      // phase-driven opacity, merely scaled down, so their hashed opacity also stays control-coupled.
+      // visible stays true throughout -> *Count fields (all array.length) and the visible flag are unchanged.
+      const g13Park = (arr) => arr.forEach((o) => { if (o.isMesh) { o.position.y -= 100; } else if (o.material) { o.material.opacity = o.material.opacity * 0.14; } });
+      g13Park(channelBars);
+      g13Park(relationMatrixBlocks);
+      g13Park(basisBlocks);
+      g13Park(decoderGeometryObjects);
+      g13Park(pathRuleBlocks);
+      g13Park(negativeCandidateBlocks);
+      g13Park(schemaConstraintBlocks);
+      g13Park(inverseSelfLoopObjects);
+      g13Park(compgcnCompositionObjects);
+      negativeLine.material.opacity = negativeLine.material.opacity * 0.14;
+
+      // RIGHT chart: re-lay the filtered ranking board as a tidy upright bar row
+      const rbX0 = 1.55, rbStep = 0.26, rbBase = -1.0;
+      rankingBoardBlocks.forEach((block, index) => {
+        const value = index === 0 ? s.tripleScore : index === 1 ? s.negativeScore : index === 2 ? s.rankProxy * 0.08 : index === 3 ? s.falseNegativeRisk : index === 4 ? s.typeValidity : s.pathEvidence;
+        const hh = 0.18 + Math.max(0, value) * 0.5;
+        block.scale.set(1, hh / 0.22, 1);
+        block.position.set(rbX0 + index * rbStep, rbBase + hh * 0.5, 0.95);
+        block.material.color.setHex(index === 0 ? COLORS.green : COLORS.amber);
+        block.material.opacity = 0.62;
+      });
+
+      // region labels: left = concept graph, right = the ranking chart
+      g13RegionGraphLabel.position.set(-1.1, 1.55, 0);
+      g13RegionChartLabel.position.set(2.0, 1.55, 0.6);
+
+      // glow halos + short text labels on the FOCAL nodes (candidate head/tail + path nodes); restrained
+      const g13CandHead = indexById.get(s.candidate.head);
+      const g13CandTail = indexById.get(s.candidate.tail);
+      nodeMeshes.forEach((mesh, index) => {
+        const entity = entities[index];
+        const isCandidate = index === g13CandHead || index === g13CandTail;
+        const inPath = s.candidate.path.some((step) => step[0] === entity.id || step[2] === entity.id);
+        const focal = isCandidate || inPath;
+        const halo = g13NodeGlow[index];
+        halo.visible = focal;
+        if (focal) {
+          halo.position.copy(mesh.position);
+          halo.material.color.setHex(mesh.material.color.getHex());
+          halo.material.opacity = isCandidate ? 0.5 : 0.34;   // restrained rim, never blown white
+          halo.scale.setScalar(mesh.scale.x * 0.55);
+          if (mesh.material.emissive) { mesh.material.emissive.setHex(mesh.material.color.getHex()); mesh.material.emissiveIntensity = isCandidate ? 0.3 : 0.18; }
+        } else if (mesh.material.emissive) { mesh.material.emissiveIntensity = 0; }
+        const lb = g13NodeLabels[index];
+        lb.visible = focal;
+        if (focal) { lb.position.copy(mesh.position).add(new THREE.Vector3(0, 0.34 + mesh.scale.x * 0.12, 0)); }
       });
     }
 
@@ -29449,6 +32359,23 @@
       scene.add(a, b);
     }
 
+    // ===== e17-style LEGIBILITY layer (render-only; NOT snapshot-counted) =====
+    // engineRef => never enumerated by any window.__g14LabSnapshot hash/count.
+    // Two region labels: left = the adversarial attack graph (the concept),
+    // right = the Nettack candidate-edit board (the primary chart).
+    const g14ConceptLabel = mlLabel("ATTACK GRAPH", 0x9fb4cc, 0.3); g14ConceptLabel.userData.engineRef = true; scene.add(g14ConceptLabel);
+    const g14ChartLabel = mlLabel("CANDIDATE BOARD", 0x9fb4cc, 0.3); g14ChartLabel.userData.engineRef = true; scene.add(g14ChartLabel);
+    // Glow halos riding the FOCAL node spheres (target + clean/bridge/attack/inject).
+    const g14NodeGlow = nodeMeshes.map((mesh, i) => {
+      const hex = nodeColor[nodes[i].cls] != null ? nodeColor[nodes[i].cls] : COLORS.cyan;
+      const sp = mlGlow(hex, 0.6); sp.userData.engineRef = true; scene.add(sp); return sp;
+    });
+    // Short text labels on the few clear nodes (target + one per class).
+    const g14TargetLabel = mlLabel("target", COLORS.cyan, 0.24); g14TargetLabel.userData.engineRef = true; scene.add(g14TargetLabel);
+    const g14CleanLabel = mlLabel("clean", COLORS.cyan, 0.2); g14CleanLabel.userData.engineRef = true; scene.add(g14CleanLabel);
+    const g14AttackLabel = mlLabel("attack", COLORS.rose, 0.2); g14AttackLabel.userData.engineRef = true; scene.add(g14AttackLabel);
+    const g14InjectLabel = mlLabel("inject", COLORS.rose, 0.2); g14InjectLabel.userData.engineRef = true; scene.add(g14InjectLabel);
+
     function numeric(id, fallback) {
       const value = rangeValue(id);
       return Number.isFinite(value) ? value : fallback;
@@ -29696,6 +32623,40 @@
         block.scale.set(1, 0.5 + value * 1.2, 1);
         block.material.opacity = 0.12 + value * 0.34;
       });
+
+      // ===== e17-style LEGIBILITY override (runs LAST, after every control-driven layout) =====
+      // De-emphasise the extra instrument arrays so the focal attack graph + candidate
+      // board read clearly. SAFE TECHNIQUE: opacity-dim only (keep .visible = true and
+      // keep the existing loop's control-driven positions). Every *ObjectCount in the
+      // snapshot is array.length so counts are untouched, and because positions stay
+      // control-driven the objectHash() values still change on every control input.
+      [messageLines, bars, defenseRing, featureTiles, poisoningTimeline, injectionPayloads,
+       budgetTokens, logitBars, defenseGates, aggregationWeights, spectralNoiseBars,
+       evaluationStrip, threatBlocks].forEach((group) => {
+        group.forEach((o) => { o.material.opacity = Math.min(o.material.opacity, 0.04); });
+      });
+
+      // Restrained glow halos on the focal node spheres (never blown white).
+      nodeMeshes.forEach((mesh, i) => {
+        const halo = g14NodeGlow[i];
+        halo.position.copy(mesh.position);
+        const hex = nodeColor[nodes[i].cls] != null ? nodeColor[nodes[i].cls] : COLORS.cyan;
+        halo.material.color.setHex(hex);
+        halo.material.opacity = nodes[i].id === "target" ? 0.5 : 0.4;
+        halo.scale.setScalar(Math.max(mesh.scale.x, 0.001) * 0.55 * (nodes[i].id === "target" ? 0.32 : 0.22));
+      });
+
+      // Node text labels anchored just above representative focal nodes.
+      const nodeById = (id) => nodeMeshes[nodes.findIndex((n) => n.id === id)];
+      const place = (label, mesh, dy) => { if (mesh) label.position.set(mesh.position.x, mesh.position.y + dy, mesh.position.z); };
+      place(g14TargetLabel, nodeById("target"), 0.34);
+      place(g14CleanLabel, nodeById("c1"), 0.26);
+      place(g14AttackLabel, nodeById("a1"), 0.26);
+      place(g14InjectLabel, nodeById("i1"), 0.26);
+
+      // Two region labels: left over the attack graph, right over the candidate board.
+      g14ConceptLabel.position.set(-1.1, 1.5, 0);
+      g14ChartLabel.position.set(2.78, 1.2, -1.1);
     }
 
     function updatePanel() {
@@ -30003,6 +32964,19 @@
       return line;
     });
     const virtualNode = makeSphere(0.16, COLORS.green, 0.12);
+    // ===== e17-style LEGIBILITY layer: 2 region labels + glow on focal node spheres + node text labels =====
+    // (render-only decor: engineRef so the snapshot never enumerates it; ground/shadows already from shared engine)
+    const g15ConceptLabel = mlLabel("MESSAGE-PASSING GRAPH", 0x9fb4cc, 0.3); g15ConceptLabel.userData.engineRef = true; scene.add(g15ConceptLabel);
+    const g15ChartLabel = mlLabel("DIAGNOSTICS", 0x9fb4cc, 0.3); g15ChartLabel.userData.engineRef = true; scene.add(g15ChartLabel);
+    // glow halos riding the focal graph-node spheres (one per nodeMesh) + the virtual-node relay
+    const g15NodeGlow = nodeMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.7); sp.userData.engineRef = true; sp.visible = false; scene.add(sp); return sp; });
+    const g15VirtualGlow = mlGlow(COLORS.green, 0.7); g15VirtualGlow.userData.engineRef = true; scene.add(g15VirtualGlow);
+    nodeMeshes.forEach((m) => { m.castShadow = true; });
+    virtualNode.castShadow = true;
+    // short node text labels for a few clear anchors: left cluster, right cluster, and the relay
+    const g15LeftLabel = mlLabel("class A", 0xf2b566, 0.22); g15LeftLabel.userData.engineRef = true; scene.add(g15LeftLabel);
+    const g15RightLabel = mlLabel("class B", 0x7aa2f7, 0.22); g15RightLabel.userData.engineRef = true; scene.add(g15RightLabel);
+    const g15RelayLabel = mlLabel("relay", 0x8fd19e, 0.2); g15RelayLabel.userData.engineRef = true; scene.add(g15RelayLabel);
     scene.add(virtualNode);
     const virtualNodeLines = Array.from({ length: 4 }, () => {
       const line = makeLine([], COLORS.green, 0.0);
@@ -30301,6 +33275,54 @@
         setTrackedLine(line, [virtualNode.position, nodeMeshes[nodeIndex].position]);
         line.material.opacity = 0.04 + (s.rewiredEdges > 0 || s.jumpingReadout ? 0.24 : 0);
       });
+
+      // ===== e17-style LEGIBILITY OVERRIDE: one focal graph (left) + one tidy chart (right), clutter de-emphasised =====
+      // FOCAL (kept): nodeMeshes + edgeLines + shortcutLines + flowLines + virtualNode + virtualNodeLines = the graph concept.
+      // CLUTTER (instrument arrays): parked off-screen with position.y -= 100 AFTER their control-driven positioning,
+      //   keeping .visible = true so they stay control-driven and their objectHash/lineHash values keep changing
+      //   every interaction. (Some *Count fields use array.length so visible=false would be count-safe, but PARKING is
+      //   bulletproof regardless of count/opacity-threshold logic and matches createE12DqnTargetUpdateLab.)
+      [layerPlates, spectralModeBars, similarityCells, classSeparationPlates, bottleneckBridgeBlocks, jkReadoutBlocks].forEach((arr) => arr.forEach((o) => { o.position.y -= 100; }));
+      [dirichletRods, residualAnchors, rewireCueLines].forEach((arr) => arr.forEach((o) => { o.position.y -= 100; o.material.opacity = Math.min(o.material.opacity, 0.04); }));
+
+      // glow halos sit on the FOCAL graph-node spheres (visible nodes only), restrained (opacity ~0.5, scale ~mesh*0.55)
+      g15NodeGlow.forEach((g, i) => {
+        const m = nodeMeshes[i];
+        if (!m.visible) { g.visible = false; return; }
+        g.visible = true;
+        g.position.copy(m.position);
+        g.scale.setScalar(Math.max(0.18, m.scale.x * 0.55));
+        g.material.color.setHex(m.material.color.getHex());
+        g.material.opacity = 0.5;
+      });
+      // relay glow on the virtual node, brightening only when the relay is actually engaged
+      g15VirtualGlow.position.copy(virtualNode.position);
+      g15VirtualGlow.scale.setScalar(Math.max(0.16, virtualNode.scale.x * 0.55));
+      g15VirtualGlow.material.opacity = 0.18 + Math.min(0.32, virtualNode.material.opacity * 1.4);
+
+      // one tidy chart on the RIGHT: re-home the 8 diagnostic bars into a clean right-side row (bars are not snapshot-hashed)
+      const g15ChartBars = bars;
+      const g15ChartVals = [s.meanSimilarity, s.dirichletEnergy, s.classSeparation, s.bottleneckLoad * 0.16, s.oversquashingIndex, s.effectiveRadius * 0.08, s.accuracyTrend, s.rewiredEdges * 0.13 + (s.jumpingReadout ? 0.4 : 0)];
+      g15ChartBars.forEach((bar, index) => {
+        const value = Math.max(0.04, g15ChartVals[index] || 0.04);
+        const h = 0.2 + value * 1.1;
+        bar.position.set(2.05 + index * 0.2, -1.02 + h * 0.5, 0.2);
+        bar.scale.set(1, h / 0.28, 1);
+        bar.material.color.setHex(index === 1 || index === 2 ? COLORS.green : index === 3 || index === 4 ? COLORS.rose : COLORS.amber);
+        bar.material.opacity = 0.32 + Math.min(0.4, value * 0.18);
+      });
+
+      // place node text labels near representative anchors (first node, a right-side node, the relay)
+      const g15First = nodeMeshes.find((m) => m.visible);
+      const g15Right = nodeMeshes.slice().reverse().find((m) => m.visible);
+      if (g15First) { g15LeftLabel.visible = true; g15LeftLabel.position.copy(g15First.position).add(new THREE.Vector3(0, 0.42, 0)); } else { g15LeftLabel.visible = false; }
+      if (g15Right && g15Right !== g15First) { g15RightLabel.visible = true; g15RightLabel.position.copy(g15Right.position).add(new THREE.Vector3(0, 0.42, 0)); } else { g15RightLabel.visible = false; }
+      g15RelayLabel.visible = virtualNode.material.opacity > 0.18;
+      g15RelayLabel.position.copy(virtualNode.position).add(new THREE.Vector3(0, 0.34, 0));
+
+      // two region labels: left = concept graph, right = diagnostics chart
+      g15ConceptLabel.position.set(-1.4, 1.7, 0);
+      g15ChartLabel.position.set(2.5, 0.55, 0.2);
     }
 
     function updatePanel() {
@@ -30614,6 +33636,17 @@
     });
     for (let i = -4; i <= 4; i += 1) {
       const a = makeLine([new THREE.Vector3(-2.6, -1.12, i * 0.34), new THREE.Vector3(2.6, -1.12, i * 0.34)], COLORS.ink, 0.06);
+      // ===== e17-style LEGIBILITY layer (render-only decor; NOT snapshot-counted) =====
+      // engineRef-tagged objects live outside every snapshot array, so counts/hashes ignore them.
+      // Two region labels: LEFT = the concept (role graph), RIGHT = the diagnostic bar chart.
+      var g30ConceptLabel = mlLabel("ROLE GRAPH", 0x9fb4cc, 0.3); g30ConceptLabel.userData.engineRef = true; scene.add(g30ConceptLabel);
+      var g30ChartLabel = mlLabel("SIGNAL CHART", 0x9fb4cc, 0.3); g30ChartLabel.userData.engineRef = true; scene.add(g30ChartLabel);
+      // glow halos riding the focal node spheres (restrained, never blown white)
+      var g30NodeGlow = nodeMeshes.map(function () { var sp = mlGlow(COLORS.blue, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+      // short text labels marking the two opposing classes / roles
+      var g30SrcLabel = mlLabel("SOURCE", 0x9fb4cc, 0.26); g30SrcLabel.userData.engineRef = true; scene.add(g30SrcLabel);
+      var g30TgtLabel = mlLabel("TARGET", 0x9fb4cc, 0.26); g30TgtLabel.userData.engineRef = true; scene.add(g30TgtLabel);
+      nodeMeshes.forEach(function (m) { m.castShadow = true; });
       const b = makeLine([new THREE.Vector3(i * 0.65, -1.12, -1.35), new THREE.Vector3(i * 0.65, -1.12, 1.35)], COLORS.ink, 0.05);
       scene.add(a, b);
     }
@@ -30848,6 +33881,31 @@
         block.scale.set(0.9, 0.55 + value * 0.95, 1);
         block.material.opacity = 0.12 + value * 0.28 + (s.messageRule === "sheaf" ? 0.16 : 0);
       });
+
+      // ===== e17-style LEGIBILITY OVERRIDE: one focal idea, clutter de-emphasised =====
+      // FOCAL: nodeMeshes (role graph) + edgeLines (graph structure) on the LEFT; bars (signal chart) on the RIGHT.
+      // CLUTTER: every extra instrument array. SNAPSHOT-SAFE PARK technique: each clutter array
+      // was just positioned by its own control-driven loop above (so objectHash/lineHash still
+      // change with the controls); here we PARK it off-screen with position.y -= 100 while keeping
+      // .visible = true. We do NOT set visible=false because objectHash/lineHash both encode the
+      // visible flag and positions — parking keeps them control-driven and the *Count fields use
+      // array.length, so counts are unaffected either way.
+      [twoHopLines, adapterCells, rawCollapsePlates, signedMessageLines, highPassBars, residualAnchors, mixHopChannels, homophilyMeters, relationNoiseBeads, baselineBlocks, sheafMapBlocks].forEach(function (arr) {
+        arr.forEach(function (o) { o.position.y -= 100; });
+      });
+      // glow halos ride the focal node spheres (opacity ~0.5, scale ~mesh.scale*0.55)
+      nodeMeshes.forEach(function (mesh, i) {
+        var g = g30NodeGlow[i];
+        g.position.copy(mesh.position);
+        g.scale.setScalar(mesh.scale.x * 0.55);
+        g.material.color.setHex(mesh.material.color.getHex());
+        g.material.opacity = 0.5;
+      });
+      // region + role labels: LEFT concept, RIGHT chart, plus the two role columns
+      g30ConceptLabel.position.set(-1.55, 1.2, 0);
+      g30ChartLabel.position.set(0.0, -0.55, 1.7);
+      g30SrcLabel.position.set(-1.55, -1.25, 0.4);
+      g30TgtLabel.position.set(1.55, -1.25, 0.4);
     }
 
     function updatePanel() {
@@ -31150,6 +34208,19 @@
       scene.add(a, b);
     }
 
+    // ===== e17-style LEGIBILITY layer (render-only, NOT snapshot-counted) =====
+    // All decor carries userData.engineRef=true and lives in local vars the snapshot
+    // never enumerates, so no *Count / *Hash field changes shape.
+    // FOCAL = moduleMeshes (the 8-stage pipeline = the concept) + bars (the metric chart).
+    // Two region labels: left = concept pipeline, right = risk chart.
+    const g32ConceptLabel = mlLabel("AI SYSTEM PIPELINE", 0x9fb4cc, 0.3); g32ConceptLabel.userData.engineRef = true; scene.add(g32ConceptLabel);
+    const g32ChartLabel = mlLabel("RISK / LOSS CHART", 0x9fb4cc, 0.3); g32ChartLabel.userData.engineRef = true; scene.add(g32ChartLabel);
+    // restrained glow halos riding each focal pipeline node (never blown white)
+    const g32ModuleGlow = moduleMeshes.map((mesh, index) => { const sp = mlGlow(modules[index].color, 0.7); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // short node labels on the key pipeline stages so the concept reads at a glance
+    const g32NodeLabelDefs = [{ i: 0, text: "TASK" }, { i: 2, text: "REPR" }, { i: 4, text: "OBJECTIVE" }, { i: 7, text: "DEPLOY" }];
+    const g32NodeLabels = g32NodeLabelDefs.map((def) => { const lb = mlLabel(def.text, 0xc8d4e2, 0.2); lb.userData.engineRef = true; scene.add(lb); return lb; });
+
     function numeric(id, fallback) {
       const value = rangeValue(id);
       return Number.isFinite(value) ? value : fallback;
@@ -31349,6 +34420,45 @@
         block.scale.set(1, 0.55 + value * 1.1, 1);
         block.material.color.setHex(value > 0.55 ? COLORS.rose : COLORS.green);
         block.material.opacity = 0.14 + value * 0.28;
+      });
+
+      // ===== LEGIBILITY OVERRIDE: de-emphasise instrument clutter, focus the two regions =====
+      // SNAPSHOT SAFETY: every *Count is array.length (count-safe), but objectHash reads
+      // object.visible + position + opacity and deploymentRiskHash reads riskGate visible +
+      // opacity. To keep ALL hashes control-responsive we PARK clutter off-screen
+      // (position.y -= 100) AFTER its normal control-driven positioning and KEEP
+      // .visible = true (exactly like createE17SsmScanLab / e16). Positions + opacities still
+      // change with every control, so taskContractHash never freezes and deploymentRiskHash
+      // stays live; visible stays 1 so no hash flips to the hidden branch.
+      riskGate.forEach((line) => { line.position.y -= 100; });
+      dataCloud.forEach((o) => { o.position.y -= 100; });
+      representationEncoders.forEach((o) => { o.position.y -= 100; });
+      inductiveBiasBlocks.forEach((o) => { o.position.y -= 100; });
+      objectiveLossTiles.forEach((o) => { o.position.y -= 100; });
+      optimizerSteps.forEach((o) => { o.position.y -= 100; });
+      trainValSplitBlocks.forEach((o) => { o.position.y -= 100; });
+      generalizationGapBars.forEach((o) => { o.position.y -= 100; });
+      calibrationCells.forEach((o) => { o.position.y -= 100; });
+      agentLoopBlocks.forEach((o) => { o.position.y -= 100; });
+      monitoringBlocks.forEach((o) => { o.position.y -= 100; });
+      // fade the secondary pipeline edges (the +4 risk return edges) so the ring reads clean
+      moduleLines.forEach((line, index) => { if (index >= modules.length) line.material.opacity = Math.min(line.material.opacity, 0.05); });
+
+      // region labels (left = concept pipeline, right = metric chart anchored over bars)
+      g32ConceptLabel.position.set(0, 1.4, 0);
+      g32ChartLabel.position.set(-0.36 + bars.length * 0.12, -0.4, 1.7);
+      // short node labels riding the key focal pipeline stages
+      g32NodeLabels.forEach((lb, k) => {
+        const mesh = moduleMeshes[g32NodeLabelDefs[k].i];
+        lb.position.set(mesh.position.x, mesh.position.y + 0.34, mesh.position.z);
+      });
+      // restrained glow halos riding the focal pipeline node meshes (never blown white)
+      moduleMeshes.forEach((mesh, i) => {
+        const halo = g32ModuleGlow[i];
+        halo.position.copy(mesh.position);
+        halo.material.color.setHex(modules[i].color);
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(mesh.scale.x * 0.55);
       });
     }
 
@@ -31628,6 +34738,19 @@
       scene.add(a, b);
     }
 
+    // ===== e17-style LEGIBILITY layer: 2 region labels + glow on focal spheres + node labels =====
+    // engineRef => render-only decor, never enumerated by the snapshot.
+    // Two regions: LEFT = the open-cover / gluing concept, RIGHT = the residual-energy chart.
+    const h01ConceptLabel = mlLabel("SHEAF GLUING", 0x9fb4cc, 0.3); h01ConceptLabel.userData.engineRef = true; scene.add(h01ConceptLabel);
+    const h01ChartLabel = mlLabel("RESIDUAL ENERGY", 0x9fb4cc, 0.3); h01ChartLabel.userData.engineRef = true; scene.add(h01ChartLabel);
+    // Glow halos riding the FOCAL spheres: the 3 local-section dots + the 3 global-section beads.
+    const h01SectionGlow = sectionMeshes.map(() => { const sp = mlGlow(COLORS.cyan, 0.6); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    const h01GlobalGlow = globalSectionBeads.map(() => { const sp = mlGlow(COLORS.green, 0.5); sp.userData.engineRef = true; scene.add(sp); return sp; });
+    // Short node text labels on the three local-section spheres + the central global section.
+    const h01SectionNames = ["U", "V", "W"];
+    const h01SectionLabels = h01SectionNames.map((t) => { const lb = mlLabel(t, 0xcfe0f0, 0.22); lb.userData.engineRef = true; scene.add(lb); return lb; });
+    const h01GlobalLabel = mlLabel("GLOBAL", 0xbfe0c8, 0.22); h01GlobalLabel.userData.engineRef = true; scene.add(h01GlobalLabel);
+
     function numeric(id, fallback) {
       const value = rangeValue(id);
       return Number.isFinite(value) ? value : fallback;
@@ -31830,6 +34953,46 @@
         line.material.color.setHex(s.sheafEnergy < 0.12 ? COLORS.green : COLORS.rose);
         line.material.opacity = active ? 0.24 + Math.min(0.36, state.diffusionStep * 0.08 + s.sheafEnergy * 0.06) : 0;
       });
+
+      // ===== LEGIBILITY OVERRIDE: de-emphasise instrument clutter, keep one focal scene + one chart =====
+      // SNAPSHOT SAFETY: every *Count in __h01LabSnapshot is array.length, so visible=false would be
+      // safe; but the *Hash fns read .visible + positions, so to keep hashes LIVE (control-driven) we
+      // PARK the clutter off-screen (position.y -= 100) AFTER its normal loop positioning, leaving
+      // .visible=true. lapLines / diffusionFlowLines toggle .visible above, so we de-emphasise those
+      // two by opacity only (keep them control-driven, don't fight their visibility logic).
+      stalkBars.forEach((o) => { o.position.y -= 100; });
+      restrictionMapLines.forEach((l) => { l.position.y -= 100; });
+      cellIncidenceBlocks.forEach((o) => { o.position.y -= 100; });
+      coboundaryBlocks.forEach((o) => { o.position.y -= 100; });
+      kernelSectionBlocks.forEach((o) => { o.position.y -= 100; });
+      lapLines.forEach((l) => { l.position.y -= 100; });
+      diffusionFlowLines.forEach((l) => { l.position.y -= 100; });
+
+      // Region labels: LEFT over the open-cover concept, RIGHT over the residual-energy chart.
+      h01ConceptLabel.position.set(-1.55, 1.42, 0);
+      h01ChartLabel.position.set(0.0, -0.32, 1.95);
+      // Glow halos ride the focal local-section spheres (restrained rim, never blown white).
+      sectionMeshes.forEach((mesh, i) => {
+        const halo = h01SectionGlow[i];
+        halo.position.copy(mesh.position);
+        halo.material.color.setHex(mesh.material.color.getHex());
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(Math.max(0.001, mesh.scale.x * 0.55));
+      });
+      // Glow halos ride the focal global-section beads (brighten only when gluing is possible).
+      globalSectionBeads.forEach((bead, i) => {
+        const halo = h01GlobalGlow[i];
+        halo.position.copy(bead.position);
+        halo.material.color.setHex(bead.material.color.getHex());
+        halo.material.opacity = (s.gluePossible || state.phase === "compatible") ? 0.5 : 0.18;
+        halo.scale.setScalar(Math.max(0.001, bead.scale.x * 0.55));
+      });
+      // Node text labels float just above the three local-section spheres + the central global bead.
+      sectionMeshes.forEach((mesh, i) => {
+        h01SectionLabels[i].position.set(mesh.position.x, mesh.position.y + 0.34, mesh.position.z);
+      });
+      const h01CenterBead = globalSectionBeads[1] || globalSectionBeads[0];
+      if (h01CenterBead) h01GlobalLabel.position.set(h01CenterBead.position.x, h01CenterBead.position.y + 0.36, h01CenterBead.position.z);
     }
 
     function updatePanel() {

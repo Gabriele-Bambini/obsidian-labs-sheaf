@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A09 Category Theory Basics</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a09-a10-canonical-clarity-v1">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a09" data-keywords="category theory objects arrows identity composition functor naturality poset monoid diagram">
@@ -87,7 +87,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=a09-a10-canonical-clarity-v1"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"a09","kind":"algebra","title":"A09 Category Theory Basics","modes":[{"value":"category","label":"Category laws"},{"value":"square","label":"Commuting square"},{"value":"functor","label":"Functor layer"},{"value":"naturality","label":"Naturality square"},{"value":"poset","label":"Poset category"},{"value":"monoid","label":"One-object monoid"},{"value":"contravariant","label":"Contravariant/sheaf"}],"parameters":[{"key":"objects","label":"objects","min":3,"max":5,"step":1,"value":4},{"key":"functor","label":"functor","min":0,"max":1,"step":0.05,"value":0.65},{"key":"naturality","label":"naturality gap","min":0,"max":1,"step":0.05,"value":0.18},{"key":"reversal","label":"arrow reversal","min":0,"max":1,"step":0.05,"value":0.25},{"key":"composition","label":"composition","min":0,"max":1,"step":0.05,"value":0.7}],"metrics":["Composition error","Functor law","Naturality gap","Arrow count"],"visual":{"kind":"category-diagram-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Naturality gap","formula":"F(g o f) = F(g) o F(f),  G(f) o eta_A = eta_B o F(f)","insight":"A09 makes categorical thinking visual: arrows compose, identities stay attached to objects, commuting squares compare routes, functors copy the whole diagram into a target layer, and naturality is a square whose two paths must agree."},"graph":{"nodes":[{"label":"objects","position":[-2.6,-1.3,-0.2],"group":0},{"label":"arrows","position":[-1.1,-0.8,0.4],"group":1},{"label":"composition","position":[0.1,-0.55,0.2],"group":2},{"label":"functor image","position":[1.4,-1,0.7],"group":3},{"label":"naturality square","position":[2.65,-0.7,-0.35],"group":4}],"edges":[[0,1,"hom set",1],[1,2,"compose",1],[2,3,"F preserves",1],[3,4,"eta comparison",1],[4,2,"commuting routes",1]]}});
     window.__a09LabSnapshot = () => window.__gLabSnapshot();

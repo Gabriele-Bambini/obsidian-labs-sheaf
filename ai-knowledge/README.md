@@ -7,7 +7,7 @@ This folder contains local interactive learning labs embedded from the AI Knowle
 Use this pattern inside a note:
 
 ```html
-<iframe src="http://127.0.0.1:8765/lab-file.html" width="100%" height="720"></iframe>
+<iframe src="https://gabrielebambini00.github.io/obsidian-labs/ai-knowledge/lab-file.html" width="100%" height="720"></iframe>
 ```
 
 Also include a direct fallback link:

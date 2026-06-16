@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A05 Functional Analysis</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a05-a06-canonical-clarity-v1">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a05" data-keywords="functional analysis Hilbert Banach operators projection basis coefficients compact derivative dual Riesz">
@@ -84,7 +84,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=a05-a06-canonical-clarity-v1"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"a05","kind":"algebra","title":"A05 Functional Analysis","modes":[{"value":"projection","label":"Hilbert projection"},{"value":"compact","label":"Compact smoothing"},{"value":"derivative","label":"Derivative stress"},{"value":"dual","label":"Dual functional"}],"parameters":[{"key":"truncation","label":"basis cutoff","min":1,"max":12,"step":1,"value":5},{"key":"frequency","label":"frequency","min":1,"max":12,"step":1,"value":6},{"key":"strength","label":"op strength","min":0.2,"max":2,"step":0.05,"value":0.9},{"key":"smoothness","label":"smoothness","min":0,"max":1,"step":0.02,"value":0.45},{"key":"probe","label":"dual probe","min":0.08,"max":0.92,"step":0.01,"value":0.62}],"metrics":["Input norm","Output norm","Operator gain","Residual norm"],"visual":{"kind":"functional-operator-space","graphStyle":"hidden"},"profile":{"preferredMetric":"Operator gain","formula":"T: f = sum a_k e_k -> sum b_k e_k,  ||T|| = sup ||Tf||/||f||","insight":"A05 treats functions as vectors: coefficient towers are coordinates, waveforms are the same vector in physical space, and each operator shows whether geometry is preserved, compressed, amplified, or read by a dual functional."},"graph":{"nodes":[{"label":"function f","position":[-2.7,-0.65,-0.55],"group":0},{"label":"basis coefficients","position":[-1,-1.45,0.85],"group":1},{"label":"operator T","position":[0.55,-1,0],"group":2},{"label":"projection","position":[1.8,-1.3,0.65],"group":3},{"label":"dual functional","position":[2.75,-0.55,-0.65],"group":4}],"edges":[[0,1,"basis expansion",1],[1,2,"operator on modes",1],[2,3,"closed subspace",1],[2,4,"scalar readout",1],[3,0,"residual geometry",1]]}});
     window.__a05LabSnapshot = () => window.__gLabSnapshot();

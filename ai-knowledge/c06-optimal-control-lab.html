@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>C06 Optimal Control Theory</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=c06-optimal-control-premium-v3">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="optimization" data-lab-id="c06" data-keywords="optimal control state control costate Pontryagin Hamiltonian HJB Riccati LQR">
@@ -86,7 +86,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=c06-c07-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"c06","kind":"optimization","title":"C06 Optimal Control Theory","modes":[{"value":"state","label":"State-control"},{"value":"pontryagin","label":"Pontryagin"},{"value":"hjb","label":"HJB"},{"value":"lqr","label":"LQR"},{"value":"bangbang","label":"Bang-bang"},{"value":"mpc","label":"MPC"}],"parameters":[{"key":"curvature","label":"Terminal weight Q_f","min":0,"max":2.5,"step":0.01,"value":0.9},{"key":"step","label":"Actuator limit u_max","min":0.02,"max":1,"step":0.01,"value":0.28},{"key":"noise","label":"Disturbance impulse","min":0,"max":1,"step":0.01,"value":0.16},{"key":"budget","label":"Horizon T nodes","min":1,"max":14,"step":1,"value":6},{"key":"regularization","label":"Feedback gain scale","min":0,"max":1,"step":0.01,"value":0.45}],"metrics":["Control cost","HJB residual","Riccati gain","Terminal error"],"visual":{"kind":"optimal-control-lab","graphStyle":"hidden","quality":"c05-c06-premium-v1"},"profile":{"preferredMetric":"Control cost","formula":"min_u integral L(x,u,t)dt + Phi(x_T)","insight":"C06 shows optimization through dynamics: controls bend state trajectories, costates price future error, and Riccati feedback stabilizes the terminal target."}});
     window.__c06LabSnapshot = () => window.__gLabSnapshot();

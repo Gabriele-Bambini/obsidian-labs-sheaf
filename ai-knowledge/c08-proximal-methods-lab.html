@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>C08 Proximal Methods</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=c08-proximal-methods-premium-v5">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="optimization" data-lab-id="c08" data-keywords="proximal methods prox operator Moreau envelope soft thresholding sparse ADMM splitting">
@@ -86,7 +86,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=c08-c09-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"c08","kind":"optimization","title":"C08 Proximal Methods","modes":[{"value":"prox","label":"Prox map"},{"value":"moreau","label":"Moreau envelope"},{"value":"soft","label":"Soft threshold"},{"value":"fista","label":"ISTA / FISTA"},{"value":"admm","label":"ADMM split"},{"value":"projection","label":"Projection catalog"}],"parameters":[{"key":"curvature","label":"Smooth curvature L","min":-1.5,"max":2.5,"step":0.01,"value":0.9},{"key":"step","label":"Step alpha / v","min":0.02,"max":1,"step":0.01,"value":0.28},{"key":"noise","label":"Forward gradient bias","min":0,"max":1,"step":0.01,"value":0.16},{"key":"budget","label":"Iteration k","min":1,"max":14,"step":1,"value":6},{"key":"regularization","label":"Lambda threshold","min":0,"max":1,"step":0.01,"value":0.45}],"metrics":["Prox distance","Moreau smoothness","Sparsity","ADMM residual"],"visual":{"kind":"proximal-methods-lab","graphStyle":"hidden","quality":"c07-c08-premium-v1"},"profile":{"preferredMetric":"Prox distance","formula":"prox_{lambda g}(v) = argmin_x g(x) + ||x-v||^2/(2lambda)","insight":"C08 shows why prox methods work: a quadratic center pulls toward v while the nonsmooth term shrinks, projects, or splits the update into easier pieces."}});
     window.__c08LabSnapshot = () => window.__gLabSnapshot();

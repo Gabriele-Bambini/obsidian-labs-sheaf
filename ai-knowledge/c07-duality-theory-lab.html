@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>C07 Duality Theory</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=c07-duality-theory-premium-v5">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="optimization" data-lab-id="c07" data-keywords="duality Lagrangian dual gap strong duality Fenchel conjugate primal dual certificate">
@@ -86,7 +86,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=c06-c07-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"c07","kind":"optimization","title":"C07 Duality Theory","modes":[{"value":"lagrangian","label":"Lagrangian"},{"value":"dual","label":"Dual gap"},{"value":"fenchel","label":"Fenchel"},{"value":"minimax","label":"Minimax"},{"value":"lp","label":"Linear programming"},{"value":"svm","label":"SVM dual"}],"parameters":[{"key":"curvature","label":"Constraint bound b","min":-1.5,"max":2.5,"step":0.01,"value":0.9},{"key":"step","label":"Candidate x","min":0.02,"max":1,"step":0.01,"value":0.28},{"key":"noise","label":"Objective tilt","min":0,"max":1,"step":0.01,"value":0.16},{"key":"budget","label":"Dual price samples","min":1,"max":14,"step":1,"value":6},{"key":"regularization","label":"Certificate lambda","min":0,"max":1,"step":0.01,"value":0.45}],"metrics":["Duality gap","Primal residual","Complementarity","Certificate slack"],"visual":{"kind":"duality-theory-lab","graphStyle":"hidden","quality":"c07-c08-premium-v1"},"profile":{"preferredMetric":"Duality gap","formula":"dual value <= primal value","insight":"C07 turns duality into an inspection tool: a dual bound certifies primal quality, complementarity explains active constraints, and Fenchel pairs expose support geometry."}});
     window.__c07LabSnapshot = () => window.__gLabSnapshot();

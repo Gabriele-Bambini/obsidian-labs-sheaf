@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>B01 Probability Theory Foundations</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a15-b01-canonical-clarity-v2">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="probability" data-lab-id="b01" data-keywords="probability sample space event conditional probability random variable expectation Monte Carlo">
@@ -84,7 +84,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=a15-b01-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"b01","kind":"probability","title":"B01 Probability Theory Foundations","modes":[{"value":"space","label":"Sample space"},{"value":"conditioning","label":"Conditioning"},{"value":"random","label":"Random variable"},{"value":"montecarlo","label":"Monte Carlo"}],"parameters":[{"key":"focus","label":"Concept focus","min":0,"max":1,"step":0.01,"value":0.45},{"key":"spread","label":"Spread / uncertainty","min":0.05,"max":1,"step":0.01,"value":0.55},{"key":"noise","label":"Noise / perturbation","min":0,"max":1,"step":0.01,"value":0.24},{"key":"samples","label":"Sample count","min":2,"max":14,"step":1,"value":7},{"key":"strength","label":"Evidence strength","min":0,"max":1,"step":0.01,"value":0.5}],"metrics":["Event probability","Entropy","Conditional mass","Expectation"],"visual":{"kind":"probability-space-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Event probability","formula":"P(A | B) = P(A cap B) / P(B)","insight":"B01 makes the primitive objects visible: sample space, event, evidence, conditional mass, random variable height, and empirical sampling."}});
     window.__b01LabSnapshot = () => window.__gLabSnapshot();

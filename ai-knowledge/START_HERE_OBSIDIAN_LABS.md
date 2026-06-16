@@ -28,7 +28,7 @@ AI Knowledge/_interactive/index.html
 On desktop, the server URL should be:
 
 ```text
-http://127.0.0.1:8765/index.html
+https://gabrielebambini00.github.io/obsidian-labs/ai-knowledge/index.html
 ```
 
 This URL is local to each PC. It works only while Obsidian is open with the local plugin enabled, or while the fallback server script is running.

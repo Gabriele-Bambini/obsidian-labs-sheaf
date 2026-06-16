@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A10 Advanced Category Theory</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a09-a10-canonical-clarity-v1">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a10" data-keywords="advanced category theory limits colimits cones adjunction monad Kan extension sheaf gluing universal property">
@@ -85,7 +85,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=a09-a10-canonical-clarity-v1"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"a10","kind":"algebra","title":"A10 Advanced Category Theory","modes":[{"value":"limits","label":"Limits"},{"value":"adjunction","label":"Adjunction"},{"value":"monad","label":"Monad"},{"value":"kan","label":"Kan extension"},{"value":"sheaf","label":"Sheaf glue"}],"parameters":[{"key":"defect","label":"cone defect","min":0,"max":1,"step":0.02,"value":0.18},{"key":"adjunction","label":"adjunction fit","min":0,"max":1,"step":0.02,"value":0.72},{"key":"depth","label":"monad depth","min":1,"max":8,"step":1,"value":3},{"key":"extension","label":"extension span","min":0,"max":1,"step":0.02,"value":0.45},{"key":"glue","label":"glue strength","min":0,"max":1,"step":0.02,"value":0.28}],"metrics":["Universal defect","Adjunction fit","Monad coherence","Extension cost"],"visual":{"kind":"advanced-category-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Universal defect","formula":"limit cone + hom_C(Fa,b) ~= hom_D(a,Ub) + T=UF + Lan_K","insight":"A10 keeps advanced category theory as universal tasks: a cone factors uniquely through a limit, adjunctions transpose arrows, monads flatten nested structure, Kan extensions fill missing data, and sheaf gluing checks coherence."}});
     window.__a10LabSnapshot = () => window.__gLabSnapshot();

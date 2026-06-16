@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>B03 Statistical Estimation</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=b02-b03-canonical-clarity-v2">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="probability" data-lab-id="b03" data-keywords="statistical estimation estimator likelihood MLE MAP bias variance sampling distribution confidence interval">
@@ -84,7 +84,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=b02-b03-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"b03","kind":"probability","title":"B03 Statistical Estimation","modes":[{"value":"likelihood","label":"Likelihood"},{"value":"mle","label":"MLE"},{"value":"bias","label":"Bias / variance"},{"value":"confidence","label":"Confidence interval"}],"parameters":[{"key":"focus","label":"Concept focus","min":0,"max":1,"step":0.01,"value":0.45},{"key":"spread","label":"Spread / uncertainty","min":0.05,"max":1,"step":0.01,"value":0.55},{"key":"noise","label":"Noise / perturbation","min":0,"max":1,"step":0.01,"value":0.24},{"key":"samples","label":"Sample count","min":2,"max":14,"step":1,"value":7},{"key":"strength","label":"Evidence strength","min":0,"max":1,"step":0.01,"value":0.5}],"metrics":["Likelihood peak","Estimator bias","Variance","CI width"],"visual":{"kind":"estimation-likelihood-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Likelihood peak","formula":"theta_hat = argmax_theta L(theta; data)","insight":"B03 shows estimation as a geometric choice: data support a parameter, repeated samples move the estimator, and uncertainty becomes interval width."}});
     window.__b03LabSnapshot = () => window.__gLabSnapshot();

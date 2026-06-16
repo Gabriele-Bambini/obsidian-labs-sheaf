@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A06 Topology Basics</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a05-a06-canonical-clarity-v1">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a06" data-keywords="topology open sets neighborhoods boundary continuity preimage compactness connectedness quotient">
@@ -85,7 +85,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=a05-a06-canonical-clarity-v1"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"a06","kind":"algebra","title":"A06 Topology Basics","modes":[{"value":"open","label":"Open neighborhoods"},{"value":"continuity","label":"Continuity preimage"},{"value":"compact","label":"Compact subcover"},{"value":"connected","label":"Connected split"},{"value":"quotient","label":"Quotient glue"}],"parameters":[{"key":"radius","label":"neighborhood","min":0.12,"max":0.9,"step":0.02,"value":0.34},{"key":"cover","label":"cover sets","min":2,"max":9,"step":1,"value":5},{"key":"map","label":"map stretch","min":0.4,"max":1.8,"step":0.05,"value":1},{"key":"glue","label":"glue strength","min":0,"max":1,"step":0.05,"value":0.25},{"key":"separation","label":"separation","min":0,"max":1,"step":0.05,"value":0.2}],"metrics":["Open coverage","Boundary count","Subcover size","Continuity score"],"visual":{"kind":"topology-space-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Open coverage","formula":"f continuous iff f^-1(V) is open in X for every open V in Y","insight":"A06 makes topology operational: open neighborhoods define local context, preimages test continuity, compactness extracts finite subcovers, connectedness fails by separated opens, and quotient gluing changes the global space."},"graph":{"nodes":[{"label":"space X","position":[-2.7,-1.9,-0.2],"group":0},{"label":"open neighborhoods","position":[-0.8,-1.65,-0.1],"group":1},{"label":"boundary","position":[0.2,-1.55,-0.2],"group":2},{"label":"target open set V","position":[0,-0.8,1.2],"group":3},{"label":"preimage test","position":[0,-1.8,-0.2],"group":4},{"label":"finite subcover","position":[0.6,-1.65,0.7],"group":5},{"label":"connected split","position":[-0.1,-1.8,-0.65],"group":6},{"label":"quotient glue","position":[2.2,-1,1.2],"group":7}],"edges":[[0,1,"opens define neighborhoods",1.1],[1,2,"boundary of local data",0.9],[3,4,"continuity by preimage",1.3],[1,5,"open cover reduces",1],[0,6,"connectedness test",1],[0,7,"quotient projection",0.9],[5,7,"global shape changes",0.8]]}});
     window.__a06LabSnapshot = () => window.__gLabSnapshot();

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>C03 Constrained Optimization</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=c02-c03-canonical-clarity-v2">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="optimization" data-lab-id="c03" data-keywords="constrained optimization feasible set Lagrange multiplier KKT active set barrier normal cone">
@@ -86,7 +86,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=c02-c03-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"c03","kind":"optimization","title":"C03 Constrained Optimization","modes":[{"value":"feasible","label":"Feasible set"},{"value":"projection","label":"Projection"},{"value":"lagrange","label":"Lagrange"},{"value":"kkt","label":"KKT"},{"value":"penalty","label":"Penalty"},{"value":"barrier","label":"Barrier"}],"parameters":[{"key":"curvature","label":"Constraint offset s","min":-1.5,"max":2.5,"step":0.01,"value":0.9},{"key":"step","label":"Projected step alpha","min":0.02,"max":1,"step":0.01,"value":0.28},{"key":"noise","label":"Unconstrained optimum a","min":0,"max":1,"step":0.01,"value":0.16},{"key":"budget","label":"KKT / path samples","min":1,"max":14,"step":1,"value":6},{"key":"regularization","label":"Penalty rho / barrier mu","min":0,"max":1,"step":0.01,"value":0.45}],"metrics":["Max violation","KKT residual","Lagrange lambda","Complementarity"],"visual":{"kind":"constrained-optimization-lab","graphStyle":"hidden","quality":"c03-c04-premium-v1"},"profile":{"preferredMetric":"KKT residual","formula":"grad f(x*) + sum_i lambda_i grad g_i(x*) = 0","insight":"C03 makes constraints visible: descent cannot ignore the feasible set, and optimality happens when objective force is balanced by active boundary normals."}});
     window.__c03LabSnapshot = () => window.__gLabSnapshot();

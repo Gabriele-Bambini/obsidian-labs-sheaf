@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A02 Vectors, Spaces and Linear Maps</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a01-a02-canonical-clarity-v1">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a02" data-keywords="vector spaces linear maps domain codomain kernel image rank nullity dual functional">
@@ -83,7 +83,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=a01-a02-canonical-clarity-v1"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"a02","kind":"algebra","title":"A02 Vectors, Spaces and Linear Maps","modes":[{"value":"map","label":"Map T"},{"value":"kernel","label":"Kernel / image"},{"value":"dual","label":"Dual action"}],"parameters":[{"key":"stretch","label":"Stretch","min":0.35,"max":2.4,"step":0.05,"value":1.2},{"key":"shear","label":"Shear","min":-1.2,"max":1.2,"step":0.05,"value":0.25},{"key":"collapse","label":"Collapse","min":0,"max":1,"step":0.02,"value":0.18},{"key":"angle","label":"Input angle","min":-180,"max":180,"step":1,"value":35},{"key":"dual","label":"Dual probe","min":-1,"max":1,"step":0.05,"value":0.3}],"metrics":["Rank of T","Kernel dim","Image norm","Dual value"],"visual":{"kind":"linear-map-3d","graphStyle":"hidden"},"profile":{"preferredMetric":"Rank of T","formula":"T(v) = A v; dim(domain) = rank(T) + dim ker(T)","insight":"A02 reads a linear map as movement between spaces: the domain vector v is transformed into T(v), the transformed axes show the image, a red direction marks the kernel when collapse removes information, and the dual probe reads a scalar from the output."},"graph":{"nodes":[{"label":"domain V","position":[-2.4,-1.3,-0.2],"group":0},{"label":"vector v","position":[-1.45,-0.65,0.7],"group":1},{"label":"linear map T","position":[0,-0.55,0.3],"group":2},{"label":"codomain W","position":[2.15,-1.3,-0.2],"group":3},{"label":"image T(v)","position":[2.85,-0.45,0.55],"group":4},{"label":"image subspace","position":[2.15,-1.15,0.75],"group":5},{"label":"kernel direction","position":[-2.65,-1.1,1],"group":6},{"label":"dual probe","position":[2.7,0.25,0.95],"group":7}],"edges":[[0,1,"choose input vector",1],[1,2,"apply T",1.4],[2,4,"output image vector",1.3],[3,4,"codomain coordinates",1],[3,5,"reachable image",1.1],[0,6,"kernel invisible input",0.8],[4,7,"dual functional reads scalar",0.9],[6,5,"rank-nullity ledger",0.7]]}});
     window.__a02LabSnapshot = () => window.__gLabSnapshot();

@@ -634,3 +634,221 @@ h1 {
     display: none;
   }
 }
+
+/* ---- collapsible drawers: side info panel + bottom command bar ---- */
+.gnn-lab.lab-3d-shell {
+  transition: grid-template-columns 0.28s ease, grid-template-rows 0.28s ease;
+}
+
+.visual-stack {
+  transition: grid-template-rows 0.28s ease;
+}
+
+.side-panel,
+.command-bar {
+  transition: opacity 0.2s ease;
+}
+
+.lab-drawer-toggle {
+  position: absolute;
+  z-index: 30;
+  min-height: 0;
+  width: 24px;
+  height: 46px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: rgba(8, 16, 20, 0.92);
+  color: var(--cyan);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lab-drawer-toggle:hover {
+  border-color: color-mix(in srgb, var(--cyan) 62%, transparent);
+  color: var(--ink);
+}
+
+.lab-drawer-toggle.side {
+  top: calc(50% - 23px);
+  right: 0;
+  border-radius: 9px 0 0 9px;
+}
+
+.lab-drawer-toggle.bottom {
+  left: calc(50% - 23px);
+  bottom: 0;
+  width: 46px;
+  height: 24px;
+  border-radius: 9px 9px 0 0;
+}
+
+.gnn-lab.lab-3d-shell.side-collapsed {
+  grid-template-columns: minmax(0, 1fr) 0px;
+}
+
+.gnn-lab.lab-3d-shell.side-collapsed > .side-panel {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.visual-stack.bottom-collapsed {
+  grid-template-rows: minmax(0, 1fr) 0px;
+}
+
+.visual-stack.bottom-collapsed > .command-bar {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 1050px) {
+  .gnn-lab.lab-3d-shell.side-collapsed {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) 0px;
+  }
+}
+
+/* ================================================================
+ * CANONICAL ENGINE UPGRADE — Section 4 additions (append-only).
+ * Tokens, a11y focus/reduced-motion, card/typography polish, and
+ * the Section-3 comprehensibility overlay classes used by the JS
+ * implementers (gnn-lab-core.js + quantum-labs.js IIFE).
+ * Nothing here changes box sizes affecting the <=18px document-
+ * overflow or <=6px command-bar-overflow budgets: the overlay is
+ * absolutely positioned inside overflow:hidden .stage, and the
+ * card tweaks stay within the existing panel grid.
+ * ================================================================ */
+
+/* ---- new semantic tokens (extend :root; safe additive) ---- */
+:root {
+  --focus-ring: 0 0 0 3px rgba(88, 224, 211, 0.34);
+  --panel-3: rgba(7, 14, 18, 0.82);
+}
+
+/* ---- focus visibility for ALL real controls (a11y) ---- */
+button:focus-visible,
+select:focus-visible,
+input[type="range"]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+/* drawer + overlay chrome controls: keyboard fallback ring, still aria-hidden */
+.lab-drawer-toggle:focus-visible,
+.scene-guide-orbit-dismiss:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.lab-drawer-toggle:active { transform: scale(0.94); }
+
+/* ---- explicit range track tint (was browser default) ---- */
+input[type="range"] { accent-color: var(--cyan); }
+
+/* ---- reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- metric + insight readability polish (no box-size growth) ---- */
+.metric {
+  border-left: 3px solid color-mix(in srgb, var(--cyan) 70%, transparent);
+}
+.insight-card { border-top: 2px solid color-mix(in srgb, var(--cyan) 60%, transparent); }
+.insight-card h2 { color: var(--cyan); }
+.insight-card #stateBox {
+  border-left: 2px solid var(--cyan);
+  background: rgba(88, 224, 211, 0.08);
+  padding: 6px 8px;
+}
+
+/* ============ Section-3 comprehensibility overlay ============ */
+.scene-guide {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 6;
+  max-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-3);
+  backdrop-filter: blur(10px);
+  color: var(--muted);
+  pointer-events: none;
+}
+.scene-guide-caption {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.scene-guide-legend { display: flex; flex-direction: column; gap: 3px; }
+.scene-guide-legend-title {
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+.scene-guide-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  line-height: 1.3;
+  text-transform: capitalize;
+}
+.scene-guide-legend-swatch {
+  flex: 0 0 9px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.scene-guide-orbit {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-3);
+  backdrop-filter: blur(10px);
+  color: var(--muted);
+  font-size: 10px;
+  pointer-events: none;          /* container ignores pointer; button re-enables */
+  transition: opacity 0.6s ease;
+}
+.scene-guide-orbit-dismiss {
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+.scene-guide-orbit-dismiss:hover { color: var(--ink); }

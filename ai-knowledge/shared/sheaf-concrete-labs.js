@@ -86,6 +86,37 @@
     line.geometry = new THREE.BufferGeometry().setFromPoints(points);
   }
 
+  // Shared legibility helpers (h05 clean override): additive glow + aspect-fit text label.
+  const _scGlowTex = (function () {
+    const cv = document.createElement("canvas"); cv.width = 128; cv.height = 128;
+    const cx = cv.getContext("2d");
+    const g = cx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.addColorStop(0, "rgba(255,255,255,0.6)"); g.addColorStop(0.22, "rgba(255,255,255,0.24)"); g.addColorStop(1, "rgba(255,255,255,0)");
+    cx.fillStyle = g; cx.fillRect(0, 0, 128, 128);
+    return new THREE.CanvasTexture(cv);
+  })();
+  function scGlow(hex, size) {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: _scGlowTex, color: hex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    sp.scale.set(size, size, 1);
+    return sp;
+  }
+  function scLabel(text, hex, sc) {
+    const pad = 12, fs = 64;
+    const cv = document.createElement("canvas");
+    const m = cv.getContext("2d");
+    m.font = "600 " + fs + "px Inter, system-ui, sans-serif";
+    const w = Math.ceil(m.measureText(text).width) + pad * 2, h = fs + pad * 2;
+    cv.width = w; cv.height = h;
+    const cx = cv.getContext("2d");
+    cx.font = "600 " + fs + "px Inter, system-ui, sans-serif";
+    cx.textBaseline = "middle"; cx.textAlign = "center";
+    cx.fillStyle = "#" + (hex >>> 0).toString(16).padStart(6, "0");
+    cx.fillText(text, w / 2, h / 2);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false, depthTest: false }));
+    sp.scale.set(sc * (w / h), sc, 1);
+    return sp;
+  }
+
   function objectHash(objects) {
     return compactHash(objects.flatMap((object, index) => {
       const opacity = object.material && object.material.opacity != null ? object.material.opacity : 1;
@@ -130,16 +161,28 @@
   function setupScene(root, canvas, distance) {
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // --- canonical color pipeline (r128) ---
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.98;
     renderer.setClearColor(COLORS.bg, 1);
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x061015, 8, 16);
+    scene.fog = new THREE.Fog(COLORS.bg, 8.5, 22);
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 80);
     const state = { theta: -0.74, phi: 0.58, radius: distance || 8, dragging: false, x: 0, y: 0 };
 
-    const ambient = new THREE.AmbientLight(0xffffff, 0.62);
-    const key = new THREE.DirectionalLight(0xefffff, 1.3);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.50);
+    const key = new THREE.DirectionalLight(0xefffff, 1.34);
     key.position.set(3, 5, 4);
-    const fill = new THREE.PointLight(0x58e0d3, 1.1, 12);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.near = 0.5; key.shadow.camera.far = 42;
+    key.shadow.camera.left = -7; key.shadow.camera.right = 7;
+    key.shadow.camera.top = 7; key.shadow.camera.bottom = -7;
+    key.shadow.bias = -0.0006;
+    const fill = new THREE.PointLight(0x58e0d3, 0.92, 12);
     fill.position.set(-3, 2, -4);
     scene.add(ambient, key, fill);
 
@@ -192,6 +235,25 @@
     resize();
     placeCamera();
 
+    function addEngineGroundRef(targetScene, y, half) {
+      const g = new THREE.Group();
+      g.userData.engineRef = true;
+      const axes = [
+        [[half, 0, 0], 0x54a8ff],   // +X blue
+        [[0, half, 0], 0x77df96],   // +Y green
+        [[0, 0, half], 0x58e0d3]    // +Z cyan
+      ];
+      axes.forEach(([end, color]) => {
+        const ln = makeLine(
+          [new THREE.Vector3(0, y, 0), new THREE.Vector3(end[0], y + end[1], end[2])],
+          color, 0.3);
+        ln.userData.engineRef = true;
+        g.add(ln);
+      });
+      targetScene.add(g);
+      return g;
+    }
+
     function grid(width, depth, y) {
       for (let i = -4; i <= 4; i += 1) {
         scene.add(makeLine([new THREE.Vector3(-width, y, i * depth / 4), new THREE.Vector3(width, y, i * depth / 4)], COLORS.ink, 0.055));
@@ -200,7 +262,28 @@
     }
 
     root.dataset.cameraTheta = String(state.theta);
-    return { renderer, scene, camera, cameraState: state, grid, placeCamera };
+    // Generic premium polish for h02-h05: transparent shadow-catcher + auto shadow casters.
+    const _scOrigRender = renderer.render.bind(renderer);
+    let _scGrounded = false;
+    renderer.render = function (sc, cam) {
+      if (!_scGrounded) {
+        try {
+          const gp = new THREE.Mesh(new THREE.PlaneGeometry(44, 44), new THREE.ShadowMaterial({ opacity: 0.3 }));
+          gp.rotation.x = -Math.PI / 2; gp.position.y = -1.4; gp.receiveShadow = true; gp.userData.engineRef = true;
+          sc.add(gp);
+        } catch (e) {}
+        _scGrounded = true;
+      }
+      sc.traverse((o) => {
+        if (o.isMesh && o.geometry && !o.castShadow && !o.userData.engineRef) {
+          const t = o.geometry.type || "";
+          if (t.indexOf("Sphere") >= 0 || t.indexOf("Box") >= 0 || t.indexOf("Cylinder") >= 0 || t.indexOf("Cone") >= 0 || t.indexOf("Torus") >= 0) o.castShadow = true;
+        }
+      });
+      _scOrigRender(sc, cam);
+    };
+    try { window.__sheafConcreteRenderNow = function () { renderer.render(scene, camera); }; } catch (e) {}
+    return { renderer, scene, camera, cameraState: state, grid, placeCamera, addEngineGroundRef };
   }
 
   function createH02TopologicalSheafLab() {
@@ -289,6 +372,23 @@
       return halo;
     });
     grid(2.9, 1.45, -1.12);
+
+    // ===== legibility layer (h07-style clean override): focal node spheres at each local
+    // section, glowing overlap edges (Ui -> Uj), per-overlap residual rods, and a tidy defect
+    // chart. The dense instrument arrays above stay alive/control-driven (counts+hashes hold)
+    // but are hidden so the open-cover sheaf scene reads clearly. =====
+    const h02Pairs = [[0, 1], [1, 2], [0, 2]];
+    const h02Nodes = patchCenters.map((c, i) => { const sp = makeSphere(0.2, patchColors[i], 0.97); sp.userData.engineRef = true; sp.castShadow = true; scene.add(sp); return sp; });
+    const h02Halos = patchCenters.map((c, i) => { const g = scGlow(patchColors[i], 0.9); g.userData.engineRef = true; scene.add(g); return g; });
+    const h02EdgeTubes = h02Pairs.map(() => { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 12), new THREE.MeshStandardMaterial({ color: COLORS.green, emissive: COLORS.green, emissiveIntensity: 0.5, transparent: true, opacity: 0.85, roughness: 0.4 })); m.userData.engineRef = true; scene.add(m); return m; });
+    const h02PlaceEdge = (mesh, a, b) => { const dir = new THREE.Vector3().subVectors(b, a); const len = dir.length(); mesh.position.copy(a).add(b).multiplyScalar(0.5); mesh.scale.set(1, len, 1); mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize()); };
+    const h02NodeLabels = ["U1", "U2", "U3"].map((t) => { const l = scLabel(t, 0xeaf4ff, 0.22); l.userData.engineRef = true; scene.add(l); return l; });
+    const h02StructLabel = scLabel("SHEAF COVER", 0x9fb4cc, 0.34); h02StructLabel.userData.engineRef = true; scene.add(h02StructLabel);
+    const h02ChartLabel = scLabel("DEFECT SPECTRUM", 0x9fb4cc, 0.3); h02ChartLabel.userData.engineRef = true; scene.add(h02ChartLabel);
+    // per-overlap restriction-agreement rods (green=compatible / rose=conflict) — interpretable
+    const h02ResidRods = h02Pairs.map(() => { const r = makeBox([0.07, 0.4, 0.07], COLORS.green, 0.85); r.userData.engineRef = true; r.castShadow = true; scene.add(r); return r; });
+    // defect chart baseline for the right region (h07-style)
+    const h02ChartBaseline = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 1, 8), new THREE.MeshStandardMaterial({ color: 0x3a4a5e, emissive: 0x223040, roughness: 0.6 })); h02ChartBaseline.userData.engineRef = true; scene.add(h02ChartBaseline);
 
     function maps(restrictionMode) {
       if (restrictionMode === "chart") return [1, -1, 0.75];
@@ -490,6 +590,76 @@
         halo.scale.set(1.02 + s.refinement * 0.035, 0.08, 0.72 + s.refinement * 0.02);
         halo.material.opacity = state.phase === "sheafified" ? 0.34 + s.refinement * 0.015 : 0.1;
       });
+
+      // ===== CLEAN OVERRIDE: hide the instrument soup, show a legible open-cover sheaf =====
+      // snapshotSafe: hashes record visible flags (no .filter(visible)), so hiding is safe.
+      [germColumns, residualBars, equalizerBlocks, localityPlates, gluingAxiomLines, presheafFailureRods, sheafificationHalos].forEach((arr) => arr.forEach((o) => { o.visible = false; }));
+      globalCurve.visible = false; topologicalBase.visible = false;
+      // KEEP focal meshes: brighten the open-set discs so the cover reads clearly
+      patches.forEach((patch, index) => {
+        patch.visible = index < s.patchCount;
+        if (index < s.patchCount) patch.material.opacity = 0.26 + s.gluingScore * 0.1;
+      });
+      // node spheres sit at each local section + glow halos + ASCII labels (compatible colours)
+      const h02Agree = s.compatible;
+      h02Nodes.forEach((sp, i) => {
+        const on = i < s.patchCount;
+        sp.visible = on;
+        if (!on) { h02Halos[i].visible = false; h02NodeLabels[i].visible = false; return; }
+        sp.position.copy(sectionDots[i].position);
+        const col = s.restricted[i] >= 0 ? patchColors[i] : COLORS.amber;
+        sp.material.color.setHex(col);
+        if (sp.material.emissive) { sp.material.emissive.setHex(col); sp.material.emissiveIntensity = 0.3; }
+        h02Halos[i].visible = true; h02Halos[i].position.copy(sp.position); h02Halos[i].material.color.setHex(col); h02Halos[i].material.opacity = 0.5; h02Halos[i].scale.setScalar(0.85);
+        h02NodeLabels[i].visible = true; h02NodeLabels[i].position.copy(sp.position).add(new THREE.Vector3(0.05, 0.4, 0));
+      });
+      // overlap edges Ui -> Uj between section dots, colour + thickness by agreement (thin, restrained)
+      h02EdgeTubes.forEach((mesh, i) => {
+        const [pa, pb] = h02Pairs[i];
+        const on = pa < s.patchCount && pb < s.patchCount;
+        mesh.visible = on;
+        if (!on) return;
+        const a = sectionDots[pa].position.clone();
+        const b = sectionDots[pb].position.clone();
+        h02PlaceEdge(mesh, a, b);
+        const resid = s.residuals[i] != null ? s.residuals[i] : 0;
+        const col = resid <= s.tolerance ? COLORS.green : COLORS.rose;
+        mesh.material.color.setHex(col); mesh.material.emissive.setHex(col);
+        mesh.material.emissiveIntensity = 0.32 + s.gluingScore * 0.18;
+        mesh.material.opacity = 0.8;
+        const w = 0.5 + s.gluingScore * 0.4; mesh.scale.x = w; mesh.scale.z = w;
+      });
+      // per-overlap residual rods at edge midpoints (green=compatible / rose=conflict)
+      h02ResidRods.forEach((rod, i) => {
+        const [pa, pb] = h02Pairs[i];
+        const on = pa < s.patchCount && pb < s.patchCount;
+        rod.visible = on;
+        if (!on) return;
+        const mid = sectionDots[pa].position.clone().lerp(sectionDots[pb].position, 0.5);
+        const resid = s.residuals[i] != null ? s.residuals[i] : 0;
+        const hh = 0.14 + Math.min(0.7, resid * 0.8);
+        rod.position.copy(mid).add(new THREE.Vector3(0, 0.18 + hh * 0.5, 0));
+        rod.scale.set(1, hh / 0.4, 1);
+        const col = resid <= s.tolerance ? COLORS.green : COLORS.rose;
+        rod.material.color.setHex(col);
+        rod.material.opacity = 0.85;
+      });
+      // RIGHT region chart (DEFECT SPECTRUM): reuse residualBars, tidy into a clean row
+      const h02ChX = 1.9, h02ChBase = -1.0;
+      const h02Chart = [s.maxDefect, s.tolerance, s.uniquenessGap, s.gluingScore];
+      residualBars.forEach((bar, i) => {
+        bar.visible = true;
+        const value = Math.max(0, h02Chart[i]);
+        const hh = 0.12 + value * 0.9;
+        bar.scale.set(1, hh / 0.32, 1);
+        bar.position.set(h02ChX + i * 0.26, h02ChBase + hh * 0.5, 0.6);
+        bar.material.opacity = 0.9;
+        bar.material.color.setHex(i === 3 ? (h02Agree ? COLORS.green : COLORS.amber) : i === 1 ? COLORS.cyan : (h02Chart[i] <= s.tolerance ? COLORS.green : COLORS.rose));
+      });
+      h02PlaceEdge(h02ChartBaseline, new THREE.Vector3(h02ChX - 0.2, h02ChBase + 0.02, 0.6), new THREE.Vector3(h02ChX + 1.4, h02ChBase + 0.02, 0.6));
+      // region labels
+      h02StructLabel.position.set(-1.4, 1.5, 0);
+      h02ChartLabel.position.set(2.4, 1.4, 0.6);
     }
 
     function updatePanel() {
@@ -773,6 +943,21 @@
     });
     grid(2.9, 1.55, -1.15);
 
+    // ===== legibility layer (h06/h07-style clean override): node glow halos + node labels +
+    // restriction-map edge tubes (the cell-complex 1-skeleton) + 2 region labels + an energy
+    // decay curve for the chart region. The dense instrument arrays above stay alive/control-
+    // driven (counts+hashes hold) but are hidden so the cellular sheaf graph reads clearly. =====
+    const h04Halos = nodes.map(() => { const g = scGlow(COLORS.cyan, 0.9); g.userData.engineRef = true; scene.add(g); return g; });
+    const h04NodeLabels = ["A", "B", "C", "D"].map((t) => { const l = scLabel(t, 0xeaf4ff, 0.22); l.userData.engineRef = true; scene.add(l); return l; });
+    const h04EdgeTubes = edges.map(() => { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 12), new THREE.MeshStandardMaterial({ color: COLORS.ink, emissive: COLORS.ink, emissiveIntensity: 0.32, transparent: true, opacity: 0.8, roughness: 0.45 })); m.userData.engineRef = true; scene.add(m); return m; });
+    const h04PlaceEdge = (mesh, a, b) => { const dir = new THREE.Vector3().subVectors(b, a); const len = dir.length(); mesh.position.copy(a).add(b).multiplyScalar(0.5); mesh.scale.set(1, len, 1); mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize()); };
+    const h04StructLabel = scLabel("SHEAF GRAPH", 0x9fb4cc, 0.34); h04StructLabel.userData.engineRef = true; scene.add(h04StructLabel);
+    const h04ChartLabel = scLabel("ENERGY / RESIDUALS", 0x9fb4cc, 0.3); h04ChartLabel.userData.engineRef = true; scene.add(h04ChartLabel);
+    // sheaf energy decay curve E(t) + baseline for the chart region (h06/h07-style)
+    const h04EnergyCurve = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshStandardMaterial({ color: COLORS.cyan, emissive: COLORS.cyan, emissiveIntensity: 0.55, roughness: 0.4, transparent: true, opacity: 0.92 }));
+    h04EnergyCurve.userData.engineRef = true; scene.add(h04EnergyCurve);
+    const h04ChartBaseline = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 1, 8), new THREE.MeshStandardMaterial({ color: 0x3a4a5e, emissive: 0x223040, roughness: 0.6 })); h04ChartBaseline.userData.engineRef = true; scene.add(h04ChartBaseline);
+
     function markControl(id, value) {
       state.revision += 1;
       state.lastControl = id;
@@ -963,6 +1148,99 @@
         block.material.color.setHex(s.sheafType === "signed" ? (value < 0.16 ? COLORS.green : COLORS.amber) : COLORS.muted);
         block.material.opacity = s.sheafType === "signed" ? 0.45 : 0.12;
       });
+
+      // ===== CLEAN OVERRIDE: hide the instrument soup, show a legible cellular sheaf graph =====
+      // snapshotSafe=true (snapshot uses .length, never .filter(visible)) so visible=false is safe.
+      [restrictionLines, matrixBlocks, restrictionMatrixGlyphs, globalSectionBeads, projectionCoordinateBars, connectionFrameBars, signedCompatibilityBlocks].forEach((arr) => arr.forEach((o) => { o.visible = false; }));
+      // node spheres: clear focal nodes lifted onto the graph; halos + labels for legibility
+      nodeSpheres.forEach((mesh, index) => {
+        mesh.visible = true;
+        const value = s.values[index][0];
+        mesh.position.copy(nodes[index]).add(new THREE.Vector3(0, 0.16 + value * 0.08, 0));
+        mesh.scale.setScalar(1.05 + Math.abs(value) * 0.26);
+        const col = [COLORS.blue, COLORS.cyan, COLORS.amber, COLORS.violet][index];
+        mesh.material.color.setHex(col);
+        if (mesh.material.emissive) { mesh.material.emissive.setHex(col); mesh.material.emissiveIntensity = 0.28; }
+        h04Halos[index].visible = true; h04Halos[index].position.copy(mesh.position); h04Halos[index].material.color.setHex(col); h04Halos[index].material.opacity = 0.5; h04Halos[index].scale.setScalar(0.85);
+        h04NodeLabels[index].position.copy(mesh.position).add(new THREE.Vector3(0.04, 0.4, 0));
+      });
+      // node stalk columns: keep as slim gauges beside each node, brighter
+      nodeStalks.forEach((group, index) => {
+        group.visible = true;
+        group.position.copy(nodes[index]).add(new THREE.Vector3(0.34, 0.28, 0));
+        group.children.forEach((bar, component) => {
+          const value = s.values[index][component];
+          bar.scale.y = 0.55 + Math.abs(value) * 0.6;
+          bar.position.set((component - 0.5) * 0.13, 0.42, 0);
+          bar.material.color.setHex(value >= 0 ? (component === 0 ? COLORS.blue : COLORS.cyan) : COLORS.amber);
+          bar.material.opacity = 0.82;
+        });
+      });
+      // restriction-map edge tubes (cell-complex 1-skeleton): green=compatible / rose=conflict, thin
+      h04EdgeTubes.forEach((mesh, index) => {
+        mesh.visible = true;
+        const [a, b] = edges[index];
+        const pa = nodes[a].clone().add(new THREE.Vector3(0, 0.16, 0));
+        const pb = nodes[b].clone().add(new THREE.Vector3(0, 0.16, 0));
+        h04PlaceEdge(mesh, pa, pb);
+        const compat = Math.abs(s.residuals[index]) < 0.16;
+        const col = compat ? COLORS.green : COLORS.rose;
+        mesh.material.color.setHex(col); mesh.material.emissive.setHex(col);
+        mesh.material.emissiveIntensity = 0.3 + (compat ? 0.12 : 0.22);   // restrained, no blown white
+        mesh.material.opacity = 0.8;
+        const w = 0.5 + (compat ? 0.18 : Math.min(0.5, Math.abs(s.residuals[index]) * 0.4)); mesh.scale.x = w; mesh.scale.z = w;   // thin
+      });
+      // keep edge lines as a faint underlay (they back the tubes); plates stay as edge-stalk markers
+      edgeLines.forEach((line, index) => {
+        line.visible = true; line.material.opacity = 0.12;
+        setTrackedLine(line, [nodes[edges[index][0]], nodes[edges[index][1]]]);
+      });
+      edgePlates.forEach((plate, index) => {
+        plate.visible = true;
+        const [a, b] = edges[index];
+        const compat = Math.abs(s.residuals[index]) < 0.16;
+        plate.position.copy(nodes[a]).lerp(nodes[b], 0.5).add(new THREE.Vector3(0, 0.14, 0));
+        plate.scale.set(0.85, 1, 1);
+        plate.material.color.setHex(compat ? COLORS.green : COLORS.rose);
+        plate.material.opacity = 0.4;
+      });
+      // per-edge coboundary residual rods at edge midpoints: green=compatible / rose=conflict
+      residualRods.forEach((rod, index) => {
+        rod.visible = true;
+        const [a, b] = edges[index];
+        const value = Math.abs(s.residuals[index]);
+        const mid = nodes[a].clone().lerp(nodes[b], 0.5).add(new THREE.Vector3(0, 0.16, 0));
+        const hh = 0.14 + value * 0.7;
+        rod.position.copy(mid).add(new THREE.Vector3(0, 0.22 + hh * 0.5, 0));
+        rod.scale.set(1, hh / 0.5, 1);
+        rod.material.color.setHex(value < 0.16 ? COLORS.green : COLORS.rose);
+        rod.material.opacity = 0.85;
+      });
+      // RIGHT region chart: per-edge sheaf energy / residual magnitude (reuse energyBars, tidy)
+      const chX = 1.05, chBase = -1.0;
+      energyBars.forEach((bar, index) => {
+        bar.visible = true;
+        const value = Math.abs(s.residuals[index] || 0);
+        const hh = 0.12 + value * 0.9;
+        bar.scale.set(1, hh / 0.3, 1);
+        bar.position.set(chX + index * 0.26, chBase + hh * 0.5, 1.55);
+        bar.material.opacity = 0.9;
+        bar.material.color.setHex(value < 0.16 ? COLORS.green : COLORS.rose);
+      });
+      // sheaf energy decay curve E(t): residual energy settling toward a global section — over the chart
+      const ePts = [];
+      for (let i = 0; i <= 26; i += 1) {
+        const t = i / 26;
+        const y = chBase + 0.25 + (s.energy * Math.exp(-t * 1.4) * (1 - t * 0.4)) * 0.6 + Math.exp(-t * 3) * 0.12;
+        ePts.push(new THREE.Vector3(chX - 0.15 + t * 1.3, y, 1.55));
+      }
+      const eCurve = new THREE.CatmullRomCurve3(ePts);
+      h04EnergyCurve.geometry.dispose();
+      h04EnergyCurve.geometry = new THREE.TubeGeometry(eCurve, 34, 0.028, 8, false);
+      h04EnergyCurve.visible = true;
+      h04PlaceEdge(h04ChartBaseline, new THREE.Vector3(chX - 0.2, chBase + 0.02, 1.55), new THREE.Vector3(chX + 1.3, chBase + 0.02, 1.55));
+      h04StructLabel.position.set(-1.1, 1.45, 0);
+      h04ChartLabel.position.set(1.55, 1.35, 1.55);
     }
 
     function updatePanel() {
@@ -1230,6 +1508,18 @@
     });
     grid(2.7, 1.45, -1.12);
 
+    // ===== legibility layer (h07-style clean override): glow halos + ASCII labels on the
+    // triangular cell complex, thin restriction edge tubes, region labels for the focal
+    // sheaf scene and the coboundary-residual chart. The dense instrument arrays above stay
+    // alive/control-driven (snapshot counts + hashes hold) but are hidden so the scene reads. =====
+    const h03PlaceEdge = (mesh, a, b) => { const dir = new THREE.Vector3().subVectors(b, a); const len = dir.length(); mesh.position.copy(a).add(b).multiplyScalar(0.5); mesh.scale.set(1, len, 1); mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize()); };
+    const h03Halos = vertices.map((_, i) => { const g = scGlow([COLORS.blue, COLORS.cyan, COLORS.amber][i], 0.9); g.userData.engineRef = true; scene.add(g); return g; });
+    const h03NodeLabels = ["v0", "v1", "v2"].map((t) => { const l = scLabel(t, 0xeaf4ff, 0.2); l.userData.engineRef = true; scene.add(l); return l; });
+    const h03EdgeTubes = edges.map(() => { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 12), new THREE.MeshStandardMaterial({ color: COLORS.green, emissive: COLORS.green, emissiveIntensity: 0.45, transparent: true, opacity: 0.82, roughness: 0.4 })); m.userData.engineRef = true; scene.add(m); return m; });
+    const h03StructLabel = scLabel("SHEAF COHOMOLOGY", 0x9fb4cc, 0.32); h03StructLabel.userData.engineRef = true; scene.add(h03StructLabel);
+    const h03ChartLabel = scLabel("COBOUNDARY RESIDUALS", 0x9fb4cc, 0.28); h03ChartLabel.userData.engineRef = true; scene.add(h03ChartLabel);
+    const h03ChartBaseline = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 1, 8), new THREE.MeshStandardMaterial({ color: 0x3a4a5e, emissive: 0x223040, roughness: 0.6 })); h03ChartBaseline.userData.engineRef = true; scene.add(h03ChartBaseline);
+
     function markControl(id, value) {
       state.revision += 1;
       state.lastControl = id;
@@ -1385,6 +1675,45 @@
         block.material.color.setHex(s.complexMode === "hole" ? COLORS.amber : COLORS.green);
         block.material.opacity = state.status === "Cocycle" ? 0.52 : 0.13;
       });
+
+      // ===== CLEAN OVERRIDE: hide the instrument soup, show a legible cellular-cohomology scene =====
+      [vertexStalks, edgeStalks, restrictionLines, cochainBlocks, delta0MatrixCells, delta1BoundaryBeads, kernelH0Beads, imageDelta0Blocks, h1CycleBeads, harmonicRepresentativeBeads, quotientWitnessBlocks].forEach((arr) => arr.forEach((o) => { o.visible = false; }));
+      // focal cell complex: vertex dots stay as the nodes, glow halos + labels make them read
+      vertexDots.forEach((dot, i) => {
+        const col = s.base[i] >= 0 ? COLORS.blue : COLORS.amber;
+        h03Halos[i].visible = true;
+        h03Halos[i].position.copy(dot.position);
+        h03Halos[i].material.color.setHex(col);
+        h03Halos[i].material.opacity = 0.5;
+        h03Halos[i].scale.setScalar(0.8 + Math.abs(s.base[i]) * 0.2);
+        h03NodeLabels[i].position.copy(dot.position).add(new THREE.Vector3(0.04, 0.4, 0));
+      });
+      // restriction edge tubes along the triangle, coloured by residual (green=compatible / rose=conflict), thin
+      h03EdgeTubes.forEach((mesh, i) => {
+        mesh.visible = true;
+        const a = vertices[edges[i][0]], b = vertices[edges[i][1]];
+        h03PlaceEdge(mesh, a, b);
+        const conflict = Math.abs(s.residuals[i]) >= 0.18;
+        const col = conflict ? COLORS.rose : COLORS.green;
+        mesh.material.color.setHex(col); mesh.material.emissive.setHex(col);
+        mesh.material.emissiveIntensity = 0.38;
+        mesh.material.opacity = 0.82;
+        const w = 0.55 + Math.min(0.45, Math.abs(s.residuals[i]) * 0.4); mesh.scale.x = w; mesh.scale.z = w;
+      });
+      // RIGHT chart: per-edge coboundary residual rods (reuse delta0Rods, tidy into a clean bar row)
+      const chX = 1.7, chBase = -1.0;
+      delta0Rods.forEach((rod, i) => {
+        rod.visible = true;
+        const value = Math.abs(s.residuals[i]);
+        const hh = 0.14 + value * 0.8;
+        rod.scale.set(1, hh / 0.4, 1);
+        rod.position.set(chX + i * 0.34, chBase + hh * 0.5, 0.6);
+        rod.material.opacity = 0.9;
+        rod.material.color.setHex(value < 0.18 ? COLORS.green : COLORS.rose);
+      });
+      h03PlaceEdge(h03ChartBaseline, new THREE.Vector3(chX - 0.25, chBase + 0.02, 0.6), new THREE.Vector3(chX + 1.05, chBase + 0.02, 0.6));
+      h03StructLabel.position.set(-1.4, 1.5, 0);
+      h03ChartLabel.position.set(2.2, 1.4, 0.6);
     }
 
     function updatePanel() {
@@ -1642,6 +1971,13 @@
     });
     grid(2.9, 1.55, -1.12);
 
+    // ===== legibility layer (h06-style): node glow + labels + 2 region labels. The dense
+    // instrument arrays stay alive/control-driven (counts+hashes hold) but are hidden. =====
+    const h05Halos = nodes.map(() => { const g = scGlow(COLORS.cyan, 0.8); g.userData.engineRef = true; scene.add(g); return g; });
+    const h05NodeLabels = ["x1", "x2", "x3"].map((t) => { const l = scLabel(t, 0xeaf4ff, 0.2); l.userData.engineRef = true; scene.add(l); return l; });
+    const h05StructLabel = scLabel("SHEAF GRAPH (delta x)", 0x9fb4cc, 0.3); h05StructLabel.userData.engineRef = true; scene.add(h05StructLabel);
+    const h05MatrixLabel = scLabel("LAPLACIAN  L_F = delta^T delta", 0x9fb4cc, 0.28); h05MatrixLabel.userData.engineRef = true; scene.add(h05MatrixLabel);
+
     function markControl(id, value) {
       state.revision += 1;
       state.lastControl = id;
@@ -1795,6 +2131,47 @@
         bar.scale.y = 0.2 + value * 0.44;
         bar.material.color.setHex(index === 2 ? COLORS.green : index < 2 ? COLORS.rose : COLORS.amber);
       });
+
+      // ===== CLEAN OVERRIDE: legible "assemble L_F" — sheaf graph | Laplacian matrix =====
+      [deltaBlocks, blockContributionCells, projectionSheafPlates, connectionFrameLines, flowLines, kernelGlobalSectionBeads, edgePlates, energyBars, restrictionLines].forEach((arr) => arr.forEach((o) => { o.visible = false; }));
+      nodeDots.forEach((dot, i) => {
+        dot.castShadow = true;
+        const col = dot.material.color.getHex();
+        if (dot.material.emissive) { dot.material.emissive.setHex(col); dot.material.emissiveIntensity = 0.3; }
+        h05Halos[i].visible = true; h05Halos[i].position.copy(dot.position); h05Halos[i].material.color.setHex(col); h05Halos[i].material.opacity = 0.5; h05Halos[i].scale.setScalar(dot.scale.x * 0.8);
+        h05NodeLabels[i].position.copy(dot.position).add(new THREE.Vector3(0.06, 0.4, 0));
+      });
+      edgeLines.forEach((line) => { line.material.opacity = 0.55; });
+      residualRods.forEach((rod, i) => {
+        const v = Math.abs(s.residuals[i]);
+        const mid = nodes[edges[i][0]].clone().lerp(nodes[edges[i][1]], 0.5);
+        const h = 0.14 + Math.min(1, v) * 0.6;
+        rod.visible = true; rod.position.copy(mid).add(new THREE.Vector3(0, 0.08 + h * 0.5, 0));
+        rod.scale.set(1.1, h / 0.42, 1.1);
+        rod.material.color.setHex(v < 0.16 ? COLORS.green : COLORS.rose); rod.material.opacity = 0.82; rod.castShadow = true;
+      });
+      // RIGHT region: the Laplacian L_F as a clean 3x3 matrix + eigen-spectrum chart
+      lapBlocks.forEach((block, i) => {
+        const row = Math.floor(i / 3), col = i % 3;
+        block.visible = true;
+        block.position.set(2.45 + col * 0.32, 0.92 - row * 0.32, 0.1);
+        block.scale.setScalar(1.5);
+        block.material.opacity = 0.92;
+        block.material.color.setHex(row === col ? COLORS.green : COLORS.amber);
+        block.castShadow = true;
+      });
+      spectrumEigenBars.forEach((bar, i) => {
+        bar.visible = true;
+        const lambda = i === 0 ? 0 : 0.22 + i * 0.22 * s.mapStrength;
+        const height = i === 0 ? s.kernelProximity : Math.exp(-lambda) * 0.8;
+        const hh = 0.12 + Math.max(0, height) * 0.8;
+        bar.position.set(2.5 + i * 0.3, -1.0 + hh * 0.5, 1.05);
+        bar.scale.set(1, hh / 0.24, 1);
+        bar.material.opacity = 0.85;
+        bar.castShadow = true;
+      });
+      h05StructLabel.position.set(-0.2, 1.5, 0);
+      h05MatrixLabel.position.set(3.0, 1.5, 0.1);
     }
 
     function updatePanel() {

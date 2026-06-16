@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>B08 Information Geometry</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=b08-b09-canonical-clarity-v2">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="probability" data-lab-id="b08" data-keywords="information geometry statistical manifold Fisher metric KL divergence geodesic natural gradient">
@@ -84,7 +84,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=b08-b09-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"b08","kind":"probability","title":"B08 Information Geometry","modes":[{"value":"manifold","label":"Manifold"},{"value":"fisher","label":"Fisher metric"},{"value":"kl","label":"KL projection"},{"value":"natural","label":"Natural gradient"}],"parameters":[{"key":"focus","label":"Concept focus","min":0,"max":1,"step":0.01,"value":0.45},{"key":"spread","label":"Spread / uncertainty","min":0.05,"max":1,"step":0.01,"value":0.55},{"key":"noise","label":"Noise / perturbation","min":0,"max":1,"step":0.01,"value":0.24},{"key":"samples","label":"Sample count","min":2,"max":14,"step":1,"value":7},{"key":"strength","label":"Evidence strength","min":0,"max":1,"step":0.01,"value":0.5}],"metrics":["Fisher length","KL projection","Geodesic gap","Curvature"],"visual":{"kind":"information-geometry-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Fisher length","formula":"ds^2 = dtheta^T I(theta) dtheta","insight":"B08 treats probability models as geometry: Fisher metric measures distinguishability, KL bends local neighborhoods, and natural gradient follows that geometry."}});
     window.__b08LabSnapshot = () => window.__gLabSnapshot();

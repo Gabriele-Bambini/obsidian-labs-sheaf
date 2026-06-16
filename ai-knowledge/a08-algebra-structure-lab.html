@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A08 Abstract Algebra</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a07-a08-canonical-clarity-v1">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a08" data-keywords="abstract algebra groups rings fields homomorphism kernel quotient orbit units zero divisors">
@@ -84,7 +84,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=a07-a08-canonical-clarity-v1"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"a08","kind":"algebra","title":"A08 Abstract Algebra","modes":[{"value":"table","label":"Group table"},{"value":"ring","label":"Ring units"},{"value":"homomorphism","label":"Homomorphism"},{"value":"action","label":"Group action"}],"parameters":[{"key":"modulus","label":"modulus n","min":4,"max":9,"step":1,"value":4},{"key":"generator","label":"generator","min":1,"max":8,"step":1,"value":1},{"key":"map","label":"map factor","min":1,"max":5,"step":1,"value":2},{"key":"operation","label":"operation","min":0,"max":1,"step":1,"value":0},{"key":"quotient","label":"quotient","min":2,"max":5,"step":1,"value":2}],"metrics":["Closure score","Unit fraction","Kernel size","Orbit length"],"visual":{"kind":"abstract-algebra-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Orbit length","formula":"operation table + generator orbit + ker(phi) -> quotient structure","insight":"A08 makes algebra procedural: the table proves closure, highlighted rows show identity/inverses/units, generator arrows show reachability, and the kernel/quotient view shows exactly what a homomorphism forgets."},"graph":{"nodes":[{"label":"operation table","position":[-1.8,-1.7,0],"group":0},{"label":"identity","position":[-0.2,-0.8,-0.7],"group":1},{"label":"inverse/unit","position":[0.8,-1,-0.2],"group":2},{"label":"generator orbit","position":[2,-1.3,0.4],"group":3},{"label":"kernel quotient","position":[2.8,-0.8,-0.55],"group":4}],"edges":[[0,1,"law check",1],[0,2,"invertibility",1],[2,3,"action orbit",1],[0,4,"homomorphism collapse",1],[4,3,"quotient action",1]]}});
     window.__a08LabSnapshot = () => window.__gLabSnapshot();

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>C01 Convex Analysis</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=b10-c01-canonical-clarity-v2">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="optimization" data-lab-id="c01" data-keywords="convex analysis convex set epigraph Jensen subgradient supporting hyperplane Fenchel conjugate">
@@ -84,7 +84,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=b10-c01-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"c01","kind":"optimization","title":"C01 Convex Analysis","modes":[{"value":"set","label":"Convex set"},{"value":"epigraph","label":"Epigraph"},{"value":"jensen","label":"Jensen"},{"value":"fenchel","label":"Fenchel conjugate"}],"parameters":[{"key":"curvature","label":"Curvature / convexity","min":-1.5,"max":2.5,"step":0.01,"value":0.9},{"key":"step","label":"Step size / time","min":0.02,"max":1,"step":0.01,"value":0.28},{"key":"noise","label":"Noise / perturbation","min":0,"max":1,"step":0.01,"value":0.16},{"key":"budget","label":"Iterations / particles","min":1,"max":14,"step":1,"value":6},{"key":"regularization","label":"Regularization / dual weight","min":0,"max":1,"step":0.01,"value":0.45}],"metrics":["Jensen gap","Support violation","Subgradient norm","Fenchel gap"],"visual":{"kind":"convex-analysis-lab","graphStyle":"hidden","quality":"c01-c02-premium-v1"},"profile":{"preferredMetric":"Jensen gap","formula":"f(theta x + (1-theta)y) <= theta f(x) + (1-theta)f(y)","insight":"C01 makes convex analysis concrete: epigraphs, supporting planes, Jensen gaps, and conjugate slopes are visible certificates, not abstract definitions."}});
     window.__c01LabSnapshot = () => window.__gLabSnapshot();

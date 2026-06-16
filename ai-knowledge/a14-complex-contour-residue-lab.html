@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A14 Complex Analysis</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a13-a14-canonical-clarity-v3">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a14" data-keywords="complex analysis Cauchy Riemann analytic contour integral residue theorem Laurent pole branch cut winding number">
@@ -85,7 +85,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=a13-a14-canonical-clarity-v3"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"a14","kind":"algebra","title":"A14 Complex Analysis","modes":[{"value":"cr","label":"Cauchy-Riemann"},{"value":"contour","label":"Contour integral"},{"value":"residue","label":"Residue theorem"},{"value":"laurent","label":"Laurent pole"},{"value":"branch","label":"Branch cut"}],"parameters":[{"key":"radius","label":"contour radius","min":0.45,"max":2.2,"step":0.05,"value":1.25},{"key":"pole","label":"pole distance","min":0,"max":2.4,"step":0.05,"value":0.72},{"key":"residue","label":"residue scale","min":-2,"max":2,"step":0.05,"value":1},{"key":"winding","label":"winding","min":-2,"max":3,"step":1,"value":1},{"key":"branch","label":"branch cut","min":0,"max":1,"step":0.02,"value":0.25}],"metrics":["Winding number","Residue integral","CR defect","Pole distance"],"visual":{"kind":"complex-analysis-contour-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Winding number","formula":"oint_C f(z) dz = 2 pi i * sum Res(f,a) * wind(C,a)","insight":"A14 makes the residue theorem operational: a contour samples analytic structure globally, a pole contributes only when enclosed with nonzero winding, and branch cuts mark where analytic continuation changes sheet."}});
     window.__a14LabSnapshot = () => window.__gLabSnapshot();

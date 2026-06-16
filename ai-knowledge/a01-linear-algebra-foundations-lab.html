@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A01 Linear Algebra Fundamentals</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a01-a02-canonical-clarity-v1">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a01" data-keywords="linear algebra vectors 3d space axes components coordinates projection dot product basis">
@@ -83,7 +83,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=a01-a02-canonical-clarity-v1"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"a01","kind":"algebra","title":"A01 Linear Algebra Fundamentals","modes":[{"value":"vector","label":"Vector coordinates"},{"value":"components","label":"Components"},{"value":"projection","label":"Projection"}],"parameters":[{"key":"x","label":"x component","min":-2,"max":2,"step":0.05,"value":1.1},{"key":"y","label":"y component","min":-2,"max":2,"step":0.05,"value":0.85},{"key":"z","label":"z component","min":-2,"max":2,"step":0.05,"value":0.55},{"key":"basis","label":"Basis scale","min":0.5,"max":2.5,"step":0.05,"value":1},{"key":"mix","label":"Second vector mix","min":-1,"max":1,"step":0.05,"value":0.35}],"metrics":["Vector length","Plane projection","Dot with u","Basis volume"],"visual":{"kind":"vector-space-3d","graphStyle":"hidden"},"profile":{"preferredMetric":"Vector length","formula":"v = x e1 + y e2 + z e3","insight":"This lab keeps linear algebra at the object level: one vector in 3D space, its coordinate components, its projection onto the base plane, and its comparison with a second vector."},"graph":{"nodes":[{"label":"origin","position":[-0.35,-1.75,0],"group":0},{"label":"x axis","position":[2.2,-1.75,0],"group":1},{"label":"y axis","position":[-0.35,0.55,0],"group":2},{"label":"z axis","position":[-0.35,-1.75,2.2],"group":3},{"label":"vector v","position":[1,-0.65,0.7],"group":4},{"label":"component legs","position":[0.65,-1.05,0.35],"group":5},{"label":"plane projection","position":[1,-1.75,0.7],"group":6},{"label":"second vector u","position":[-1,-1.2,1.15],"group":7}],"edges":[[0,1,"basis x direction",1],[0,2,"basis y direction",1],[0,3,"basis z direction",1],[0,4,"v coordinates",1.4],[0,5,"component decomposition",1],[4,6,"projection shadow",1.1],[0,7,"second vector comparison",0.9],[4,7,"dot product angle",0.8]]}});
     window.__a01LabSnapshot = () => window.__gLabSnapshot();

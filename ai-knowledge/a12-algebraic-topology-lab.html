@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A12 Algebraic Topology</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a11-a12-canonical-clarity-v1">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a12" data-keywords="algebraic topology simplicial complex chains boundary maps homology Betti fundamental group persistence">
@@ -85,7 +85,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=a11-a12-canonical-clarity-v1"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"a12","kind":"algebra","title":"A12 Algebraic Topology","modes":[{"value":"complex","label":"Simplicial complex"},{"value":"boundary","label":"Boundary maps"},{"value":"homology","label":"Homology"},{"value":"fundamental","label":"Fundamental loop"},{"value":"persistence","label":"Persistence"}],"parameters":[{"key":"radius","label":"filtration radius","min":0.45,"max":1.8,"step":0.05,"value":1.05},{"key":"fill","label":"face fill","min":0,"max":1,"step":0.02,"value":0.22},{"key":"boundary","label":"boundary weight","min":0,"max":1,"step":0.02,"value":0.65},{"key":"twist","label":"loop twist","min":0,"max":1,"step":0.02,"value":0.2},{"key":"persistence","label":"persistence","min":0,"max":1,"step":0.02,"value":0.55}],"metrics":["Betti-0","Betti-1","Boundary rank","Persistence span"],"visual":{"kind":"algebraic-topology-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Betti-1","formula":"H_k = ker(partial_k) / im(partial_{k+1})","insight":"A12 turns topology into computable algebra: simplices become chain groups, boundary matrices detect cycles, a filled face kills a loop, and persistence records how long features survive."}});
     window.__a12LabSnapshot = () => window.__gLabSnapshot();

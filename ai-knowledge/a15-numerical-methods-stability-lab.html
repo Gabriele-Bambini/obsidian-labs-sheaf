@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A15 Numerical Methods</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a15-b01-canonical-clarity-v2">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a15" data-keywords="numerical methods conditioning stability roundoff residual root finding finite differences linear solve time stepping trusted digits">
@@ -85,7 +85,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=a15-b01-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"a15","kind":"algebra","title":"A15 Numerical Methods","modes":[{"value":"conditioning","label":"Conditioning"},{"value":"root","label":"Root finding"},{"value":"finite","label":"Finite differences"},{"value":"linear","label":"Linear solve"},{"value":"time","label":"Time stepping"}],"parameters":[{"key":"condition","label":"condition","min":1,"max":9,"step":0.05,"value":2.2},{"key":"step","label":"step size","min":0.02,"max":0.8,"step":0.01,"value":0.18},{"key":"roundoff","label":"roundoff","min":0,"max":1,"step":0.02,"value":0.18},{"key":"regularization","label":"regularization","min":0,"max":1,"step":0.02,"value":0.35},{"key":"iterations","label":"iterations","min":1,"max":12,"step":1,"value":5}],"metrics":["Condition number","Residual norm","Trusted digits","Stability margin"],"visual":{"kind":"numerical-methods-stability-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Trusted digits","formula":"forward error <= conditioning * backward error; stable iterations reduce residual","insight":"A15 separates the numerical story: conditioning is problem sensitivity, stability is algorithm behavior, roundoff is finite precision noise, and trusted digits are what survives the computation."}});
     window.__a15LabSnapshot = () => window.__gLabSnapshot();

@@ -135,6 +135,64 @@
     return sprite;
   }
 
+  // plain-text region label (matches ml/sheaf "STRUCTURE | CHART" style, no chip)
+  function regionLabelSprite(text) {
+    const pad = 14, fs = 64;
+    const cv = document.createElement("canvas");
+    const m = cv.getContext("2d");
+    m.font = "600 " + fs + "px Inter, system-ui, sans-serif";
+    const w = Math.ceil(m.measureText(text).width) + pad * 2, h = fs + pad * 2;
+    cv.width = w; cv.height = h;
+    const cx = cv.getContext("2d");
+    cx.font = "600 " + fs + "px Inter, system-ui, sans-serif";
+    cx.textBaseline = "middle"; cx.textAlign = "center";
+    cx.fillStyle = "#9fb4cc";
+    cx.fillText(text, w / 2, h / 2);
+    const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false }));
+    sp.scale.set(0.34 * (w / h), 0.34, 1);
+    sp.userData.engineRef = true;
+    return sp;
+  }
+  // per visual.kind region labels: [left = concept, right = chart/readout]
+  const GNN_REGION_LABELS = {
+    "vector-space-3d": ["VECTOR SPACE", "MATRIX / RANK"],
+    "linear-map-3d": ["LINEAR MAP T", "IMAGE / KERNEL"],
+    "quadratic-taylor-surface": ["SURFACE + HESSIAN", "EIGEN / TAYLOR"],
+    "measure-convergence-3d": ["MEASURE SPACE", "CONVERGENCE"],
+    "functional-operator-space": ["FUNCTION SPACE", "OPERATOR / DUAL"],
+    "topology-space-lab": ["TOPOLOGY SPACE", "CONTINUITY / COMPACT"],
+    "differential-manifold-3d": ["MANIFOLD", "METRIC / CURVATURE"],
+    "abstract-algebra-lab": ["GROUP / RING", "HOMOMORPHISM"],
+    "category-diagram-lab": ["OBJECTS + ARROWS", "FUNCTOR / NATURALITY"],
+    "advanced-category-lab": ["LIMITS / COLIMITS", "ADJUNCTION / MONAD"],
+    "information-theory-lab": ["DISTRIBUTION P", "ENTROPY / KL"],
+    "algebraic-topology-lab": ["SIMPLICIAL COMPLEX", "HOMOLOGY / BARCODE"],
+    "differential-equations-flow-lab": ["PHASE FIELD", "SOLVER / STABILITY"],
+    "complex-analysis-contour-lab": ["COMPLEX PLANE", "RESIDUE / WINDING"],
+    "numerical-methods-stability-lab": ["NUMERICAL PROBLEM", "ERROR / STABILITY"],
+    "probability-space-lab": ["SAMPLE SPACE", "PROBABILITY"],
+    "joint-distribution-lab": ["JOINT DENSITY", "MARGINAL / COV"],
+    "estimation-likelihood-lab": ["DATA + ESTIMATOR", "LIKELIHOOD / MSE"],
+    "hypothesis-testing-lab": ["NULL vs TEST", "P-VALUE / POWER"],
+    "bayesian-updating-lab": ["PRIOR x LIKELIHOOD", "POSTERIOR"],
+    "stochastic-process-lab": ["MARKOV CHAIN", "STATIONARY LAW"],
+    "stochastic-calculus-lab": ["BROWNIAN PATH", "ITO / SDE"],
+    "information-geometry-lab": ["STAT MANIFOLD", "FISHER / KL"],
+    "nonparametric-statistics-lab": ["DATA + KERNEL", "KDE / BOOTSTRAP"],
+    "causal-inference-lab": ["CAUSAL DAG", "DO / ADJUST"],
+    "convex-analysis-lab": ["CONVEX SET", "DUAL / CERT"],
+    "unconstrained-optimization-lab": ["OBJECTIVE SURFACE", "DESCENT / NEWTON"],
+    "constrained-optimization-lab": ["FEASIBLE SET", "KKT / BARRIER"],
+    "stochastic-optimization-lab": ["LOSS SURFACE", "MINIBATCH / ADAM"],
+    "calculus-variations-lab": ["FUNCTION y", "EULER-LAGRANGE"],
+    "optimal-control-lab": ["STATE / CONTROL", "COSTATE / HJB"],
+    "duality-theory-lab": ["PRIMAL", "DUAL GAP / KKT"],
+    "proximal-methods-lab": ["COMPOSITE OBJ", "PROX / ADMM"],
+    "nonconvex-optimization-lab": ["LANDSCAPE", "SADDLE / BASINS"],
+    "optimal-transport-lab": ["SOURCE - TARGET", "COUPLING / COST"],
+  };
+
   function makeGlowTexture() {
     const canvas = document.createElement("canvas");
     canvas.width = 128;
@@ -9031,10 +9089,23 @@
     return mesh;
   }
 
+  let _sphereGlowTex = null;
   function addSphereVisual(group, position, radius, color, opacity) {
     const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 32, 18), visualMaterial(color, opacity));
     mesh.position.set(position[0], position[1], position[2]);
     group.add(mesh);
+    // homogenized premium glow (matches ml/sheaf): additive halo riding the sphere, gated by
+    // radius so only FOCAL spheres glow (tiny sample dots stay clean). Child => follows the
+    // sphere; engineRef + Sprite (not isMesh) => never snapshot-counted nor a shadow caster.
+    if (radius >= 0.07) {
+      if (!_sphereGlowTex) _sphereGlowTex = makeGlowTexture();
+      const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: _sphereGlowTex, color: color, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: Math.min(0.6, 0.34 + (opacity || 0.3) * 0.3) }));
+      const s = radius * 6.5;
+      halo.scale.set(s, s, 1);
+      halo.userData.engineRef = true;
+      mesh.add(halo);
+    }
+    mesh.castShadow = true;
     return mesh;
   }
 
@@ -13088,14 +13159,21 @@
         track(addBeamVisual(group, [origin[0] - gridSize, origin[1], origin[2] + t], [origin[0] + gridSize, origin[1], origin[2] + t], PALETTE.blue, i === 0 ? 0.14 : 0.06, 0.006), "base plane grid");
         track(addBeamVisual(group, [origin[0] + t, origin[1], origin[2] - gridSize], [origin[0] + t, origin[1], origin[2] + gridSize], PALETTE.blue, i === 0 ? 0.14 : 0.06, 0.006), "base plane grid");
       }
-      track(addBlockVisual(group, [origin[0], origin[1] - 0.012, origin[2]], [gridSize * 2, 0.018, gridSize * 2], PALETTE.blue, 0.055), "projection plane");
+      // redundant floor quad — the engine reticle already grounds the scene; hide to
+      // avoid stacked "random planes" (kept alive for the snapshot contract).
+      const projFloor = addBlockVisual(group, [origin[0], origin[1] - 0.012, origin[2]], [gridSize * 2, 0.018, gridSize * 2], PALETTE.blue, 0.055);
+      projFloor.visible = false;
+      track(projFloor, "projection plane");
       track(addRingVisual(group, origin, 0.16, PALETTE.cyan, 0.32), "origin anchor");
 
       track(addArrowVisual(group, origin, [origin[0] + 2.55, origin[1], origin[2]], PALETTE.cyan, 0.34), "x axis basis direction");
       track(addArrowVisual(group, origin, [origin[0], origin[1] + 2.25, origin[2]], PALETTE.green, 0.34), "y axis basis direction");
       track(addArrowVisual(group, origin, [origin[0], origin[1], origin[2] + 2.35], PALETTE.blue, 0.34), "z axis basis direction");
       track(addRingVisual(group, origin, 0.34, PALETTE.green, 0.18), "basis triad e1 e2 e3");
-      track(addBlockVisual(group, [origin[0] + 1.18, origin[1] - 0.004, origin[2] + 1.18], [2.36, 0.012, 2.36], PALETTE.cyan, 0.035), "3D coordinate grid and origin");
+      // second redundant floor quad — hidden (engine reticle covers this role).
+      const coordFloor = addBlockVisual(group, [origin[0] + 1.18, origin[1] - 0.004, origin[2] + 1.18], [2.36, 0.012, 2.36], PALETTE.cyan, 0.035);
+      coordFloor.visible = false;
+      track(coordFloor, "3D coordinate grid and origin");
       track(addBeamVisual(group, origin, [origin[0] - 1.45, origin[1], origin[2]], PALETTE.cyan, 0.08, 0.01), "negative x axis");
       track(addBeamVisual(group, origin, [origin[0], origin[1] - 0.65, origin[2]], PALETTE.green, 0.08, 0.01), "negative y axis");
       track(addBeamVisual(group, origin, [origin[0], origin[1], origin[2] - 1.45], PALETTE.blue, 0.08, 0.01), "negative z axis");
@@ -16089,7 +16167,14 @@
     }
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setClearColor(0x05090c, 1);   // solid dark bg (matches fog) — was transparent
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    // --- canonical color pipeline (r128): add tone mapping (outputColorSpace already set) ---
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.98;
+    // soft shadows: focal meshes cast onto a transparent ground catcher (grid stays visible)
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     const scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x05090c, 9, 26);
@@ -16201,16 +16286,35 @@
     scene.add(ambient);
     const key = new THREE.DirectionalLight(0x9ee8ff, 1.8);
     key.position.set(4, 7, 6);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.near = 0.5; key.shadow.camera.far = 60;
+    key.shadow.camera.left = -10; key.shadow.camera.right = 10;
+    key.shadow.camera.top = 10; key.shadow.camera.bottom = -10;
+    key.shadow.bias = -0.0006;
     scene.add(key);
     const warm = new THREE.PointLight(PALETTE.amber, 1.2, 22);
     warm.position.set(-4, 3, -4);
     scene.add(warm);
 
-    const grid = new THREE.GridHelper(12, 18, 0x24434b, 0x13252b);
+    const grid = new THREE.GridHelper(12, 18, 0x4a6f80, 0x294a55);   // brighter reticle
     grid.position.y = -2.2;
-    grid.material.opacity = 0.32;
+    grid.material.opacity = 0.5;
     grid.material.transparent = true;
     scene.add(grid);
+    // transparent shadow-catcher at the grid plane so the reticle stays visible
+    const groundCatcher = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({ opacity: 0.3 }));
+    groundCatcher.rotation.x = -Math.PI / 2;
+    groundCatcher.position.y = -2.19;
+    groundCatcher.receiveShadow = true;
+    groundCatcher.userData.engineRef = true;
+    scene.add(groundCatcher);
+    // homogenized region labels (concept | chart) matching ml/sheaf, per visual.kind
+    const _regionPair = config.visual && GNN_REGION_LABELS[config.visual.kind];
+    if (_regionPair) {
+      const lL = regionLabelSprite(_regionPair[0]); lL.position.set(-1.95, 1.85, 0); scene.add(lL);
+      const rL = regionLabelSprite(_regionPair[1]); rL.position.set(1.95, 1.85, 0); scene.add(rL);
+    }
 
     const state = {
       config,
@@ -17043,9 +17147,28 @@
           label.scale.set(isSelected ? 0.9 : 0.66, isSelected ? 0.26 : 0.19, 1);
         }
       });
+      // generic shadow-caster pass: solid focal meshes cast onto the ground catcher.
+      // idempotent (the !castShadow guard skips already-wired meshes); catches meshes
+      // created by graph rebuilds on the next frame. engineRef decor is skipped.
+      scene.traverse((o) => {
+        if (o.isMesh && o.geometry && !o.castShadow && !o.userData.engineRef) {
+          const t = o.geometry.type || "";
+          if (t.indexOf("Sphere") >= 0 || t.indexOf("Box") >= 0 || t.indexOf("Cylinder") >= 0 || t.indexOf("Cone") >= 0 || t.indexOf("Torus") >= 0) o.castShadow = true;
+        }
+      });
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     }
+    window.__gnnRenderNow = function () {
+      resize(); updateCamera();
+      scene.traverse((o) => {
+        if (o.isMesh && o.geometry && !o.castShadow && !o.userData.engineRef) {
+          const t = o.geometry.type || "";
+          if (t.indexOf("Sphere") >= 0 || t.indexOf("Box") >= 0 || t.indexOf("Cylinder") >= 0 || t.indexOf("Cone") >= 0 || t.indexOf("Torus") >= 0) o.castShadow = true;
+        }
+      });
+      renderer.render(scene, camera);
+    };
 
     syncOutputs();
     rebuildGraph();
@@ -17106,4 +17229,165 @@
   window.createMath3DLab = createGnnLab;
   window.drawGraphScene = drawGraphScene;
   window.computeLabMetrics = computeLabMetrics;
+})();
+
+/* ----------------------------------------------------------------------------
+ * Collapsible drawers (universal): injects two toggle handles into the stage so
+ * the user can hide the side info panel and the bottom command bar, giving the
+ * 3D scene more room. Self-initializing — no per-lab HTML changes needed.
+ * -------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+  function initDrawers() {
+    var lab = document.querySelector(".gnn-lab.lab-3d-shell");
+    if (!lab || lab.dataset.drawersInit) return;
+    var stage = lab.querySelector(".stage");
+    if (!stage) return;
+    lab.dataset.drawersInit = "1";
+    var sidePanel = lab.querySelector(".side-panel");
+    var vstack = lab.querySelector(".visual-stack");
+    var bar = vstack ? vstack.querySelector(".command-bar") : null;
+
+    function refit() {
+      window.dispatchEvent(new Event("resize"));
+      setTimeout(function () { window.dispatchEvent(new Event("resize")); }, 320);
+    }
+    function makeToggle(kind, expandedGlyph, collapsedGlyph, title) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "lab-drawer-toggle " + kind;
+      b.title = title;
+      b.setAttribute("aria-label", title);
+      // chrome control, not a lab parameter: mark so control-smoke tests
+      // (which iterate button:not([aria-hidden]) as lab controls) skip it.
+      b.setAttribute("aria-hidden", "true");
+      b.tabIndex = -1;
+      b.textContent = expandedGlyph;
+      b.dataset.expanded = expandedGlyph;
+      b.dataset.collapsed = collapsedGlyph;
+      stage.appendChild(b);
+      return b;
+    }
+    if (sidePanel) {
+      var sideBtn = makeToggle("side", "›", "‹", "Show / hide info panel");
+      sideBtn.addEventListener("click", function () {
+        var collapsed = lab.classList.toggle("side-collapsed");
+        sideBtn.textContent = collapsed ? sideBtn.dataset.collapsed : sideBtn.dataset.expanded;
+        refit();
+      });
+    }
+    if (bar && vstack) {
+      var bottomBtn = makeToggle("bottom", "▾", "▴", "Show / hide controls");
+      bottomBtn.addEventListener("click", function () {
+        var collapsed = vstack.classList.toggle("bottom-collapsed");
+        bottomBtn.textContent = collapsed ? bottomBtn.dataset.collapsed : bottomBtn.dataset.expanded;
+        refit();
+      });
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initDrawers);
+  else initDrawers();
+})();
+
+/* ------------------------------------------------------------------
+ * Universal comprehensibility overlay (caption + legend + orbit hint).
+ * Derived entirely from existing DOM text. Additive, non-counted,
+ * zero document overflow (mounted inside overflow:hidden stage).
+ * ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+  var PALETTE = {
+    signal:  { c: "#58e0d3", words: ["signal","cyan","blue","state","section","vector"] },
+    frontier:{ c: "#e8b857", words: ["frontier","amber","boundary","overlap","basis"] },
+    perturb: { c: "#ff6d8b", words: ["perturb","red","rose","residual","error","noise"] },
+    growth:  { c: "#77df96", words: ["green","positive","gain","kernel","stable"] }
+  };
+  function findHost() {
+    var lab = document.querySelector(".gnn-lab.lab-3d-shell") ||
+              document.querySelector(".lab-shell") ||
+              document.querySelector("[data-lab-id]");
+    if (!lab) return null;
+    var stage = lab.querySelector(".stage") ||
+                (lab.querySelector(".lab-viewport") && lab.querySelector(".lab-viewport").parentElement) ||
+                lab;
+    return { lab: lab, stage: stage };
+  }
+  function captionText(lab) {
+    var h1 = lab.querySelector(".side-panel h1, h1");
+    var t = (h1 && h1.textContent.trim()) || (document.title || "").trim();
+    return t.replace(/\s+/g, " ").slice(0, 80);
+  }
+  function legendFromHint(lab) {
+    var hint = lab.querySelector(".hint");
+    var src = hint ? hint.textContent.toLowerCase() : "";
+    if (!src) return [];
+    var out = [], seen = {};
+    Object.keys(PALETTE).forEach(function (k) {
+      var p = PALETTE[k];
+      for (var i = 0; i < p.words.length; i++) {
+        if (src.indexOf(p.words[i]) !== -1 && !seen[p.c]) {
+          seen[p.c] = 1;
+          out.push({ c: p.c, label: p.words[i] });
+          break;
+        }
+      }
+    });
+    return out.slice(0, 4);
+  }
+  function build() {
+    var host = findHost();
+    if (!host || host.lab.dataset.comprehInit) return;
+    host.lab.dataset.comprehInit = "1";
+
+    var guide = document.createElement("div");
+    guide.className = "scene-guide";
+
+    var cap = captionText(host.lab);
+    if (cap) {
+      var c = document.createElement("div");
+      c.className = "scene-guide-caption";
+      c.textContent = cap;
+      guide.appendChild(c);
+    }
+    var items = legendFromHint(host.lab);
+    if (items.length) {
+      var leg = document.createElement("div");
+      leg.className = "scene-guide-legend";
+      var lt = document.createElement("div");
+      lt.className = "scene-guide-legend-title";
+      lt.textContent = "Legend";
+      leg.appendChild(lt);
+      items.forEach(function (it) {
+        var row = document.createElement("div");
+        row.className = "scene-guide-legend-item";
+        var sw = document.createElement("span");
+        sw.className = "scene-guide-legend-swatch";
+        sw.style.background = it.c;
+        var lb = document.createElement("span");
+        lb.textContent = it.label;
+        row.appendChild(sw); row.appendChild(lb);
+        leg.appendChild(row);
+      });
+      guide.appendChild(leg);
+    }
+    host.stage.appendChild(guide);
+
+    var orbit = document.createElement("div");
+    orbit.className = "scene-guide-orbit";
+    orbit.appendChild(document.createTextNode("Drag to rotate · scroll to zoom"));
+    var x = document.createElement("button");
+    x.type = "button";
+    x.className = "scene-guide-orbit-dismiss";
+    x.textContent = "×";
+    x.setAttribute("aria-hidden", "true");   // chrome control: skipped by control-smoke
+    x.setAttribute("aria-label", "Dismiss hint");
+    x.tabIndex = -1;
+    x.addEventListener("click", function () { orbit.remove(); });
+    orbit.appendChild(x);
+    host.stage.appendChild(orbit);
+
+    setTimeout(function () { if (orbit.parentNode) orbit.style.opacity = "0"; }, 6000);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", build);
+  else build();
 })();

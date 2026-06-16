@@ -3,7 +3,7 @@
 The notes embed labs through:
 
 ```html
-<iframe src="http://127.0.0.1:8765/<lab-file>.html"></iframe>
+<iframe src="https://gabrielebambini00.github.io/obsidian-labs/ai-knowledge/<lab-file>.html"></iframe>
 ```
 
 The local Obsidian plugin `.obsidian/plugins/interactive-lab-server` starts that server automatically when the vault opens on desktop.
@@ -13,7 +13,7 @@ If labs do not appear:
 1. Restart Obsidian or run `Ctrl+R`.
 2. Open Settings -> Community plugins.
 3. Make sure `Interactive Lab Server` is enabled.
-4. Test the catalog in a browser: `http://127.0.0.1:8765/index.html`.
+4. Test the catalog in a browser: `https://gabrielebambini00.github.io/obsidian-labs/ai-knowledge/index.html`.
 
 This is portable across machines because the plugin serves files from the current vault path instead of using an absolute disk path.
 
@@ -24,7 +24,7 @@ The same local plugin is mobile-safe. When the vault is synced to Android, Obsid
 No note rewrites are needed. Keep the desktop iframe source:
 
 ```html
-<iframe src="http://127.0.0.1:8765/<lab-file>.html"></iframe>
+<iframe src="https://gabrielebambini00.github.io/obsidian-labs/ai-knowledge/<lab-file>.html"></iframe>
 ```
 
 If a mobile-specific version exists beside the normal lab, Android uses it first:

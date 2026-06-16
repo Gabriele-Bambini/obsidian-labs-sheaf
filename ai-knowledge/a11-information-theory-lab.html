@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A11 Information Theory</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=a11-a12-canonical-clarity-v1">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="algebra" data-lab-id="a11" data-keywords="information theory entropy cross entropy KL divergence mutual information noisy channel coding theorem">
@@ -85,7 +85,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=a11-a12-canonical-clarity-v1"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"a11","kind":"algebra","title":"A11 Information Theory","modes":[{"value":"entropy","label":"Entropy"},{"value":"cross","label":"Cross entropy"},{"value":"kl","label":"KL mismatch"},{"value":"mi","label":"Mutual information"},{"value":"channel","label":"Noisy channel"}],"parameters":[{"key":"spread","label":"entropy spread","min":0.05,"max":1,"step":0.02,"value":0.62},{"key":"mismatch","label":"model mismatch","min":0,"max":1,"step":0.02,"value":0.25},{"key":"noise","label":"channel noise","min":0,"max":0.5,"step":0.01,"value":0.18},{"key":"samples","label":"samples","min":2,"max":12,"step":1,"value":6},{"key":"temperature","label":"softmax temp","min":0.35,"max":2.5,"step":0.05,"value":1}],"metrics":["Entropy H(p)","Cross entropy","KL divergence","Mutual information"],"visual":{"kind":"information-theory-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"KL divergence","formula":"H(p), H(p,q)=H(p)+D_KL(p||q), I(X;Y)=H(X)-H(X|Y)","insight":"A11 makes information visible as coding geometry: p sets ideal code lengths, q pays an extra KL cost when mismatched, and channel noise destroys shared uncertainty between input and output."}});
     window.__a11LabSnapshot = () => window.__gLabSnapshot();

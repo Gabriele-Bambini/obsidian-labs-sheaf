@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>C10 Optimal Transport</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=c10-d01-canonical-clarity-v2">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="optimization" data-lab-id="c10" data-keywords="optimal transport transport plan coupling Sinkhorn Wasserstein dual potentials displacement interpolation">
@@ -84,7 +84,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=c10-d01-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"c10","kind":"optimization","title":"C10 Optimal Transport","modes":[{"value":"plan","label":"Plan"},{"value":"sinkhorn","label":"Sinkhorn"},{"value":"dual","label":"Dual potentials"},{"value":"displacement","label":"Displacement"}],"parameters":[{"key":"curvature","label":"Cost power p","min":-1.5,"max":2.5,"step":0.01,"value":0.9},{"key":"step","label":"Geodesic time t","min":0.02,"max":1,"step":0.01,"value":0.28},{"key":"noise","label":"Source-target layout","min":0,"max":1,"step":0.01,"value":0.16},{"key":"budget","label":"Sinkhorn iterations","min":1,"max":14,"step":1,"value":6},{"key":"regularization","label":"Entropy epsilon","min":0,"max":1,"step":0.01,"value":0.45}],"metrics":["Transport cost","Marginal error","Entropy","Wasserstein path"],"visual":{"kind":"optimal-transport-lab","graphStyle":"hidden","quality":"c09-c10-premium-v1"},"profile":{"preferredMetric":"Transport cost","formula":"min_pi sum_ij c_ij pi_ij subject to pi 1 = a, pi^T 1 = b","insight":"C10 shows distribution comparison as moving mass: a coupling links source and target, Sinkhorn regularizes the plan, and Wasserstein geometry interpolates displacement."}});
     window.__c10LabSnapshot = () => window.__gLabSnapshot();

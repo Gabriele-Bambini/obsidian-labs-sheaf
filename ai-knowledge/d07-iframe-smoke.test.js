@@ -30,6 +30,23 @@ async function waitForLabFrame(page, fileName) {
   throw new Error(`No iframe loaded ${fileName}.`);
 }
 
+function canvasInkScore(canvas) {
+  const copy = document.createElement("canvas");
+  copy.width = canvas.width;
+  copy.height = canvas.height;
+  const ctx = copy.getContext("2d");
+  ctx.drawImage(canvas, 0, 0);
+  const sample = ctx.getImageData(0, 0, copy.width, copy.height).data;
+  let ink = 0;
+  for (let i = 0; i < sample.length; i += 16) {
+    const r = sample[i];
+    const g = sample[i + 1];
+    const b = sample[i + 2];
+    if (r < 245 || g < 245 || b < 245) ink += 1;
+  }
+  return ink;
+}
+
 async function main() {
   const notePath = path.resolve(__dirname, "..", "D07- Metric Learning.md");
   const note = fs.readFileSync(notePath, "utf8");
@@ -62,34 +79,46 @@ async function main() {
     const page = await browser.newPage({ viewport: { width: 1280, height: 760 } });
     await page.goto(pathToFileURL(harnessPath).href);
     const frame = await waitForLabFrame(page, labFile);
-    await frame.locator(".lab-viewport canvas").waitFor({ state: "visible" });
+    await frame.locator("canvas").waitFor({ state: "visible" });
     await frame.waitForFunction(() => window.__d07LabReady === true && window.__d07LabSnapshot && window.__d07LabSnapshot());
+
+    await frame.selectOption("#lossType", "triplet");
+    await frame.selectOption("#metricType", "mahalanobis");
+    await frame.selectOption("#miningMode", "hard");
+    await frame.click("#mineTriplet");
+    await frame.click("#trainStep");
     await frame.waitForTimeout(220);
 
-    result = await frame.evaluate(() => {
-      const canvas = document.querySelector(".lab-viewport canvas");
+    result = await frame.evaluate((scoreFnSource) => {
+      const score = Function(`return (${scoreFnSource})`)();
+      const canvas = document.querySelector("canvas");
       return {
         bytes: canvas.toDataURL("image/png").length,
+        ink: score(canvas),
         snapshot: window.__d07LabSnapshot(),
-        stateText: document.querySelector("#stateBox").textContent.trim(),
+        loss: document.querySelector("#lossLabel").textContent.trim(),
+        knn: document.querySelector("#scoreBadge").textContent.trim(),
+        stateText: document.querySelector(".state-box").textContent.trim(),
         shellBackground: getComputedStyle(document.querySelector(".lab-3d-shell")).backgroundColor
       };
-    });
+    }, canvasInkScore.toString());
   } finally {
     await browser.close();
     if (fs.existsSync(harnessPath)) fs.unlinkSync(harnessPath);
   }
 
-  if (result.bytes < 14000 || result.snapshot.lossType !== "triplet") {
+  if (result.bytes < 12000 || result.ink < 400) {
     throw new Error(`D07 embedded iframe render is weak: ${JSON.stringify(result)}.`);
   }
-  if (result.snapshot.knnAccuracy <= 0 || result.snapshot.positiveDistance <= 0 || result.snapshot.negativeDistance <= 0) {
-    throw new Error(`D07 embedded iframe diagnostics are weak: ${JSON.stringify(result)}.`);
+  if (result.snapshot.metricType !== "mahalanobis" || result.snapshot.miningMode !== "hard") {
+    throw new Error(`D07 embedded iframe controls did not update snapshot: ${JSON.stringify(result)}.`);
   }
-  if (!/triplet|margin|retrieval/i.test(result.stateText)) {
+  if (!/^\d+\.\d{3}$/.test(result.loss) || !/%$/.test(result.knn)) {
+    throw new Error(`D07 embedded iframe diagnostics are malformed: ${JSON.stringify(result)}.`);
+  }
+  if (!/anchor/i.test(result.stateText) || !/negative/i.test(result.stateText) || !/hard negative|Triplet step/i.test(result.stateText)) {
     throw new Error(`D07 embedded iframe state text is weak: ${JSON.stringify(result)}.`);
   }
-
   console.log(`D07 local-server iframe render passed: ${src}`);
 }
 

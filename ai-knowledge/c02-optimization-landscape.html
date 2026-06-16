@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>C02 Unconstrained Optimization</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=c02-c03-canonical-clarity-v2">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="optimization" data-lab-id="c02" data-keywords="unconstrained optimization objective gradient descent line search Newton momentum Hessian">
@@ -85,7 +85,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=c02-c03-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"c02","kind":"optimization","title":"C02 Unconstrained Optimization","modes":[{"value":"gradient","label":"Gradient descent"},{"value":"line","label":"Line search"},{"value":"newton","label":"Newton"},{"value":"bfgs","label":"BFGS"},{"value":"momentum","label":"Momentum"}],"parameters":[{"key":"curvature","label":"Condition number kappa","min":-1.5,"max":2.5,"step":0.01,"value":0.9},{"key":"step","label":"Step size alpha","min":0.02,"max":1,"step":0.01,"value":0.28},{"key":"noise","label":"Damping / trust","min":0,"max":1,"step":0.01,"value":0.16},{"key":"budget","label":"Iterations / path beads","min":1,"max":14,"step":1,"value":6},{"key":"regularization","label":"Momentum beta","min":0,"max":1,"step":0.01,"value":0.45}],"metrics":["Objective value","Gradient norm","Step decrease","Newton gain"],"visual":{"kind":"unconstrained-optimization-lab","graphStyle":"hidden","quality":"c01-c02-premium-v1"},"profile":{"preferredMetric":"Gradient norm","formula":"x_{k+1} = x_k - alpha grad f(x_k)","insight":"C02 shows descent as geometry: the objective surface supplies a gradient, line search chooses a reliable step, Newton rescales by curvature, BFGS learns secant curvature, and momentum carries velocity."}});
     window.__c02LabSnapshot = () => window.__gLabSnapshot();

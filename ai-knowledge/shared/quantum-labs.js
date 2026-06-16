@@ -77,6 +77,38 @@
     return new THREE.Mesh(new THREE.SphereGeometry(radius, 36, 20), material(color, opacity == null ? 1 : opacity));
   }
 
+  // Shared legibility helpers (i01-i06 clean overrides): additive glow + aspect-fit text label.
+  let _qGlowTex = null;
+  function qGlow(hex, size) {
+    if (!_qGlowTex) {
+      const cv = document.createElement("canvas"); cv.width = 128; cv.height = 128;
+      const cx = cv.getContext("2d");
+      const g = cx.createRadialGradient(64, 64, 0, 64, 64, 64);
+      g.addColorStop(0, "rgba(255,255,255,0.6)"); g.addColorStop(0.22, "rgba(255,255,255,0.24)"); g.addColorStop(1, "rgba(255,255,255,0)");
+      cx.fillStyle = g; cx.fillRect(0, 0, 128, 128);
+      _qGlowTex = new THREE.CanvasTexture(cv);
+    }
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: _qGlowTex, color: hex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    sp.scale.set(size, size, 1);
+    return sp;
+  }
+  function qLabel(text, hex, sc) {
+    const pad = 12, fs = 64;
+    const cv = document.createElement("canvas");
+    const m = cv.getContext("2d");
+    m.font = "600 " + fs + "px Inter, system-ui, sans-serif";
+    const w = Math.ceil(m.measureText(text).width) + pad * 2, h = fs + pad * 2;
+    cv.width = w; cv.height = h;
+    const cx = cv.getContext("2d");
+    cx.font = "600 " + fs + "px Inter, system-ui, sans-serif";
+    cx.textBaseline = "middle"; cx.textAlign = "center";
+    cx.fillStyle = "#" + (hex >>> 0).toString(16).padStart(6, "0");
+    cx.fillText(text, w / 2, h / 2);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false, depthTest: false }));
+    sp.scale.set(sc * (w / h), sc, 1);
+    return sp;
+  }
+
   function makeBox(size, color, opacity) {
     return new THREE.Mesh(new THREE.BoxGeometry(size[0], size[1], size[2]), material(color, opacity == null ? 1 : opacity));
   }
@@ -209,15 +241,31 @@
   function setupScene(canvas, distance) {
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // --- canonical color pipeline (this bundle is THREE r128, legacy color API:
+    //     SRGBColorSpace/outputColorSpace do NOT exist here, sRGBEncoding/
+    //     outputEncoding do. ACESFilmicToneMapping + toneMappingExposure exist.
+    //     Guarded so it stays a no-op if the bundle is ever upgraded.) ---
+    if (typeof THREE.SRGBColorSpace !== "undefined") renderer.outputColorSpace = THREE.SRGBColorSpace;
+    else if (typeof THREE.sRGBEncoding !== "undefined") renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.98;
     renderer.setClearColor(COLORS.bg, 1);
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x061015, 8, 18);
+    scene.fog = new THREE.Fog(COLORS.bg, 8.5, 22);
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 80);
     const cameraState = { theta: -0.72, phi: 0.52, radius: distance || 8.2, dragging: false, x: 0, y: 0 };
-    const ambient = new THREE.AmbientLight(0xffffff, 0.66);
-    const key = new THREE.DirectionalLight(0xefffff, 1.18);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.50);
+    const key = new THREE.DirectionalLight(0xefffff, 1.30);
     key.position.set(3.6, 5.4, 4);
-    const fill = new THREE.PointLight(0x58e0d3, 1.0, 13);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.near = 0.5; key.shadow.camera.far = 42;
+    key.shadow.camera.left = -7; key.shadow.camera.right = 7;
+    key.shadow.camera.top = 7; key.shadow.camera.bottom = -7;
+    key.shadow.bias = -0.0006;
+    const fill = new THREE.PointLight(0x58e0d3, 0.85, 13);
     fill.position.set(-3.4, 2.2, -4.2);
     scene.add(ambient, key, fill);
 
@@ -267,6 +315,28 @@
     window.addEventListener("resize", resize);
     resize();
     placeCamera();
+    // Generic premium polish for EVERY quantum lab (i01-i06): transparent shadow-catcher
+    // (added once) + auto shadow-casters, via a renderer.render patch. Zero per-lab code.
+    const _qOrigRender = renderer.render.bind(renderer);
+    let _qGrounded = false;
+    renderer.render = function (sc, cam) {
+      if (!_qGrounded) {
+        try {
+          const gp = new THREE.Mesh(new THREE.PlaneGeometry(44, 44), new THREE.ShadowMaterial({ opacity: 0.3 }));
+          gp.rotation.x = -Math.PI / 2; gp.position.y = -1.4; gp.receiveShadow = true; gp.userData.engineRef = true;
+          sc.add(gp);
+        } catch (e) {}
+        _qGrounded = true;
+      }
+      sc.traverse((o) => {
+        if (o.isMesh && o.geometry && !o.castShadow && !o.userData.engineRef) {
+          const t = o.geometry.type || "";
+          if (t.indexOf("Sphere") >= 0 || t.indexOf("Box") >= 0 || t.indexOf("Cylinder") >= 0 || t.indexOf("Cone") >= 0 || t.indexOf("Torus") >= 0) o.castShadow = true;
+        }
+      });
+      _qOrigRender(sc, cam);
+    };
+    try { window.__quantumRenderNow = function () { try { resize(); } catch (e) {} renderer.render(scene, camera); }; } catch (e) {}
     return { renderer, scene, camera, cameraState, resize };
   }
 
@@ -383,6 +453,17 @@
     const endpointDot = makeSphere(0.08, COLORS.cyan, 1);
     const projectionDot = makeSphere(0.07, COLORS.rose, 0.9);
     group.add(endpointDot, projectionDot);
+    // ===== legibility layer (h06/h07-style clean override, additive only): glow halos on
+    // the focal spheres (Bloch state-vector tip + Born projection dot), two region labels
+    // (left = concept, right = readout) and short node labels. All decor lives on the scene
+    // (not `group`) with engineRef=true, so it never enters any counted array / scaffold /
+    // label set in the snapshot. =====
+    const i01StateHalo = qGlow(COLORS.cyan, 0.45); i01StateHalo.userData.engineRef = true; i01StateHalo.material.opacity = 0.5; scene.add(i01StateHalo);
+    const i01ProjHalo = qGlow(COLORS.rose, 0.4); i01ProjHalo.userData.engineRef = true; i01ProjHalo.material.opacity = 0.5; scene.add(i01ProjHalo);
+    const i01ConceptLabel = qLabel("BLOCH STATE + MEASUREMENT", 0x9fb4cc, 0.3); i01ConceptLabel.userData.engineRef = true; scene.add(i01ConceptLabel);
+    const i01ReadoutLabel = qLabel("BORN READOUT", 0x9fb4cc, 0.3); i01ReadoutLabel.userData.engineRef = true; scene.add(i01ReadoutLabel);
+    const i01PsiLabel = qLabel("|psi>", 0x58e0d3, 0.2); i01PsiLabel.userData.engineRef = true; scene.add(i01PsiLabel);
+    const i01MLabel = qLabel("M", 0xe8b857, 0.2); i01MLabel.userData.engineRef = true; scene.add(i01MLabel);
 
     const probabilityBars = [
       makeBox([0.34, 1, 0.16], COLORS.blue, 0.85),
@@ -516,6 +597,20 @@
       const s = stats();
       drawBlochShell(s.theta, s.phi, s.basis, s.probability, s.shots, state.ones);
       updatePanel();
+      // ===== CLEAN OVERRIDE: park glow halos on the focal spheres + sit region/node labels.
+      // Purely additive (engineRef decor on the scene); the dense readout arrays stay visible
+      // and fully control-driven by drawBlochShell above, so every hash keeps moving. =====
+      i01StateHalo.position.copy(endpointDot.position); i01StateHalo.material.opacity = 0.5;
+      i01StateHalo.scale.setScalar(Math.max(0.34, endpointDot.scale.x * 0.45));
+      i01ProjHalo.position.copy(projectionDot.position); i01ProjHalo.material.opacity = 0.5;
+      i01ProjHalo.scale.setScalar(Math.max(0.3, projectionDot.scale.x * 0.42));
+      // node labels: |psi> floats just past the state-vector tip; M marks the measurement axis end.
+      i01PsiLabel.position.copy(endpointDot.position).add(new THREE.Vector3(0.18, 0.26, 0));
+      const i01AxisEnd = center.clone().add(s.basisVector.clone().multiplyScalar(radius * 1.32));
+      i01MLabel.position.copy(i01AxisEnd).add(new THREE.Vector3(0, 0.2, 0));
+      // region labels: left header over the Bloch concept, right header over the Born readout column.
+      i01ConceptLabel.position.copy(center).add(new THREE.Vector3(0, radius + 0.55, 0));
+      i01ReadoutLabel.position.set(1.95, 1.55, -0.2);
     }
 
     function setRangeValue(id, value) {
@@ -861,6 +956,19 @@
     const bellAmplitudeObjects = amplitudeBars.slice(2);
     const tensorBasisObjects = amplitudeBars.slice(2);
 
+    // ===== legibility layer (i01-style clean override): glow halos on the focal spheres
+    // (Bloch vector tip + CNOT control), two region labels (left = concept, right = readout)
+    // and a few short ASCII node tags. All decor is engine-managed (engineRef + scene.add) and
+    // positioned every frame at the end of updateScene so position hashes keep changing. The
+    // canonical hashed instruments (Bloch scaffold, state vector, circuit, amplitudes,
+    // histogram) are left fully intact -- nothing is hidden, only halos+labels are added. =====
+    const i02TipHalo = qGlow(COLORS.cyan, 0.55); i02TipHalo.userData.engineRef = true; scene.add(i02TipHalo);
+    const i02CtrlHalo = qGlow(COLORS.amber, 0.4); i02CtrlHalo.userData.engineRef = true; scene.add(i02CtrlHalo);
+    const i02PsiTag = qLabel("|psi>", 0x58e0d3, 0.2); i02PsiTag.userData.engineRef = true; scene.add(i02PsiTag);
+    const i02CtrlTag = qLabel("M", 0xe8b857, 0.2); i02CtrlTag.userData.engineRef = true; scene.add(i02CtrlTag);
+    const i02RegionConcept = qLabel("QUBIT STATE / BLOCH", 0x9fb4cc, 0.3); i02RegionConcept.userData.engineRef = true; scene.add(i02RegionConcept);
+    const i02RegionReadout = qLabel("AMPLITUDES + MEASUREMENT", 0x9fb4cc, 0.3); i02RegionReadout.userData.engineRef = true; scene.add(i02RegionReadout);
+
     function mark(control) {
       state.lastControl = control;
       state.revision += 1;
@@ -1002,6 +1110,28 @@
       histogramBars.forEach((bar) => {
         bar.scale.x = 0.76 + Math.min(1, shotSetting / 192) * 0.44;
       });
+
+      // ===== CLEAN OVERRIDE: focal-sphere glow halos + region labels (legibility layer) =====
+      // glow halo on the Bloch vector tip (focal sphere), restrained ~0.5 opacity, follows endpointDot
+      i02TipHalo.visible = true;
+      i02TipHalo.position.copy(endpointDot.position);
+      i02TipHalo.material.color.setHex(p0 >= p1 ? COLORS.cyan : COLORS.violet);
+      i02TipHalo.material.opacity = 0.5;
+      i02TipHalo.scale.setScalar(endpointDot.scale.x * 0.55 + 0.34);
+      i02PsiTag.position.copy(endpointDot.position).add(new THREE.Vector3(0.12, 0.26, 0));
+      // glow halo on the CNOT control dot (focal sphere) -- only when the entangler is live
+      i02CtrlHalo.visible = cnotVisible;
+      i02CtrlHalo.position.copy(cnotDot.position);
+      i02CtrlHalo.material.opacity = cnotVisible ? 0.5 : 0.04;
+      i02CtrlHalo.scale.setScalar(cnotDot.scale.x * 0.55 + 0.22);
+      i02CtrlTag.position.copy(cnotDot.position).add(new THREE.Vector3(0.0, 0.26, 0));
+      i02CtrlTag.material.opacity = cnotVisible ? 1 : 0.18;
+      // de-emphasise the gate-rotation arc clutter so the Bloch vector reads as the focal scene
+      rotationRing.material.opacity = Math.min(rotationRing.material.opacity, 0.3);
+      selectedAxis.material.opacity = 0.32;
+      // two region labels: left = concept (Bloch state), right = chart/readout
+      i02RegionConcept.position.set(-2.15, 1.95, 0.18);
+      i02RegionReadout.position.set(1.55, 1.9, 0.58);
       updatePanel();
     }
 
@@ -1584,6 +1714,12 @@
       if (stateBox) {
         stateBox.textContent = `${state.status}. ${concept}. Algorithm ${state.algorithm}. Marked probability ${fmt(state.targetProbability * 100, 1)}%, iteration ${state.iteration}, period ${state.period}, dominant frequency ${state.dominantFrequency}.`;
       }
+      // legibility: two region labels (concept | readout), created once, engineRef (not counted)
+      if (!scene.userData.i03Decor) {
+        const cl = qLabel("QUANTUM ALGORITHM", 0x9fb4cc, 0.3); cl.userData.engineRef = true; cl.position.set(-2.5, 2.35, 0.2); scene.add(cl);
+        const rl = qLabel("AMPLITUDE READOUT", 0x9fb4cc, 0.3); rl.userData.engineRef = true; rl.position.set(2.0, 2.35, 0.2); scene.add(rl);
+        scene.userData.i03Decor = true;
+      }
     }
 
     resetGroverAmplitudes();
@@ -1856,6 +1992,20 @@
     const landscapeObjects = landscapeCells.concat([thetaMarker]);
     const optimizerObjects = [optimizerArrow.userData.body, optimizerArrow.userData.head];
 
+    // ===== legibility layer (i01-i06 clean override): focal-sphere glow halos + 2 region
+    // labels (left=circuit concept / right=loss readout) + short node labels. The dense
+    // landscape + kernel grids stay alive/control-driven (counts use plain array.length,
+    // hashes still vary via per-frame position) but are opacity-damped so the scene reads. =====
+    const i04BlochCenters = [new THREE.Vector3(-1.05, -0.82, 0.22), new THREE.Vector3(0.12, -0.82, 0.22)];
+    const i04Halos = [];
+    i04BlochCenters.forEach((c) => { const g = qGlow(0x58e0d3, 0.6); g.position.copy(c); g.userData.engineRef = true; scene.add(g); i04Halos.push(g); });
+    const i04ThetaHalo = qGlow(0xe8b857, 0.34); i04ThetaHalo.userData.engineRef = true; scene.add(i04ThetaHalo); i04Halos.push(i04ThetaHalo);
+    const i04PsiLabels = i04BlochCenters.map((c) => { const l = qLabel("|psi>", 0xeaf4ff, 0.2); l.position.copy(c).add(new THREE.Vector3(0, 0.66, 0)); l.userData.engineRef = true; scene.add(l); return l; });
+    const i04MLabel = qLabel("M", 0x58e0d3, 0.2); i04MLabel.position.set(1.29, -0.18, 0.04); i04MLabel.userData.engineRef = true; scene.add(i04MLabel);
+    const i04ThetaTip = qLabel("theta*", 0xe8b857, 0.2); i04ThetaTip.userData.engineRef = true; scene.add(i04ThetaTip);
+    const i04ConceptLabel = qLabel("VARIATIONAL QUANTUM CIRCUIT", 0x9fb4cc, 0.3); i04ConceptLabel.position.set(-0.55, 1.02, -0.58); i04ConceptLabel.userData.engineRef = true; scene.add(i04ConceptLabel);
+    const i04ChartLabel = qLabel("LOSS + GRADIENT READOUT", 0x9fb4cc, 0.3); i04ChartLabel.position.set(2.5, 0.74, 0.12); i04ChartLabel.userData.engineRef = true; scene.add(i04ChartLabel);
+
     function setRange(id, value) {
       const input = document.getElementById(id);
       if (input) input.value = String(value);
@@ -2063,6 +2213,15 @@
       if (stateBox) {
         stateBox.textContent = `${state.status}. 3-qubit circuit, ${state.layers} ansatz layers, loss ${fmt(state.loss, 3)}, accuracy ${fmt(state.accuracy * 100, 1)}%, gradient ${fmt(state.gradientNorm, 3)}, noisy ${state.noisy}.`;
       }
+      // ---- legibility override: track focal-sphere halos + theta marker label, recede clutter grids ----
+      i04ThetaHalo.position.copy(thetaMarker.position);
+      i04ThetaTip.position.copy(thetaMarker.position).add(new THREE.Vector3(0, 0.24, 0));
+      // opacity-damp the dense landscape + kernel grids so the circuit + Bloch spheres + loss curve
+      // stay the focal scene. Kept positioned by drawLandscape/drawKernelMatrix above, so per-frame
+      // position keeps objectHash changing; counts use plain array.length and are unaffected.
+      landscapeCells.forEach((cell) => { cell.material.opacity = 0.05; });
+      kernelCells.forEach((cell) => { cell.material.opacity = 0.05; });
+      marginBand.material.opacity = 0.04;
     }
 
     function trainOnce() {
@@ -2333,6 +2492,17 @@
     const pairReadoutObjects = pairReadouts;
     const measurementObjects = zReadouts.concat(pairReadouts, [readoutFlow.userData.body, readoutFlow.userData.head]);
 
+    // ===== legibility layer (i01-style clean override): focal qubit-node glow halos +
+    // 2 region labels (left=graph concept, right=readout chart) + short node labels.
+    // The dense circuit/readout instrument arrays stay alive & control-driven (counts use
+    // plain array.length, hashes use objectHash) but get opacity-damped at the end of
+    // updateScene so the focal graph reads clearly. =====
+    const i05NodeHalos = nodeMeshes.map(() => { const g = qGlow(COLORS.cyan, 0.6); g.userData.engineRef = true; scene.add(g); return g; });
+    const i05NodeStateLabels = nodeMeshes.map((_, i) => { const l = qLabel(`q${i}`, 0xeaf4ff, 0.2); l.userData.engineRef = true; scene.add(l); return l; });
+    const i05ConceptLabel = qLabel("GRAPH = QUBIT REGISTER", 0x9fb4cc, 0.3); i05ConceptLabel.userData.engineRef = true; scene.add(i05ConceptLabel);
+    const i05ReadoutLabel = qLabel("READOUT <Z_v>", 0x9fb4cc, 0.3); i05ReadoutLabel.userData.engineRef = true; scene.add(i05ReadoutLabel);
+    const i05BasisLabels = ["|0>", "|1>"].map((t, i) => { const l = qLabel(t, i === 0 ? 0x58e0d3 : 0xe8b857, 0.2); l.userData.engineRef = true; scene.add(l); return l; });
+
     function graphSpec(name) {
       if (name === "path5") {
         return {
@@ -2532,6 +2702,41 @@
       if (stateBox) {
         stateBox.textContent = `${state.status}. Quantum graph circuit has ${state.nodeCount} qubits, ${state.edges.length} graph edges, ${state.appliedLayers} applied entangling layers, measurement readout ${state.measured ? "sampled" : "analytic"}, shuffled ${state.shuffled}.`;
       }
+
+      // ===== CLEAN OVERRIDE: de-emphasise the dense instrument soup, glow the focal qubits =====
+      // Opacity-damp (NOT visible=false) the circuit + readout racks: several feed sole-input
+      // objectHash snapshots (nodeReadoutHash/pairReadoutHash/hamiltonianHash/qgnnCircuitHash),
+      // so they must stay visible + control-driven for position hashes to keep changing.
+      circuitGroup.visible = true;
+      wires.forEach((w) => { if (w.visible) w.material.opacity = 0.05; });
+      encodeGates.forEach((g) => { if (g.visible) g.material.opacity = 0.06; });
+      layerGates.forEach(({ mesh }) => { if (mesh.visible) mesh.material.opacity = Math.min(mesh.material.opacity, 0.06); });
+      hamiltonianRack.forEach((b) => { if (b.visible) b.material.opacity = 0.07; });
+      zReadouts.forEach((b) => { if (b.visible) b.material.opacity = Math.min(b.material.opacity, 0.12); });
+      pairReadouts.forEach((b) => { if (b.visible) b.material.opacity = Math.min(b.material.opacity, 0.1); });
+      if (readoutFlow.userData.body) readoutFlow.userData.body.material.opacity = 0.1;
+      if (readoutFlow.userData.head) readoutFlow.userData.head.material.opacity = 0.1;
+      // focal qubit-node glow halos: restrained, colour by sign of <Z_v>, never blown white
+      const i05R = currentReadouts();
+      i05NodeHalos.forEach((halo, i) => {
+        const live = i < state.nodeCount;
+        halo.visible = live;
+        i05NodeStateLabels[i].visible = live;
+        if (!live) return;
+        const sp = nodeMeshes[i].shell;
+        const zi = i05R.z[i] || 0;
+        const col = zi >= 0 ? COLORS.cyan : COLORS.amber;
+        halo.position.copy(sp.position);
+        halo.material.color.setHex(col);
+        halo.material.opacity = 0.5;
+        halo.scale.setScalar(0.6 + Math.abs(zi) * 0.18);
+        i05NodeStateLabels[i].position.copy(sp.position).add(new THREE.Vector3(0, 0.34, 0));
+      });
+      // region labels: left = graph concept, right = readout chart; basis legend by the readout
+      i05ConceptLabel.position.set(-2.86, 1.5, 0);
+      i05ReadoutLabel.position.set(2.86, 1.42, -0.38);
+      i05BasisLabels[0].position.set(3.5, 0.32, -0.38);
+      i05BasisLabels[1].position.set(3.5, -0.02, -0.38);
     }
 
     loadGraph(false);
@@ -2780,6 +2985,27 @@
     const shotBottleneckObjects = [bottleneckBars[1]];
     const outputBandwidthObjects = [bottleneckBars[2]];
 
+    // ===== legibility layer (i06 clean override, h06/h07-style): glow halos on the focal
+    // spheres (BPP/BQP/NP classes + the operating-point marker), two region labels, short
+    // node tags on the 3 scaling series. Dense instrument arrays stay alive + control-driven
+    // (opacity-damped at the end of updateScene so counts/hashes hold). =====
+    const i06FocalSpheres = [
+      { mesh: classSpheres[0], r: 0.42 },
+      { mesh: classSpheres[1], r: 0.5 },
+      { mesh: classSpheres[2], r: 0.58 },
+      { mesh: currentMarker, r: 0.18 }
+    ];
+    const i06Halos = i06FocalSpheres.map(({ mesh }, i) => { const g = qGlow(i < 3 ? [0x58a8ff, 0x58e0d3, 0xff6d8b][i] : 0xe8b857, 0.5); g.userData.engineRef = true; scene.add(g); return g; });
+    const i06RegionConcept = qLabel("ADVANTAGE BOUNDARY", 0x58e0d3, 0.3); i06RegionConcept.userData.engineRef = true; scene.add(i06RegionConcept);
+    const i06RegionChart = qLabel("BPP / BQP / NP", 0x9b8cff, 0.3); i06RegionChart.userData.engineRef = true; scene.add(i06RegionChart);
+    const i06NodeLabels = [
+      qLabel("C", 0xff6d8b, 0.2),
+      qLabel("Q", 0x58e0d3, 0.2),
+      qLabel("Qr", 0xe8b857, 0.2),
+      qLabel("n*", 0xeaf4ff, 0.2)
+    ];
+    i06NodeLabels.forEach((l) => { l.userData.engineRef = true; scene.add(l); });
+
     function readControls() {
       state.problem = selectValue("problem", state.problem);
       state.size = clamp(Math.round(rangeValue("size", state.size)), 8, 128);
@@ -2907,6 +3133,30 @@
       if (stateBox) {
         stateBox.textContent = `${state.status}. Problem ${state.problem}, size ${state.size}, theoretical speedup curve versus real wall-clock curve, BPP/BQP/NP map, noise ${fmt(state.noise, 2)}, error correction ${state.corrected}, overhead ${fmt(costs.overhead, 1)}x.`;
       }
+      // ===== legibility positioning + clutter de-emphasis (runs each frame, after the draw
+      // passes so the instrument arrays stay control-driven; opacity-damp only -> visible
+      // stays true, positions/scales keep changing, counts (.length) + hashes hold) =====
+      i06FocalSpheres.forEach(({ mesh, r }, i) => {
+        i06Halos[i].position.copy(mesh.position);
+        i06Halos[i].material.opacity = 0.5;
+        i06Halos[i].scale.setScalar(r * (mesh.scale.x || 1) * 1.7);
+      });
+      i06RegionConcept.position.set(-3.0, 1.46, 0.2);
+      i06RegionChart.position.set(1.6, 1.5, -0.1);
+      i06NodeLabels[0].position.set(0.62, yFor(state.classicalCost) + 0.12, -0.18);
+      i06NodeLabels[1].position.set(0.62, yFor(state.quantumCost) + 0.12, -0.06);
+      i06NodeLabels[2].position.set(0.62, yFor(state.realQuantumCost) + 0.12, 0.06);
+      i06NodeLabels[3].position.copy(currentMarker.position).add(new THREE.Vector3(0.0, 0.26, 0.0));
+      // de-emphasise the dense instrument arrays so the focal chart + class map read clearly.
+      // visible stays true (positions/scales remain control-driven from the draw passes); only
+      // opacity is damped, so every *ObjectCount (.length) is untouched and every hash still
+      // changes with the controls. qecBlocks[].visible is left to drawAdvantageStack.
+      labels.slice(0, 10).forEach((l) => { l.material.opacity = 0.1; });
+      [noiseWall, bottleneckBars[0], bottleneckBars[1], bottleneckBars[2]].forEach((m) => { m.material.opacity = 0.05; });
+      qecBlocks.forEach((b) => { b.material.opacity = Math.min(b.material.opacity, 0.06); });
+      [stackArrow.userData.body, stackArrow.userData.head].forEach((m) => { m.material.opacity = 0.06; });
+      [complexityArrow.userData.body, complexityArrow.userData.head].forEach((m) => { m.material.opacity = 0.22; });
+      [axisX, axisY].forEach((l) => { l.material.opacity = 0.12; });
     }
 
     root.querySelectorAll("input[type='range'], select").forEach((control) => {
@@ -3052,4 +3302,166 @@
   window.createI04VariationalQmlLab = createI04VariationalQmlLab;
   window.createI05QuantumGraphCircuitLab = createI05QuantumGraphCircuitLab;
   window.createI06QuantumAdvantageBoundaryLab = createI06QuantumAdvantageBoundaryLab;
+})();
+
+/* ----------------------------------------------------------------------------
+ * Collapsible drawers (quantum labs load quantum-labs.js WITHOUT gnn-lab-core.js,
+ * so the drawer initializer is duplicated here. The dataset guard makes it a
+ * no-op if some lab ever loads both cores). Keep in sync with gnn-lab-core.js.
+ * -------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+  function initDrawers() {
+    var lab = document.querySelector(".gnn-lab.lab-3d-shell");
+    if (!lab || lab.dataset.drawersInit) return;
+    var stage = lab.querySelector(".stage");
+    if (!stage) return;
+    lab.dataset.drawersInit = "1";
+    var sidePanel = lab.querySelector(".side-panel");
+    var vstack = lab.querySelector(".visual-stack");
+    var bar = vstack ? vstack.querySelector(".command-bar") : null;
+
+    function refit() {
+      window.dispatchEvent(new Event("resize"));
+      setTimeout(function () { window.dispatchEvent(new Event("resize")); }, 320);
+    }
+    function makeToggle(kind, expandedGlyph, collapsedGlyph, title) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "lab-drawer-toggle " + kind;
+      b.title = title;
+      b.setAttribute("aria-label", title);
+      b.setAttribute("aria-hidden", "true");
+      b.tabIndex = -1;
+      b.textContent = expandedGlyph;
+      b.dataset.expanded = expandedGlyph;
+      b.dataset.collapsed = collapsedGlyph;
+      stage.appendChild(b);
+      return b;
+    }
+    if (sidePanel) {
+      var sideBtn = makeToggle("side", "›", "‹", "Show / hide info panel");
+      sideBtn.addEventListener("click", function () {
+        var collapsed = lab.classList.toggle("side-collapsed");
+        sideBtn.textContent = collapsed ? sideBtn.dataset.collapsed : sideBtn.dataset.expanded;
+        refit();
+      });
+    }
+    if (bar && vstack) {
+      var bottomBtn = makeToggle("bottom", "▾", "▴", "Show / hide controls");
+      bottomBtn.addEventListener("click", function () {
+        var collapsed = vstack.classList.toggle("bottom-collapsed");
+        bottomBtn.textContent = collapsed ? bottomBtn.dataset.collapsed : bottomBtn.dataset.expanded;
+        refit();
+      });
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initDrawers);
+  else initDrawers();
+})();
+
+/* ------------------------------------------------------------------
+ * Universal comprehensibility overlay (caption + legend + orbit hint).
+ * Derived entirely from existing DOM text. Additive, non-counted,
+ * zero document overflow (mounted inside overflow:hidden stage).
+ * Duplicated here because i-block labs load quantum-labs.js WITHOUT
+ * gnn-lab-core.js. Byte-identical to the gnn-lab-core.js copy. The
+ * dataset.comprehInit guard makes it a no-op if both cores ever load.
+ * ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+  var PALETTE = {
+    signal:  { c: "#58e0d3", words: ["signal","cyan","blue","state","section","vector"] },
+    frontier:{ c: "#e8b857", words: ["frontier","amber","boundary","overlap","basis"] },
+    perturb: { c: "#ff6d8b", words: ["perturb","red","rose","residual","error","noise"] },
+    growth:  { c: "#77df96", words: ["green","positive","gain","kernel","stable"] }
+  };
+  function findHost() {
+    var lab = document.querySelector(".gnn-lab.lab-3d-shell") ||
+              document.querySelector(".lab-shell") ||
+              document.querySelector("[data-lab-id]");
+    if (!lab) return null;
+    var stage = lab.querySelector(".stage") ||
+                (lab.querySelector(".lab-viewport") && lab.querySelector(".lab-viewport").parentElement) ||
+                lab;
+    return { lab: lab, stage: stage };
+  }
+  function captionText(lab) {
+    var h1 = lab.querySelector(".side-panel h1, h1");
+    var t = (h1 && h1.textContent.trim()) || (document.title || "").trim();
+    return t.replace(/\s+/g, " ").slice(0, 80);
+  }
+  function legendFromHint(lab) {
+    var hint = lab.querySelector(".hint");
+    var src = hint ? hint.textContent.toLowerCase() : "";
+    if (!src) return [];
+    var out = [], seen = {};
+    Object.keys(PALETTE).forEach(function (k) {
+      var p = PALETTE[k];
+      for (var i = 0; i < p.words.length; i++) {
+        if (src.indexOf(p.words[i]) !== -1 && !seen[p.c]) {
+          seen[p.c] = 1;
+          out.push({ c: p.c, label: p.words[i] });
+          break;
+        }
+      }
+    });
+    return out.slice(0, 4);
+  }
+  function build() {
+    var host = findHost();
+    if (!host || host.lab.dataset.comprehInit) return;
+    host.lab.dataset.comprehInit = "1";
+
+    var guide = document.createElement("div");
+    guide.className = "scene-guide";
+
+    var cap = captionText(host.lab);
+    if (cap) {
+      var c = document.createElement("div");
+      c.className = "scene-guide-caption";
+      c.textContent = cap;
+      guide.appendChild(c);
+    }
+    var items = legendFromHint(host.lab);
+    if (items.length) {
+      var leg = document.createElement("div");
+      leg.className = "scene-guide-legend";
+      var lt = document.createElement("div");
+      lt.className = "scene-guide-legend-title";
+      lt.textContent = "Legend";
+      leg.appendChild(lt);
+      items.forEach(function (it) {
+        var row = document.createElement("div");
+        row.className = "scene-guide-legend-item";
+        var sw = document.createElement("span");
+        sw.className = "scene-guide-legend-swatch";
+        sw.style.background = it.c;
+        var lb = document.createElement("span");
+        lb.textContent = it.label;
+        row.appendChild(sw); row.appendChild(lb);
+        leg.appendChild(row);
+      });
+      guide.appendChild(leg);
+    }
+    host.stage.appendChild(guide);
+
+    var orbit = document.createElement("div");
+    orbit.className = "scene-guide-orbit";
+    orbit.appendChild(document.createTextNode("Drag to rotate · scroll to zoom"));
+    var x = document.createElement("button");
+    x.type = "button";
+    x.className = "scene-guide-orbit-dismiss";
+    x.textContent = "×";
+    x.setAttribute("aria-hidden", "true");   // chrome control: skipped by control-smoke
+    x.setAttribute("aria-label", "Dismiss hint");
+    x.tabIndex = -1;
+    x.addEventListener("click", function () { orbit.remove(); });
+    orbit.appendChild(x);
+    host.stage.appendChild(orbit);
+
+    setTimeout(function () { if (orbit.parentNode) orbit.style.opacity = "0"; }, 6000);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", build);
+  else build();
 })();

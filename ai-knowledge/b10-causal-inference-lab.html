@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>B10 Causal Inference</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=b10-c01-canonical-clarity-v2">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="probability" data-lab-id="b10" data-keywords="causal inference DAG confounder treatment outcome backdoor adjustment do-operator counterfactual ATE">
@@ -84,7 +84,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=b10-c01-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"b10","kind":"probability","title":"B10 Causal Inference","modes":[{"value":"dag","label":"DAG"},{"value":"backdoor","label":"Backdoor"},{"value":"intervention","label":"Intervention"},{"value":"counterfactual","label":"Counterfactual"}],"parameters":[{"key":"focus","label":"Concept focus","min":0,"max":1,"step":0.01,"value":0.45},{"key":"spread","label":"Spread / uncertainty","min":0.05,"max":1,"step":0.01,"value":0.55},{"key":"noise","label":"Noise / perturbation","min":0,"max":1,"step":0.01,"value":0.24},{"key":"samples","label":"Sample count","min":2,"max":14,"step":1,"value":7},{"key":"strength","label":"Evidence strength","min":0,"max":1,"step":0.01,"value":0.5}],"metrics":["Causal effect","Backdoor bias","Adjustment score","ATE stability"],"visual":{"kind":"causal-inference-lab","graphStyle":"hidden"},"profile":{"preferredMetric":"Causal effect","formula":"ATE = E[Y | do(T=1)] - E[Y | do(T=0)]","insight":"B10 keeps association separate from causation: confounding opens a backdoor path, adjustment blocks it, and intervention clamps treatment structurally."}});
     window.__b10LabSnapshot = () => window.__gLabSnapshot();

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>C09 Non-convex Optimization</title>
-  <link rel="stylesheet" href="shared/gnn-lab-core.css?math3d=c09-nonconvex-optimization-premium-v3">
+  <link rel="stylesheet" href="shared/gnn-lab-core.css?v=legible4">
 </head>
 <body>
   <main class="gnn-lab math-3d-lab lab-shell lab-3d-shell" data-lab-kind="optimization" data-lab-id="c09" data-keywords="non-convex optimization saddle negative curvature basin sharp flat minima perturbed gradient descent">
@@ -86,7 +86,7 @@
     </aside>
   </main>
   <script src="shared/three.min.js"></script>
-  <script src="shared/gnn-lab-core.js?math3d=c08-c09-canonical-clarity-v2"></script>
+  <script src="shared/gnn-lab-core.js?v=legible4"></script>
   <script>
     const labState = createGnnLab({"id":"c09","kind":"optimization","title":"C09 Non-convex Optimization","modes":[{"value":"landscape","label":"Landscape"},{"value":"basins","label":"Basins"},{"value":"saddle","label":"Saddle"},{"value":"optimizer","label":"Optimizer"},{"value":"curvature","label":"Curvature"},{"value":"flatness","label":"Flat vs sharp"}],"parameters":[{"key":"curvature","label":"Negative curvature lambda_min","min":-1.5,"max":2.5,"step":0.01,"value":0.9},{"key":"step","label":"Learning rate eta","min":0.02,"max":1,"step":0.01,"value":0.28},{"key":"noise","label":"Perturbation noise sigma","min":0,"max":1,"step":0.01,"value":0.16},{"key":"budget","label":"Initialization seeds","min":1,"max":14,"step":1,"value":6},{"key":"regularization","label":"Basin width / sharpness","min":0,"max":1,"step":0.01,"value":0.45}],"metrics":["Saddle escape","Sharpness","Basin energy","Perturbation gain"],"visual":{"kind":"nonconvex-optimization-lab","graphStyle":"hidden","quality":"c09-c10-premium-v1"},"profile":{"preferredMetric":"Saddle escape","formula":"grad f(x) small does not imply local minimum when Hessian has negative eigenvalues","insight":"C09 makes non-convexity inspectable: small gradient can mean saddle, perturbations reveal escape directions, and minima differ by sharpness and basin geometry."}});
     window.__c09LabSnapshot = () => window.__gLabSnapshot();
